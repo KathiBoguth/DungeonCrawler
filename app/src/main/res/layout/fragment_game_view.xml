@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".GameView">
+
+    <data>
+        <variable
+            name="gameFragment"
+            type="com.example.dungeoncrawler.GameView" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#720899">
+
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/buttonUp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="104dp"
+            android:layout_marginBottom="168dp"
+            android:contentDescription="@string/up"
+            android:insetBottom="24dp"
+            android:onClick="@{() -> gameFragment.moveUp()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:shapeAppearanceOverlay="@style/ArrowButton" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/buttonLeft"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="56dp"
+            android:layout_marginBottom="120dp"
+            android:contentDescription="@string/left"
+            android:insetBottom="24dp"
+            android:onClick="@{() -> gameFragment.moveLeft()}"
+            android:rotation="-90"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:shapeAppearanceOverlay="@style/ArrowButton" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/buttonDown"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="104dp"
+            android:layout_marginBottom="72dp"
+            android:contentDescription="@string/down"
+            android:insetBottom="24dp"
+            android:onClick="@{() -> gameFragment.moveDown()}"
+            android:rotation="180"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:shapeAppearanceOverlay="@style/ArrowButton" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/buttonRight"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="152dp"
+            android:layout_marginBottom="120dp"
+            android:contentDescription="@string/right"
+            android:insetBottom="24dp"
+            android:onClick="@{() -> gameFragment.moveRight()}"
+            android:rotation="90"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:shapeAppearanceOverlay="@style/ArrowButton" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="76dp"
+            android:layout_marginBottom="112dp"
+            android:clickable="true"
+            android:contentDescription="@string/interact"
+            android:onClick="@{() -> gameFragment.interact()}"
+            app:backgroundTint="@color/teal_200"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageView
+            android:id="@+id/background"
+            android:layout_width="950dp"
+            android:layout_height="950dp"
+            android:layout_marginLeft="-16dp"
+            android:layout_marginTop="-16dp"
+            android:contentDescription="@string/background"
+            app:layout_constraintLeft_toLeftOf="@+id/character"
+            app:layout_constraintTop_toTopOf="@+id/character"
+            app:srcCompat="@drawable/test_background" />
+
+        <ImageView
+            android:id="@+id/character"
+            android:layout_width="62dp"
+            android:layout_height="73dp"
+            android:layout_marginBottom="224dp"
+            android:contentDescription="@string/main_character"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.499"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/chara_front" />
+
+        <ImageView
+            android:id="@+id/treasure0"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/treasure"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/treasure" />
+
+        <ImageView
+            android:id="@+id/treasure1"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/treasure"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/treasure" />
+
+        <ImageView
+            android:id="@+id/treasure2"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/treasure"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/treasure" />
+
+        <ImageView
+            android:id="@+id/treasure3"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/treasure"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/treasure" />
+
+        <TextView
+            android:id="@+id/goldCounter"
+            android:layout_width="85dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:background="#B4212C68"
+            android:fontFamily="sans-serif-smallcaps"
+            android:padding="4dp"
+            android:paddingLeft="4dp"
+            android:paddingTop="4dp"
+            android:paddingRight="4dp"
+            android:paddingBottom="4dp"
+            android:text="@{@string/gold(gameFragment.gameViewModel.chara.gold)}"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ladder"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ladder"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/ladder" />
+
+        <ImageView
+            android:id="@+id/basicEnemy"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/slime_front"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/enemy" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

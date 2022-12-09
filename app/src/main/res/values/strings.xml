@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">DungeonCrawler</string>
+    <string name="up">up</string>
+    <string name="left">left</string>
+    <string name="down">down</string>
+    <string name="right">right</string>
+    <string name="interact">interact</string>
+    <string name="main_character">main character</string>
+    <string name="start_game">Start Game</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="background">background</string>
+    <string name="treasure">treasure</string>
+    <string name="gold">Gold: %1$s</string>
+    <string name="victory">Victory!</string>
+    <string name="restart">Restart</string>
+    <string name="ladder">ladder</string>
+    <string name="final_score_message">You earned %1$s gold!</string>
+    <string name="enemy">Enemy</string>
+</resources>
