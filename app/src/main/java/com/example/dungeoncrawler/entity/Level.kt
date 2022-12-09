@@ -4,13 +4,14 @@ import com.example.dungeoncrawler.Settings
 import kotlin.random.Random
 
 class Level(
-    chara: MainChara,
-    private val basicEnemy: BasicEnemy
+    chara: MainChara
 ) {
 
     val field: Array<Array<LevelObject?>> = Array(Settings.fieldSize) {
         (Array(Settings.fieldSize) {null})
     }
+
+    var enemy = BasicEnemy("basicEnemy", field)
 
     private var random: Random = Random(System.currentTimeMillis())
 
@@ -52,8 +53,8 @@ class Level(
         while (field[coordinates.x][coordinates.y] != null) {
             coordinates = getRandomCoordinates()
         }
-        field[coordinates.x][coordinates.y] = basicEnemy
-        basicEnemy.position = coordinates
+        field[coordinates.x][coordinates.y] = enemy
+        enemy.position = coordinates
     }
 
     fun randomMoney(max: Int): Int {

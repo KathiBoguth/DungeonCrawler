@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_gameView_to_victoryView"
             app:destination="@id/victoryView" />
+        <action
+            android:id="@+id/action_gameView_to_gameOverView"
+            app:destination="@id/gameOverView" />
     </fragment>
     <fragment
         android:id="@+id/victoryView"
@@ -28,6 +31,14 @@
         android:label="VictoryView" >
         <action
             android:id="@+id/action_victoryView_to_gameView"
+            app:destination="@id/gameView" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameOverView"
+        android:name="com.example.dungeoncrawler.GameOverView"
+        android:label="GameOverView" >
+        <action
+            android:id="@+id/action_gameOverView_to_gameView"
             app:destination="@id/gameView" />
     </fragment>
 </navigation>

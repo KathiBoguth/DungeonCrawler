@@ -3,10 +3,12 @@ package com.example.dungeoncrawler.entity
 import android.os.Handler
 import android.os.Looper
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import com.example.dungeoncrawler.R
+import kotlin.math.max
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +17,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class BasicEnemy(idEnemy: String): MovableEntity(LevelObjectType.ENEMY, idEnemy) {
+class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): MovableEntity(LevelObjectType.ENEMY, idEnemy) {
 
     var position = Coordinates(0,0)
 
@@ -24,8 +26,12 @@ class BasicEnemy(idEnemy: String): MovableEntity(LevelObjectType.ENEMY, idEnemy)
     var skin = "slime"
 
     var speed = 500
+    var power = 20
 
     val positionChange: MutableLiveData<Coordinates> by lazy { MutableLiveData() }
+    val attackDamage: MutableLiveData<Int> by lazy { MutableLiveData() }
+
+
 
     private var handler = Handler(Looper.getMainLooper())
     private var random: Random = Random(System.currentTimeMillis())
@@ -44,6 +50,15 @@ class BasicEnemy(idEnemy: String): MovableEntity(LevelObjectType.ENEMY, idEnemy)
     }
 
     fun move() {
+        val directionChara = checkForChara()
+        if( directionChara != null){
+            if (direction != directionChara) {
+                direction = directionChara
+                return
+            }
+            attack()
+            return
+        }
         val turn = random.nextFloat()
 
         if (turn > 0.8) {
@@ -76,5 +91,39 @@ class BasicEnemy(idEnemy: String): MovableEntity(LevelObjectType.ENEMY, idEnemy)
             positionChange.value = newPosition
         }
 
+    }
+
+    private fun attack() {
+        attackDamage.value = random.nextInt(power)
+    }
+
+    private fun checkForChara(): Direction? {
+        if(position.x != 0){
+            val left = field[position.x-1][position.y]
+            if (left != null && left.id == "character"){
+                return Direction.LEFT
+            }
+        }
+        if(position.x != field.size-1){
+            val right = field[position.x+1][position.y]
+            if (right != null && right.id == "character"){
+                return Direction.RIGHT
+            }
+        }
+
+        if(position.y != 0){
+            val top = field[position.x][position.y-1]
+            if (top != null && top.id == "character"){
+                return Direction.UP
+            }
+        }
+
+        if(position.y != field[position.x].size-1){
+            val bottom = field[position.x][position.y+1]
+            if (bottom != null && bottom.id == "character"){
+                return Direction.DOWN
+            }
+        }
+        return null
     }
 }

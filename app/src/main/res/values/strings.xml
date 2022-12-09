@@ -11,9 +11,12 @@
     <string name="background">background</string>
     <string name="treasure">treasure</string>
     <string name="gold">Gold: %1$s</string>
+    <string name="health">HP: %1$s</string>
     <string name="victory">Victory!</string>
     <string name="restart">Restart</string>
     <string name="ladder">ladder</string>
     <string name="final_score_message">You earned %1$s gold!</string>
+    <string name="killed_by_message">Killed by %1$s</string>
     <string name="enemy">Enemy</string>
+    <string name="game_over">Game Over</string>
 </resources>

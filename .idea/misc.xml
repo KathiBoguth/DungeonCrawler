@@ -6,7 +6,8 @@
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2025" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.395" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.319677734375" />
-        <entry key="app/src/main/res/layout/fragment_game_view.xml" value="0.366204833984375" />
+        <entry key="app/src/main/res/layout/fragment_game_over.xml" value="0.19437154416805558" />
+        <entry key="app/src/main/res/layout/fragment_game_view.xml" value="0.2530929565429687" />
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.17565471817153594" />
         <entry key="app/src/main/res/layout/fragment_victory.xml" value="0.36639589568191533" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2735" />

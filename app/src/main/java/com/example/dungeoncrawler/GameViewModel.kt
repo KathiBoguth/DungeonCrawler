@@ -1,7 +1,6 @@
 package com.example.dungeoncrawler
 
 import androidx.lifecycle.ViewModel
-import com.example.dungeoncrawler.entity.BasicEnemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.Level
@@ -10,23 +9,30 @@ import com.example.dungeoncrawler.entity.MainChara
 
 class GameViewModel : ViewModel() {
 
-
     var chara = MainChara()
-    var enemy = BasicEnemy("basicEnemy")
-    var level = Level(chara, enemy)
+    lateinit var killedBy: String
+
+    var level = Level(chara)
 
     fun onEnemyPositionChange(coordinates: Coordinates) {
         if (!movePossible(coordinates)) {
             return
         }
 
-        val oldCoordinates = findCoordinate(enemy.id)
+        val oldCoordinates = findCoordinate(level.enemy.id)
         if(oldCoordinates.x == -1 && oldCoordinates.y == -1) {
             return
         }
         level.field[oldCoordinates.x][oldCoordinates.y] = null
-        level.field[coordinates.x][coordinates.y] = enemy
-        enemy.position = coordinates
+        level.field[coordinates.x][coordinates.y] = level.enemy
+        level.enemy.position = coordinates
+    }
+
+    fun onEnemyAttack(damage: Int, enemyId: String) {
+        chara.health -= damage
+        if (chara.health <= 0) {
+            killedBy = enemyId
+        }
     }
 
     fun interact() : Boolean {
@@ -137,13 +143,12 @@ class GameViewModel : ViewModel() {
     }
 
     private fun attack() {
-        // TODO
+        level.enemy.health -= 20
     }
 
     fun reset() {
         chara = MainChara()
-        enemy = BasicEnemy("basicEnemy")
-        level = Level(chara, enemy)
+        level = Level(chara)
     }
 
     private fun getRandomReward() {
