@@ -271,6 +271,56 @@
             app:layout_constraintStart_toStartOf="@+id/background"
             app:layout_constraintTop_toTopOf="@+id/background" />
 
+        <ImageView
+            android:id="@+id/sword_diamond"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:contentDescription="@string/diamond_sword"
+            android:src="@drawable/sword_diamond"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background" />
+
+        <ImageView
+            android:id="@+id/gui_sword_diamond"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/sword_diamond"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/goldCounter"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/diamond_sword" />
+
+        <ImageView
+            android:id="@+id/sword_wooden"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/sword_wooden"
+            tools:layout_editor_absoluteX="453dp"
+            tools:layout_editor_absoluteY="173dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@+id/background"
+            app:layout_constraintTop_toTopOf="@+id/background"
+            android:contentDescription="@string/wooden_sword" />
+
+        <ImageView
+            android:id="@+id/gui_sword_wooden"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/sword_wooden"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/goldCounter"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/wooden_sword" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

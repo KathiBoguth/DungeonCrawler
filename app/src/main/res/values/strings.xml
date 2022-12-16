@@ -20,4 +20,6 @@
     <string name="enemy">Enemy</string>
     <string name="game_over">Game Over</string>
     <string name="coin">coin</string>
+    <string name="diamond_sword">Diamond Sword</string>
+    <string name="wooden_sword">wooden Sword</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.example.dungeoncrawler.entity
 
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.entity.weapon.Sword
+import com.example.dungeoncrawler.entity.weapon.Weapon
 import java.util.Deque
 import kotlin.random.Random
 
@@ -14,6 +16,7 @@ class Level(
 
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
+    val swordIds = listOf("sword_wooden, sword_diamond")
 
     private var random: Random = Random(System.currentTimeMillis())
 
@@ -93,6 +96,20 @@ class Level(
             3 -> Direction.RIGHT
             else -> Direction.DOWN
         }
+    }
+
+    fun dropCoin(): Boolean {
+        return random.nextBoolean()
+
+    }
+
+    fun randomWeapon(): Weapon {
+        return if (random.nextInt() > 0.8) {
+            Sword(50, "sword_diamond")
+        } else {
+            Sword(10, "sword_wooden")
+        }
+
     }
 
 }

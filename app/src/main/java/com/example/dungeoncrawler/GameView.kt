@@ -21,6 +21,7 @@ import com.example.dungeoncrawler.entity.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
+import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
@@ -37,6 +38,7 @@ class GameView : Fragment() {
     private var handler = Handler(Looper.getMainLooper())
     private lateinit var enemyObserver: Observer<EnemyPositionChangeDTO>
     private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
+    private lateinit var charaWeaponObserver: Observer<Weapon>
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -99,6 +101,11 @@ class GameView : Fragment() {
             it.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
         }
 
+        charaWeaponObserver = Observer<Weapon> {
+            showWeapon(it.id)
+        }
+
+        gameViewModel.chara.weaponObservable.observe(viewLifecycleOwner, charaWeaponObserver)
     }
 
     fun interact() {
@@ -110,6 +117,7 @@ class GameView : Fragment() {
         removeTreasures()
         removeEnemies()
         removeCoins()
+        removeWeapons()
         updateStats()
     }
 
@@ -208,7 +216,7 @@ class GameView : Fragment() {
         val xPos = x*Settings.moveLength + backgroundPos.x + Settings.margin
         val yPos = y*Settings.moveLength + backgroundPos.y + Settings.margin
 
-        if(gameObject?.type == LevelObjectType.COIN) {
+        if(gameObject?.type == LevelObjectType.COIN || gameObject?.type == LevelObjectType.WEAPON) {
             gameObjectView.x = xPos
             gameObjectView.y = yPos
         } else {
@@ -257,6 +265,13 @@ class GameView : Fragment() {
         }
     }
 
+    private fun removeWeapons() {
+        for (id in gameViewModel.level.swordIds) {
+
+            hideGameObjectIfRemoved(id)
+        }
+    }
+
     private fun hideGameObjectIfRemoved(id: String) {
         if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it?.id == id }}) {
             val enemyView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
@@ -269,6 +284,30 @@ class GameView : Fragment() {
             resources.getString((R.string.gold),
             gameViewModel.chara.gold.toString())
         )
+    }
+
+    private fun showWeapon(id: String) {
+        for (i in gameViewModel.level.swordIds) {
+            val weaponId = "gui_$id"
+            val weaponView = view?.findViewById<View>(
+                resources.getIdentifier(
+                    weaponId,
+                    "id",
+                    requireContext().packageName
+                )
+            )
+            weaponView?.visibility = View.VISIBLE
+        }
+
+        val weaponId = "gui_$id"
+        val weaponView = view?.findViewById<View>(
+            resources.getIdentifier(
+                weaponId,
+                "id",
+                requireContext().packageName
+            )
+        )
+        weaponView?.visibility = View.VISIBLE
     }
 
     private fun getGameObjectView(view: View, objectId: String): ImageView? {

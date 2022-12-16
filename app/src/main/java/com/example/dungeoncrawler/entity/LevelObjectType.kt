@@ -5,5 +5,6 @@ enum class LevelObjectType {
     TREASURE,
     LADDER,
     ENEMY,
-    COIN
+    COIN,
+    WEAPON
 }

@@ -9,6 +9,8 @@ import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
+import com.example.dungeoncrawler.entity.weapon.Sword
+import com.example.dungeoncrawler.entity.weapon.Weapon
 
 class GameViewModel : ViewModel() {
 
@@ -53,7 +55,11 @@ class GameViewModel : ViewModel() {
         return when (level.field[coordinates.x][coordinates.y]?.type) {
             LevelObjectType.TREASURE -> {
                 level.field[coordinates.x][coordinates.y] = null
-                placeCoin(coordinates)
+                if(level.dropCoin()){
+                    placeCoin(coordinates)
+                } else {
+                    placeWeapon(coordinates)
+                }
                 false
             }
             LevelObjectType.LADDER -> true
@@ -64,6 +70,18 @@ class GameViewModel : ViewModel() {
             LevelObjectType.COIN -> {
                 getRandomReward()
                 level.field[coordinates.x][coordinates.y] = null
+                false
+            }
+            LevelObjectType.WEAPON -> {
+                val oldWeapon = chara.weapon
+
+                chara.putOnWeapon(level.field[coordinates.x][coordinates.y]!! as Weapon)
+
+                if(chara.weapon != null) {
+                    level.field[coordinates.x][coordinates.y] = oldWeapon
+                } else {
+                    level.field[coordinates.x][coordinates.y] = null
+                }
                 false
             }
             else -> false
@@ -153,7 +171,8 @@ class GameViewModel : ViewModel() {
     }
 
     private fun attack(attackedEnemy: BasicEnemy) {
-        attackedEnemy.health -= 20
+        val weaponBonus = chara.weapon?.attack ?: 0
+        attackedEnemy.health -= chara.baseAttack + weaponBonus
         if (attackedEnemy.health <= 0) {
             placeCoin(attackedEnemy.position)
             attackedEnemy.position = Coordinates(-1, -1)
@@ -173,6 +192,11 @@ class GameViewModel : ViewModel() {
         val coin = level.coinStack.removeFirst()
         level.field[position.x][position.y] = Coin(coin)
         level.coinStack.addLast(coin)
+    }
+
+    private fun placeWeapon(position: Coordinates){
+        val weapon = level.randomWeapon()
+        level.field[position.x][position.y] = weapon
     }
 
     private fun movePossible(coordinates: Coordinates) : Boolean {
