@@ -1,6 +1,7 @@
 package com.example.dungeoncrawler.entity
 
 import com.example.dungeoncrawler.Settings
+import java.util.Deque
 import kotlin.random.Random
 
 class Level(
@@ -12,6 +13,7 @@ class Level(
     }
 
     lateinit var enemies: MutableList<BasicEnemy>
+    val coinStack = ArrayDeque<String>()
 
     private var random: Random = Random(System.currentTimeMillis())
 
@@ -20,6 +22,7 @@ class Level(
         placeTreasures()
         placeLadder()
         placeEnemies()
+        fillCoinStack()
 
     }
 
@@ -63,6 +66,12 @@ class Level(
         }
         enemies = enemyList.toMutableList()
 
+    }
+
+    private fun fillCoinStack() {
+        coinStack.addLast("coin0")
+        coinStack.addLast("coin1")
+        coinStack.addLast("coin2")
     }
 
     fun randomMoney(max: Int): Int {

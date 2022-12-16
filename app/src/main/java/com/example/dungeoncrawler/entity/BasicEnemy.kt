@@ -50,6 +50,9 @@ class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): Movabl
     }
 
     fun move() {
+        if(health <= 0) {
+            return
+        }
         val directionChara = checkForChara()
         if( directionChara != null){
             if (direction != directionChara) {

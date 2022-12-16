@@ -19,6 +19,7 @@ import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
+import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -100,7 +101,6 @@ class GameView : Fragment() {
 
     }
 
-
     fun interact() {
         val endGame = gameViewModel.interact()
         if (endGame) {
@@ -108,6 +108,8 @@ class GameView : Fragment() {
             return
         }
         removeTreasures()
+        removeEnemies()
+        removeCoins()
         updateStats()
     }
 
@@ -206,7 +208,12 @@ class GameView : Fragment() {
         val xPos = x*Settings.moveLength + backgroundPos.x + Settings.margin
         val yPos = y*Settings.moveLength + backgroundPos.y + Settings.margin
 
-        gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+        if(gameObject?.type == LevelObjectType.COIN) {
+            gameObjectView.x = xPos
+            gameObjectView.y = yPos
+        } else {
+            gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+        }
 
         gameObjectView.visibility = View.VISIBLE
         gameObjectView.bringToFront()
@@ -233,10 +240,27 @@ class GameView : Fragment() {
     private fun removeTreasures() {
         for (i in 0..Settings.treasureMax) {
             val treasureId = "treasure$i"
-            if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it?.id == treasureId }}) {
-                val treasure = view?.findViewById<ImageView>(resources.getIdentifier(treasureId, "id", requireContext().packageName))
-                treasure?.visibility = View.INVISIBLE
-            }
+            hideGameObjectIfRemoved(treasureId)
+        }
+    }
+
+    private fun removeEnemies() {
+        for (enemy in  gameViewModel.level.enemies) {
+            hideGameObjectIfRemoved(enemy.id)
+        }
+    }
+
+    private fun removeCoins() {
+        for (i in 0..Settings.coinsMax) {
+            val coinId = "coin$i"
+            hideGameObjectIfRemoved(coinId)
+        }
+    }
+
+    private fun hideGameObjectIfRemoved(id: String) {
+        if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it?.id == id }}) {
+            val enemyView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
+            enemyView?.visibility = View.INVISIBLE
         }
     }
 

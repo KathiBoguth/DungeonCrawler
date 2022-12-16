@@ -19,4 +19,5 @@
     <string name="killed_by_message">Killed by %1$s</string>
     <string name="enemy">Enemy</string>
     <string name="game_over">Game Over</string>
+    <string name="coin">coin</string>
 </resources>

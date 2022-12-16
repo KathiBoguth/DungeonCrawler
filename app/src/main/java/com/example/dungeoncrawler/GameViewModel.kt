@@ -2,6 +2,7 @@ package com.example.dungeoncrawler
 
 import androidx.lifecycle.ViewModel
 import com.example.dungeoncrawler.entity.BasicEnemy
+import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
@@ -51,13 +52,18 @@ class GameViewModel : ViewModel() {
 
         return when (level.field[coordinates.x][coordinates.y]?.type) {
             LevelObjectType.TREASURE -> {
-                getRandomReward()
                 level.field[coordinates.x][coordinates.y] = null
+                placeCoin(coordinates)
                 false
             }
             LevelObjectType.LADDER -> true
             LevelObjectType.ENEMY -> {
                 attack(level.field[coordinates.x][coordinates.y] as BasicEnemy)
+                false
+            }
+            LevelObjectType.COIN -> {
+                getRandomReward()
+                level.field[coordinates.x][coordinates.y] = null
                 false
             }
             else -> false
@@ -149,6 +155,7 @@ class GameViewModel : ViewModel() {
     private fun attack(attackedEnemy: BasicEnemy) {
         attackedEnemy.health -= 20
         if (attackedEnemy.health <= 0) {
+            placeCoin(attackedEnemy.position)
             attackedEnemy.position = Coordinates(-1, -1)
         }
     }
@@ -160,6 +167,12 @@ class GameViewModel : ViewModel() {
 
     private fun getRandomReward() {
         chara.gold += level.randomMoney(Settings.treasureMaxMoney)
+    }
+
+    private fun placeCoin(position: Coordinates){
+        val coin = level.coinStack.removeFirst()
+        level.field[position.x][position.y] = Coin(coin)
+        level.coinStack.addLast(coin)
     }
 
     private fun movePossible(coordinates: Coordinates) : Boolean {

@@ -6,6 +6,7 @@ class Settings {
         const val moveLength = 248f
         const val fieldSize = 10
         const val treasureMax = 4
+        const val coinsMax = 3
         const val margin = 16f
         const val treasureMaxMoney = 100
         const val enemiesAmount = 3

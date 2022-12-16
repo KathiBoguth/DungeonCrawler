@@ -4,5 +4,6 @@ enum class LevelObjectType {
     MAIN_CHARA,
     TREASURE,
     LADDER,
-    ENEMY
+    ENEMY,
+    COIN
 }
