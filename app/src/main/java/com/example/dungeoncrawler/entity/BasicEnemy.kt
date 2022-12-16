@@ -28,8 +28,8 @@ class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): Movabl
     var speed = 500
     var power = 20
 
-    val positionChange: MutableLiveData<Coordinates> by lazy { MutableLiveData() }
-    val attackDamage: MutableLiveData<Int> by lazy { MutableLiveData() }
+    val positionChange: MutableLiveData<EnemyPositionChangeDTO> by lazy { MutableLiveData() }
+    val attackDamage: MutableLiveData<EnemyDamageDTO> by lazy { MutableLiveData() }
 
 
 
@@ -88,13 +88,15 @@ class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): Movabl
                 }
 
             }
-            positionChange.value = newPosition
+            positionChange.value = EnemyPositionChangeDTO(newPosition, id)
         }
 
     }
 
     private fun attack() {
-        attackDamage.value = random.nextInt(power)
+        if (!(health <= 0)) {
+            attackDamage.value = EnemyDamageDTO(random.nextInt(power), id)
+        }
     }
 
     private fun checkForChara(): Direction? {

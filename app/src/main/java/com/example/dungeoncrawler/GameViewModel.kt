@@ -1,8 +1,10 @@
 package com.example.dungeoncrawler
 
 import androidx.lifecycle.ViewModel
+import com.example.dungeoncrawler.entity.BasicEnemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
@@ -14,18 +16,20 @@ class GameViewModel : ViewModel() {
 
     var level = Level(chara)
 
-    fun onEnemyPositionChange(coordinates: Coordinates) {
-        if (!movePossible(coordinates)) {
+    fun onEnemyPositionChange(enemyPositionChangeDTO: EnemyPositionChangeDTO) {
+        if (!movePossible(enemyPositionChangeDTO.newPosition)) {
             return
         }
 
-        val oldCoordinates = findCoordinate(level.enemy.id)
+        val oldCoordinates = findCoordinate(enemyPositionChangeDTO.id)
         if(oldCoordinates.x == -1 && oldCoordinates.y == -1) {
             return
         }
         level.field[oldCoordinates.x][oldCoordinates.y] = null
-        level.field[coordinates.x][coordinates.y] = level.enemy
-        level.enemy.position = coordinates
+        val enemy = level.enemies.find { it.id == enemyPositionChangeDTO.id }
+        level.field[enemyPositionChangeDTO.newPosition.x][enemyPositionChangeDTO.newPosition.y] = enemy
+
+        enemy?.position = enemyPositionChangeDTO.newPosition
     }
 
     fun onEnemyAttack(damage: Int, enemyId: String) {
@@ -53,7 +57,7 @@ class GameViewModel : ViewModel() {
             }
             LevelObjectType.LADDER -> true
             LevelObjectType.ENEMY -> {
-                attack()
+                attack(level.field[coordinates.x][coordinates.y] as BasicEnemy)
                 false
             }
             else -> false
@@ -142,8 +146,11 @@ class GameViewModel : ViewModel() {
         return true
     }
 
-    private fun attack() {
-        level.enemy.health -= 20
+    private fun attack(attackedEnemy: BasicEnemy) {
+        attackedEnemy.health -= 20
+        if (attackedEnemy.health <= 0) {
+            attackedEnemy.position = Coordinates(-1, -1)
+        }
     }
 
     fun reset() {

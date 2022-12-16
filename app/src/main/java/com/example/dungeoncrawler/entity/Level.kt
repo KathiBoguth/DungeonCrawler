@@ -11,7 +11,7 @@ class Level(
         (Array(Settings.fieldSize) {null})
     }
 
-    var enemy = BasicEnemy("basicEnemy", field)
+    lateinit var enemies: MutableList<BasicEnemy>
 
     private var random: Random = Random(System.currentTimeMillis())
 
@@ -49,12 +49,20 @@ class Level(
     }
 
     private fun placeEnemies() {
-        var coordinates = getRandomCoordinates()
-        while (field[coordinates.x][coordinates.y] != null) {
-            coordinates = getRandomCoordinates()
+        val enemyList = ArrayList<BasicEnemy>()
+        for (i in 0 until Settings.enemiesAmount) {
+            var coordinates = getRandomCoordinates()
+            while (field[coordinates.x][coordinates.y] != null) {
+                coordinates = getRandomCoordinates()
+            }
+            val enemy = BasicEnemy("basicEnemy$i", field)
+            field[coordinates.x][coordinates.y] = enemy
+            enemy.position = coordinates
+            enemy.direction = randomDirection()
+            enemyList.add(enemy)
         }
-        field[coordinates.x][coordinates.y] = enemy
-        enemy.position = coordinates
+        enemies = enemyList.toMutableList()
+
     }
 
     fun randomMoney(max: Int): Int {
@@ -68,6 +76,15 @@ class Level(
         return Coordinates(xCord, yCord)
     }
 
+    private fun randomDirection(): Direction {
+        return when (random.nextInt(4)){
+            0 -> Direction.UP
+            1 -> Direction.DOWN
+            2 -> Direction.LEFT
+            3 -> Direction.RIGHT
+            else -> Direction.DOWN
+        }
+    }
 
 }
 

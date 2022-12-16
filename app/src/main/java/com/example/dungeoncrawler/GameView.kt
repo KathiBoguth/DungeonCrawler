@@ -17,6 +17,8 @@ import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
 import com.example.dungeoncrawler.entity.BasicEnemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.EnemyDamageDTO
+import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.MovableEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,8 +34,8 @@ class GameView : Fragment() {
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private var handler = Handler(Looper.getMainLooper())
-    private lateinit var enemyObserver: Observer<Coordinates>
-    private lateinit var enemyDamageObserver: Observer<Int>
+    private lateinit var enemyObserver: Observer<EnemyPositionChangeDTO>
+    private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -70,17 +72,20 @@ class GameView : Fragment() {
             handler.postDelayed(runnableCode, 5)
         }
 
-        enemyObserver = Observer<Coordinates>{
-            val enemy = getGameObjectView(view)
+        enemyObserver = Observer<EnemyPositionChangeDTO>{
+            val enemyView = getGameObjectView(view, it.id)
             val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
-            enemy?.startAnimation(jumpUpAnimation)
+            enemyView?.startAnimation(jumpUpAnimation)
 
             gameViewModel.onEnemyPositionChange(it)
         }
-        gameViewModel.level.enemy.positionChange.observe(viewLifecycleOwner, enemyObserver)
 
-        enemyDamageObserver = Observer<Int> {
-            gameViewModel.onEnemyAttack(it, gameViewModel.level.enemy.id)
+        gameViewModel.level.enemies.forEach {
+            it.positionChange.observe(viewLifecycleOwner, enemyObserver)
+        }
+
+        enemyDamageObserver = Observer<EnemyDamageDTO> {
+            gameViewModel.onEnemyAttack(it.damage, it.id)
             binding?.health?.text = String.format(
                 resources.getString((R.string.health),
                     gameViewModel.chara.health.toString())
@@ -89,7 +94,9 @@ class GameView : Fragment() {
                 this.findNavController().navigate(R.id.action_gameView_to_gameOverView)
             }
         }
-        gameViewModel.level.enemy.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
+        gameViewModel.level.enemies.forEach {
+            it.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
+        }
 
     }
 
@@ -204,11 +211,11 @@ class GameView : Fragment() {
         gameObjectView.visibility = View.VISIBLE
         gameObjectView.bringToFront()
 
-        if (gameObject?.id == "basicEnemy") {
-            if ((gameObject as BasicEnemy).health <= 0) {
+        if (gameObject is BasicEnemy) {
+            if (gameObject.health <= 0) {
                 gameViewModel.level.field[x][y] = null
                 gameObjectView.visibility = View.INVISIBLE
-                gameViewModel.level.enemy.positionChange.removeObserver(enemyObserver)
+                gameObject.positionChange.removeObserver(enemyObserver)
                 return
             }
             val drawableId = when((gameViewModel.level.field[x][y] as MovableEntity).direction) {
@@ -240,8 +247,8 @@ class GameView : Fragment() {
         )
     }
 
-    private fun getGameObjectView(view: View): ImageView? {
-        val coordinates = gameViewModel.findCoordinate(gameViewModel.level.enemy.id)
+    private fun getGameObjectView(view: View, objectId: String): ImageView? {
+        val coordinates = gameViewModel.findCoordinate(objectId)
         val id = gameViewModel.level.field[coordinates.x][coordinates.y]?.id
         return view.findViewById(
             resources.getIdentifier(
