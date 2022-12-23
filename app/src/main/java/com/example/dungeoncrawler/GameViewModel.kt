@@ -89,65 +89,65 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun moveUp(id: String): Coordinates {
+    fun moveUp(id: String) {
         val coordinates = findCoordinate(id)
         if (coordinates.x == -1 || coordinates.y == -1) {
-            return Coordinates(0,0)
+            return
         }
         val newCoordinates = Coordinates(coordinates.x, coordinates.y-1)
 
         if (!movePossible(newCoordinates)) {
-            return Coordinates(0,0)
+            return
         }
 
         level.field[coordinates.x][coordinates.y] = null
         level.field[newCoordinates.x][newCoordinates.y] = chara
-        return Coordinates(0,-1)
+        return
     }
 
-    fun moveDown(id: String): Coordinates {
+    fun moveDown(id: String) {
         val coordinates = findCoordinate(id)
         if (coordinates.x == -1 || coordinates.y == -1) {
-            return Coordinates(0,0)
+            return
         }
         val newCoordinates = Coordinates(coordinates.x, coordinates.y+1)
         if (!movePossible(newCoordinates)) {
-            return Coordinates(0,0)
+            return
         }
 
         level.field[coordinates.x][coordinates.y] = null
         level.field[newCoordinates.x][newCoordinates.y] = chara
-        return Coordinates(0,1)
+        return
     }
 
-    fun moveLeft(id: String): Coordinates {
+    fun moveLeft(id: String) {
         val coordinates = findCoordinate(id)
         if (coordinates.x == -1 || coordinates.y == -1) {
-            return Coordinates(0,0)
+            return
         }
         val newCoordinates = Coordinates(coordinates.x-1, coordinates.y)
         if (!movePossible(newCoordinates)) {
-            return Coordinates(0,0)
+            return
         }
 
         level.field[coordinates.x][coordinates.y] = null
         level.field[newCoordinates.x][newCoordinates.y] = chara
-        return Coordinates(-1,0)
+        return
     }
 
-    fun moveRight(id: String): Coordinates {
+    fun moveRight(id: String) {
         val coordinates = findCoordinate(id)
         if (coordinates.x == -1 || coordinates.y == -1) {
-            return Coordinates(0,0)
+            return
         }
         val newCoordinates = Coordinates(coordinates.x+1, coordinates.y)
         if (!movePossible(newCoordinates)) {
-            return Coordinates(0, 0)
+            return
         }
 
         level.field[coordinates.x][coordinates.y] = null
         level.field[newCoordinates.x][newCoordinates.y] = chara
-        return Coordinates(1,0)
+        return
 
     }
 

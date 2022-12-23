@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 class GameView : Fragment() {
 
     private var backgroundPos = Coordinates(-1,-1)
+    private var backgroundOrigPos = Coordinates(-1,-1)
     val gameViewModel: GameViewModel by activityViewModels()
 
     private var binding: FragmentGameViewBinding? = null
@@ -45,6 +46,7 @@ class GameView : Fragment() {
             if (backgroundPos.x == -1) {
                 val background = view?.findViewById<ImageView>(R.id.background)
                 backgroundPos = Coordinates(background?.x?.toInt() ?: -1, background?.y?.toInt() ?: -1)
+                backgroundOrigPos = backgroundPos
                 drawObjects(0)
             } else {
                 drawObjects()
@@ -130,9 +132,9 @@ class GameView : Fragment() {
             chara?.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.chara_back, requireContext().theme))
             return
         }
-        val moveBackground = gameViewModel.moveUp(gameViewModel.chara.id)
+        gameViewModel.moveUp(gameViewModel.chara.id)
 
-        redraw(moveBackground)
+        redraw()
     }
 
     fun moveDown() {
@@ -144,9 +146,9 @@ class GameView : Fragment() {
             return
         }
 
-        val moveBackground = gameViewModel.moveDown(gameViewModel.chara.id)
+        gameViewModel.moveDown(gameViewModel.chara.id)
 
-        redraw(moveBackground)
+        redraw()
     }
 
     fun moveLeft() {
@@ -158,9 +160,9 @@ class GameView : Fragment() {
             return
         }
 
-        val moveBackground = gameViewModel.moveLeft(gameViewModel.chara.id)
+        gameViewModel.moveLeft(gameViewModel.chara.id)
 
-        redraw(moveBackground)
+        redraw()
     }
 
     fun moveRight() {
@@ -172,12 +174,12 @@ class GameView : Fragment() {
             return
         }
 
-        val moveBackground = gameViewModel.moveRight(gameViewModel.chara.id)
+        gameViewModel.moveRight(gameViewModel.chara.id)
 
-        redraw(moveBackground)
+        redraw()
     }
 
-    private fun redraw(moveBackground: Coordinates) {
+    private fun redraw() {
         val background = view?.findViewById<ImageView>(R.id.background)
         val chara = view?.findViewById<ImageView>(R.id.character)
 
@@ -186,8 +188,9 @@ class GameView : Fragment() {
         if (background == null) {
             return
         }
-        val xPosBackground = background.x.minus(moveBackground.x*Settings.moveLength)
-        val yPosBackground = background.y.minus(moveBackground.y*Settings.moveLength)
+        val charaPosition = gameViewModel.findCoordinate("character")
+        val xPosBackground = backgroundOrigPos.x.minus(charaPosition.x*Settings.moveLength)
+        val yPosBackground = backgroundOrigPos.y.minus(charaPosition.y*Settings.moveLength)
 
         backgroundPos = Coordinates(xPosBackground.toInt(), yPosBackground.toInt())
 
@@ -274,8 +277,8 @@ class GameView : Fragment() {
 
     private fun hideGameObjectIfRemoved(id: String) {
         if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it?.id == id }}) {
-            val enemyView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
-            enemyView?.visibility = View.INVISIBLE
+            val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
+            gameObjectView?.visibility = View.INVISIBLE
         }
     }
 
@@ -288,7 +291,7 @@ class GameView : Fragment() {
 
     private fun showWeapon(id: String) {
         for (i in gameViewModel.level.swordIds) {
-            val weaponId = "gui_$id"
+            val weaponId = "gui_$i"
             val weaponView = view?.findViewById<View>(
                 resources.getIdentifier(
                     weaponId,
@@ -296,7 +299,7 @@ class GameView : Fragment() {
                     requireContext().packageName
                 )
             )
-            weaponView?.visibility = View.VISIBLE
+            weaponView?.visibility = View.INVISIBLE
         }
 
         val weaponId = "gui_$id"

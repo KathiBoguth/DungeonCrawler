@@ -16,7 +16,7 @@ class Level(
 
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
-    val swordIds = listOf("sword_wooden, sword_diamond")
+    val swordIds = listOf("sword_wooden", "sword_diamond")
 
     private var random: Random = Random(System.currentTimeMillis())
 
