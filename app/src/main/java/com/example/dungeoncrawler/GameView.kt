@@ -3,13 +3,14 @@ package com.example.dungeoncrawler
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.fragment.app.Fragment
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -26,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+
 
 class GameView : Fragment() {
 
@@ -47,9 +49,9 @@ class GameView : Fragment() {
                 val background = view?.findViewById<ImageView>(R.id.background)
                 backgroundPos = Coordinates(background?.x?.toInt() ?: -1, background?.y?.toInt() ?: -1)
                 backgroundOrigPos = backgroundPos
-                drawObjects(0)
+                redraw(0)
             } else {
-                drawObjects()
+                redraw()
             }
             handler.postDelayed(this, 100)
         }
@@ -134,7 +136,7 @@ class GameView : Fragment() {
         }
         gameViewModel.moveUp(gameViewModel.chara.id)
 
-        redraw()
+        redraw(charaMoves = true)
     }
 
     fun moveDown() {
@@ -148,7 +150,7 @@ class GameView : Fragment() {
 
         gameViewModel.moveDown(gameViewModel.chara.id)
 
-        redraw()
+        redraw(charaMoves = true)
     }
 
     fun moveLeft() {
@@ -162,7 +164,7 @@ class GameView : Fragment() {
 
         gameViewModel.moveLeft(gameViewModel.chara.id)
 
-        redraw()
+        redraw(charaMoves = true)
     }
 
     fun moveRight() {
@@ -176,31 +178,34 @@ class GameView : Fragment() {
 
         gameViewModel.moveRight(gameViewModel.chara.id)
 
-        redraw()
+        redraw(charaMoves = true)
     }
 
-    private fun redraw() {
+    private fun redraw(duration: Long = 100, charaMoves: Boolean = false) {
         val background = view?.findViewById<ImageView>(R.id.background)
         val chara = view?.findViewById<ImageView>(R.id.character)
 
-        val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
 
         if (background == null) {
             return
         }
         val charaPosition = gameViewModel.findCoordinate("character")
-        val xPosBackground = backgroundOrigPos.x.minus(charaPosition.x*Settings.moveLength)
-        val yPosBackground = backgroundOrigPos.y.minus(charaPosition.y*Settings.moveLength)
+        val moveLength = convertDpToPixel(Settings.moveLength)
+        val xPosBackground = backgroundOrigPos.x.minus(charaPosition.x*moveLength)
+        val yPosBackground = backgroundOrigPos.y.minus(charaPosition.y*moveLength)
 
         backgroundPos = Coordinates(xPosBackground.toInt(), yPosBackground.toInt())
 
-        chara?.startAnimation(jumpUpAnimation)
-        background.animate().x(xPosBackground).y(yPosBackground).setDuration(100)
+        if (charaMoves){
+            val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
+            chara?.startAnimation(jumpUpAnimation)
+        }
+        background.animate().x(xPosBackground).y(yPosBackground).setDuration(duration)
 
-        drawObjects()
+        drawObjects(duration)
     }
 
-    private fun drawObjects(duration: Long = 100) {
+    private fun drawObjects(duration: Long) {
         for (x in 0 until gameViewModel.level.field.size) {
             for (y in 0 until gameViewModel.level.field[x].size) {
                 if (gameViewModel.level.field[x][y] != null && gameViewModel.level.field[x][y]?.id != gameViewModel.chara.id) {
@@ -216,8 +221,9 @@ class GameView : Fragment() {
             view?.findViewById<ImageView>(resources.getIdentifier(gameObject?.id, "id", requireContext().packageName))
                 ?: return
 
-        val xPos = x*Settings.moveLength + backgroundPos.x + Settings.margin
-        val yPos = y*Settings.moveLength + backgroundPos.y + Settings.margin
+        val moveLength = convertDpToPixel(Settings.moveLength)
+        val xPos = x*moveLength + backgroundPos.x + Settings.margin
+        val yPos = y*moveLength + backgroundPos.y + Settings.margin
 
         if(gameObject?.type == LevelObjectType.COIN || gameObject?.type == LevelObjectType.WEAPON) {
             gameObjectView.x = xPos
@@ -323,6 +329,11 @@ class GameView : Fragment() {
                 requireContext().packageName
             )
         )
+    }
+
+    private fun convertDpToPixel(dp: Float): Float {
+        return dp * (requireContext().resources
+            .displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 
 }

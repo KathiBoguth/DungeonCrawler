@@ -1,7 +1,12 @@
 package com.example.dungeoncrawler
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.view.Window
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.Button
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -17,6 +22,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsets.Type.statusBars())
+        }
 
     }
 

@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#720899">
+        android:background="#000000">
 
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -80,7 +80,7 @@
             android:clickable="true"
             android:contentDescription="@string/interact"
             android:onClick="@{() -> gameFragment.interact()}"
-            app:backgroundTint="@color/teal_200"
+            app:backgroundTint="@color/secondary"
             app:fabSize="normal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -90,11 +90,10 @@
             android:layout_width="950dp"
             android:layout_height="950dp"
             android:layout_marginStart="-16dp"
-            android:layout_marginTop="-16dp"
             android:contentDescription="@string/background"
             app:layout_constraintLeft_toLeftOf="@+id/character"
             app:layout_constraintTop_toTopOf="@+id/character"
-            app:srcCompat="@drawable/test_background" />
+            app:srcCompat="@drawable/dungeon_background" />
 
         <ImageView
             android:id="@+id/character"

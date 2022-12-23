@@ -21,12 +21,23 @@ class Level(
     private var random: Random = Random(System.currentTimeMillis())
 
     init {
-        field[0][0] = chara
+        field[1][1] = chara
+        placeWalls()
         placeTreasures()
         placeLadder()
         placeEnemies()
         fillCoinStack()
 
+    }
+
+    private fun placeWalls() {
+        for (row in field.indices) {
+            for (column in field[row].indices) {
+                if (row == 0 || column == 0 || row == field.size-1 || column == field[row].size-1){
+                    field[row][column] = Wall()
+                }
+            }
+        }
     }
 
     private fun placeTreasures() {
