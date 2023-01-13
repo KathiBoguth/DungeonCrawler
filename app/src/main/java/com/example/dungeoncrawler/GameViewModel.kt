@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.dungeoncrawler.entity.BasicEnemy
 import com.example.dungeoncrawler.entity.Coin
@@ -18,6 +19,8 @@ class GameViewModel : ViewModel() {
     lateinit var killedBy: String
 
     var level = Level(chara)
+
+    val attackedEntityAnimation: MutableLiveData<String> by lazy { MutableLiveData() }
 
     fun onEnemyPositionChange(enemyPositionChangeDTO: EnemyPositionChangeDTO) {
         if (!movePossible(enemyPositionChangeDTO.newPosition)) {
@@ -172,7 +175,8 @@ class GameViewModel : ViewModel() {
 
     private fun attack(attackedEnemy: BasicEnemy) {
         val weaponBonus = chara.weapon?.attack ?: 0
-        attackedEnemy.health -= chara.baseAttack + weaponBonus
+        attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
+        attackedEntityAnimation.value = attackedEnemy.id
         if (attackedEnemy.health <= 0) {
             placeCoin(attackedEnemy.position)
             attackedEnemy.position = Coordinates(-1, -1)

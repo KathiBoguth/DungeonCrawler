@@ -1,5 +1,7 @@
 package com.example.dungeoncrawler
 
+import android.animation.ValueAnimator
+import android.animation.ValueAnimator.REVERSE
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,6 +25,7 @@ import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
@@ -42,6 +45,7 @@ class GameView : Fragment() {
     private lateinit var enemyObserver: Observer<EnemyPositionChangeDTO>
     private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
     private lateinit var charaWeaponObserver: Observer<Weapon>
+    private lateinit var attackedEntityAnimationObserver: Observer<String>
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -93,10 +97,15 @@ class GameView : Fragment() {
 
         enemyDamageObserver = Observer<EnemyDamageDTO> {
             gameViewModel.onEnemyAttack(it.damage, it.id)
+            val charaView = getGameObjectView(view, gameViewModel.chara.id)
+            flashRed(charaView)
+
             binding?.health?.text = String.format(
                 resources.getString((R.string.health),
                     gameViewModel.chara.health.toString())
             )
+            val enemyView = getGameObjectView(view, it.id)
+            nudge(enemyView, it.id, it.direction)
             if (gameViewModel.chara.health <= 0) {
                 this.findNavController().navigate(R.id.action_gameView_to_gameOverView)
             }
@@ -110,6 +119,14 @@ class GameView : Fragment() {
         }
 
         gameViewModel.chara.weaponObservable.observe(viewLifecycleOwner, charaWeaponObserver)
+
+        attackedEntityAnimationObserver = Observer<String> {
+            val enemyView = getGameObjectView(view, it)
+
+            flashRed(enemyView)
+
+        }
+        gameViewModel.attackedEntityAnimation.observe(viewLifecycleOwner, attackedEntityAnimationObserver)
     }
 
     fun interact() {
@@ -118,6 +135,9 @@ class GameView : Fragment() {
             this.findNavController().navigate(R.id.action_gameView_to_victoryView)
             return
         }
+        val charaView = getGameObjectView(view, gameViewModel.chara.id)
+        nudge(charaView, gameViewModel.chara.id, gameViewModel.chara.direction)
+
         removeTreasures()
         removeEnemies()
         removeCoins()
@@ -181,7 +201,7 @@ class GameView : Fragment() {
         redraw(charaMoves = true)
     }
 
-    private fun redraw(duration: Long = 100, charaMoves: Boolean = false) {
+    private fun redraw(duration: Long = Settings.animDuration, charaMoves: Boolean = false) {
         val background = view?.findViewById<ImageView>(R.id.background)
         val chara = view?.findViewById<ImageView>(R.id.character)
 
@@ -189,7 +209,7 @@ class GameView : Fragment() {
         if (background == null) {
             return
         }
-        val charaPosition = gameViewModel.findCoordinate("character")
+        val charaPosition = gameViewModel.findCoordinate(gameViewModel.chara.id)
         val moveLength = convertDpToPixel(Settings.moveLength)
         val xPosBackground = backgroundOrigPos.x.minus(charaPosition.x*moveLength)
         val yPosBackground = backgroundOrigPos.y.minus(charaPosition.y*moveLength)
@@ -205,6 +225,62 @@ class GameView : Fragment() {
         drawObjects(duration)
     }
 
+    private fun flashRed(gameObjectView: ImageView?) {
+        if (gameObjectView == null) {
+            return
+        }
+        val colorAnim = ValueAnimator.ofArgb(
+            ResourcesCompat.getColor(
+                resources,
+                R.color.red_semitransparent,
+                null
+            )
+        )
+        colorAnim.addUpdateListener { valueAnimator ->
+            gameObjectView.setColorFilter(
+                (valueAnimator.animatedValue as Int)
+            )
+        }
+        colorAnim.setDuration(Settings.animDuration)
+        colorAnim.repeatMode = REVERSE
+        colorAnim.repeatCount = 1
+        colorAnim.start()
+    }
+
+    private fun nudge(gameObjectView: ImageView?, id: String, direction: Direction) {
+        if (gameObjectView == null) {
+            return
+        }
+        var deltaX = 0
+        var deltaY = 0
+
+        when (direction) {
+            Direction.UP -> deltaY = -1
+            Direction.DOWN -> deltaY = 1
+            Direction.LEFT -> deltaX = -1
+            Direction.RIGHT -> deltaX = 1
+        }
+
+        val coords = gameViewModel.findCoordinate(id)
+        val (xPos, yPos) = getPositionFromCoordinates(coords)
+        val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
+        val newX = xPos + deltaX*nudgeWidth
+        val newY = yPos + deltaY*nudgeWidth
+        gameObjectView.animate().x(newX).y(newY)
+            .setDuration(Settings.animDuration).withEndAction {
+                gameObjectView.animate().x(xPos).y(yPos)
+                    .setDuration(Settings.animDuration)
+            }
+
+    }
+
+    private fun getPositionFromCoordinates(coords: Coordinates): Pair<Float, Float> {
+        val moveLength = convertDpToPixel(Settings.moveLength)
+        val xPos = coords.x * moveLength + backgroundPos.x + Settings.margin
+        val yPos = coords.y * moveLength + backgroundPos.y + Settings.margin
+        return Pair(xPos, yPos)
+    }
+
     private fun drawObjects(duration: Long) {
         for (x in 0 until gameViewModel.level.field.size) {
             for (y in 0 until gameViewModel.level.field[x].size) {
@@ -216,20 +292,27 @@ class GameView : Fragment() {
     }
 
     private fun moveObject(x: Int, y: Int, duration: Long) {
-        val gameObject = gameViewModel.level.field[x][y]
-        val gameObjectView =
-            view?.findViewById<ImageView>(resources.getIdentifier(gameObject?.id, "id", requireContext().packageName))
+        val gameObject = gameViewModel.level.field[x][y] ?: return
+        val gameObjectView = getGameObjectView(view, gameObject.id)
                 ?: return
 
-        val moveLength = convertDpToPixel(Settings.moveLength)
-        val xPos = x*moveLength + backgroundPos.x + Settings.margin
-        val yPos = y*moveLength + backgroundPos.y + Settings.margin
+        val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y))
 
-        if(gameObject?.type == LevelObjectType.COIN || gameObject?.type == LevelObjectType.WEAPON) {
-            gameObjectView.x = xPos
-            gameObjectView.y = yPos
+        if(gameObject.type == LevelObjectType.COIN || gameObject.type == LevelObjectType.WEAPON) {
+            val moveLength = convertDpToPixel(Settings.moveLength)
+            if(gameObjectView.x.toInt() <= moveLength && gameObjectView.y.toInt() <= moveLength ){
+                gameObjectView.x = xPos
+                gameObjectView.y = yPos
+
+            } else {
+                gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+            }
         } else {
-            gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+            val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
+
+            if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth){
+                gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+            }
         }
 
         gameObjectView.visibility = View.VISIBLE
@@ -319,12 +402,12 @@ class GameView : Fragment() {
         weaponView?.visibility = View.VISIBLE
     }
 
-    private fun getGameObjectView(view: View, objectId: String): ImageView? {
-        val coordinates = gameViewModel.findCoordinate(objectId)
-        val id = gameViewModel.level.field[coordinates.x][coordinates.y]?.id
-        return view.findViewById(
+    private fun getGameObjectView(view: View?, objectId: String): ImageView? {
+        //val coordinates = gameViewModel.findCoordinate(objectId)
+        //val id = gameViewModel.level.field[coordinates.x][coordinates.y]?.id
+        return view?.findViewById(
             resources.getIdentifier(
-                id,
+                objectId,
                 "id",
                 requireContext().packageName
             )

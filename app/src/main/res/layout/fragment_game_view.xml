@@ -242,8 +242,8 @@
             android:contentDescription="@string/coin"
             android:src="@drawable/coin"
             android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/coin1"
@@ -254,8 +254,8 @@
             android:contentDescription="@string/coin"
             android:src="@drawable/coin"
             android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/coin2"
@@ -266,8 +266,8 @@
             android:contentDescription="@string/coin"
             android:src="@drawable/coin"
             android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/sword_diamond"
@@ -278,8 +278,8 @@
             android:contentDescription="@string/diamond_sword"
             android:src="@drawable/sword_diamond"
             android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/gui_sword_diamond"
@@ -303,8 +303,8 @@
             tools:layout_editor_absoluteX="453dp"
             tools:layout_editor_absoluteY="173dp"
             android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/wooden_sword" />
 
         <ImageView

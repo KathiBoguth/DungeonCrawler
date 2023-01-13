@@ -25,18 +25,14 @@ class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): Movabl
 
     var skin = "slime"
 
-    var speed = 500
+    var speed = 800
     var power = 20
 
     val positionChange: MutableLiveData<EnemyPositionChangeDTO> by lazy { MutableLiveData() }
     val attackDamage: MutableLiveData<EnemyDamageDTO> by lazy { MutableLiveData() }
 
-
-
     private var handler = Handler(Looper.getMainLooper())
     private var random: Random = Random(System.currentTimeMillis())
-
-
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -96,9 +92,13 @@ class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): Movabl
 
     }
 
+    fun takeDamage(damage: Int) {
+        health -= damage
+    }
+
     private fun attack() {
-        if (!(health <= 0)) {
-            attackDamage.value = EnemyDamageDTO(random.nextInt(power), id)
+        if (health > 0) {
+            attackDamage.value = EnemyDamageDTO(random.nextInt(power), direction, id)
         }
     }
 

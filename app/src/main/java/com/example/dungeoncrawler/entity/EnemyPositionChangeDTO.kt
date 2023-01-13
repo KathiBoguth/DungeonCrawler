@@ -7,5 +7,6 @@ data class EnemyPositionChangeDTO(
 
 data class EnemyDamageDTO(
     val damage: Int,
+    val direction: Direction,
     val id: String
 )
