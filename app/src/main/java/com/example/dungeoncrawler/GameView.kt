@@ -38,7 +38,7 @@ class GameView : Fragment() {
 
     private var backgroundPos = Coordinates(-1,-1)
     private var backgroundOrigPos = Coordinates(-1,-1)
-    val gameViewModel: GameViewModel by viewModels()
+    val gameViewModel: GameViewModel by activityViewModels()
 
     private var binding: FragmentGameViewBinding? = null
 
@@ -49,6 +49,7 @@ class GameView : Fragment() {
     private lateinit var charaWeaponObserver: Observer<Weapon>
     private lateinit var attackedEntityAnimationObserver: Observer<String>
     private lateinit var endGameObserver: Observer<Boolean>
+    private lateinit var updateLevelObserver: Observer<Boolean>
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -138,6 +139,23 @@ class GameView : Fragment() {
             endGameObserver
         )
 
+        updateLevelObserver = Observer<Boolean> {
+            updateLevel()
+        }
+
+        gameViewModel.updateLevel.observe(
+            viewLifecycleOwner,
+            updateLevelObserver
+        )
+
+    }
+
+    private fun updateLevel() {
+        removeTreasures()
+        removeEnemies()
+        removeCoins()
+        removeWeapons()
+        updateStats()
     }
 
     private fun onEnemyAttack(
@@ -175,11 +193,7 @@ class GameView : Fragment() {
         val charaView = getGameObjectView(view, gameViewModel.chara.id)
         nudge(charaView, gameViewModel.chara.id, gameViewModel.chara.direction)
 
-        removeTreasures()
-        removeEnemies()
-        removeCoins()
-        removeWeapons()
-        updateStats()
+        updateLevel()
     }
 
     fun moveUp() {

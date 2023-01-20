@@ -24,6 +24,7 @@ class GameViewModel : ViewModel() {
 
     val attackedEntityAnimation: MutableLiveData<String> by lazy { MutableLiveData() }
     val endGame: MutableLiveData<Boolean> by lazy { MutableLiveData() }
+    val updateLevel: MutableLiveData<Boolean> by lazy { MutableLiveData() }
 
     fun onEnemyPositionChange(enemyPositionChangeDTO: EnemyPositionChangeDTO) {
         if (!movePossible(enemyPositionChangeDTO.newPosition)) {
@@ -46,7 +47,6 @@ class GameViewModel : ViewModel() {
     fun onEnemyAttack(damage: Int, enemyId: String) {
         chara.health -= damage
         if (chara.health <= 0) {
-            // TODO: killedby is not set in GameoverView
             killedBy = enemyId
             endGame.value = false
         }
@@ -154,20 +154,23 @@ class GameViewModel : ViewModel() {
             return
         }
 
-        val levelObjectList = level.field[coordinates.x][coordinates.y]
-        levelObjectList.remove(chara)
+        level.field[coordinates.x][coordinates.y].remove(chara)
+        val levelObjectList = level.field[newCoordinates.x][newCoordinates.y]
         levelObjectList.forEach {
             when (it.type) {
-                LevelObjectType.COIN -> getRandomReward()
-                // TODO: does not trigger?
+                LevelObjectType.COIN -> {
+                    getRandomReward()
+                    levelObjectList.remove(it)
+                }
                 LevelObjectType.LADDER -> endGame.value = true
                 LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
 
                 else -> {}
             }
         }
+        updateLevel.value = true
 
-        level.field[newCoordinates.x][newCoordinates.y].add(chara)
+        levelObjectList.add(chara)
     }
 
     fun findCoordinate(id: String): Coordinates {
