@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): MovableEntity(LevelObjectType.ENEMY, idEnemy) {
+class BasicEnemy(idEnemy: String, private var field: Array<Array<MutableList<LevelObject>>>): MovableEntity(LevelObjectType.ENEMY, idEnemy) {
 
     var position = Coordinates(0,0)
 
@@ -105,27 +105,27 @@ class BasicEnemy(idEnemy: String, var field: Array<Array<LevelObject?>>): Movabl
     private fun checkForChara(): Direction? {
         if(position.x != 0){
             val left = field[position.x-1][position.y]
-            if (left != null && left.id == "character"){
+            if (left.any { it.type == LevelObjectType.MAIN_CHARA }){
                 return Direction.LEFT
             }
         }
         if(position.x != field.size-1){
             val right = field[position.x+1][position.y]
-            if (right != null && right.id == "character"){
+            if (right.any { it.type == LevelObjectType.MAIN_CHARA }){
                 return Direction.RIGHT
             }
         }
 
         if(position.y != 0){
             val top = field[position.x][position.y-1]
-            if (top != null && top.id == "character"){
+            if (top.any { it.type == LevelObjectType.MAIN_CHARA }){
                 return Direction.UP
             }
         }
 
         if(position.y != field[position.x].size-1){
             val bottom = field[position.x][position.y+1]
-            if (bottom != null && bottom.id == "character"){
+            if (bottom.any { it.type == LevelObjectType.MAIN_CHARA }){
                 return Direction.DOWN
             }
         }

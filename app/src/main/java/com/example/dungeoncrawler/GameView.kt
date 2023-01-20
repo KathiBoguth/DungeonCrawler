@@ -14,6 +14,7 @@ import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
@@ -22,6 +23,7 @@ import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
+import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.weapon.Weapon
@@ -36,7 +38,7 @@ class GameView : Fragment() {
 
     private var backgroundPos = Coordinates(-1,-1)
     private var backgroundOrigPos = Coordinates(-1,-1)
-    val gameViewModel: GameViewModel by activityViewModels()
+    val gameViewModel: GameViewModel by viewModels()
 
     private var binding: FragmentGameViewBinding? = null
 
@@ -46,6 +48,7 @@ class GameView : Fragment() {
     private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
     private lateinit var charaWeaponObserver: Observer<Weapon>
     private lateinit var attackedEntityAnimationObserver: Observer<String>
+    private lateinit var endGameObserver: Observer<Boolean>
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -83,12 +86,12 @@ class GameView : Fragment() {
             handler.postDelayed(runnableCode, 5)
         }
 
-        enemyObserver = Observer<EnemyPositionChangeDTO>{
-            val enemyView = getGameObjectView(view, it.id)
-            val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
-            enemyView?.startAnimation(jumpUpAnimation)
+        setupObserver(view)
+    }
 
-            gameViewModel.onEnemyPositionChange(it)
+    private fun setupObserver(view: View) {
+        enemyObserver = Observer<EnemyPositionChangeDTO> {
+            onEnemyMove(view, it)
         }
 
         gameViewModel.level.enemies.forEach {
@@ -96,19 +99,7 @@ class GameView : Fragment() {
         }
 
         enemyDamageObserver = Observer<EnemyDamageDTO> {
-            gameViewModel.onEnemyAttack(it.damage, it.id)
-            val charaView = getGameObjectView(view, gameViewModel.chara.id)
-            flashRed(charaView)
-
-            binding?.health?.text = String.format(
-                resources.getString((R.string.health),
-                    gameViewModel.chara.health.toString())
-            )
-            val enemyView = getGameObjectView(view, it.id)
-            nudge(enemyView, it.id, it.direction)
-            if (gameViewModel.chara.health <= 0) {
-                this.findNavController().navigate(R.id.action_gameView_to_gameOverView)
-            }
+            onEnemyAttack(it, view)
         }
         gameViewModel.level.enemies.forEach {
             it.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
@@ -126,15 +117,61 @@ class GameView : Fragment() {
             flashRed(enemyView)
 
         }
-        gameViewModel.attackedEntityAnimation.observe(viewLifecycleOwner, attackedEntityAnimationObserver)
+        gameViewModel.attackedEntityAnimation.observe(
+            viewLifecycleOwner,
+            attackedEntityAnimationObserver
+        )
+
+        endGameObserver = Observer<Boolean> { victory ->
+            if (victory == null) {
+                return@Observer
+            }
+            if (victory) {
+                this.findNavController().navigate(R.id.action_gameView_to_victoryView)
+            } else {
+                this.findNavController().navigate(R.id.action_gameView_to_gameOverView)
+            }
+        }
+
+        gameViewModel.endGame.observe(
+            viewLifecycleOwner,
+            endGameObserver
+        )
+
+    }
+
+    private fun onEnemyAttack(
+        it: EnemyDamageDTO,
+        view: View
+    ) {
+        gameViewModel.onEnemyAttack(it.damage, it.id)
+        val charaView = getGameObjectView(view, gameViewModel.chara.id)
+        flashRed(charaView)
+
+        binding?.health?.text = String.format(
+            resources.getString(
+                (R.string.health),
+                gameViewModel.chara.health.toString()
+            )
+        )
+        val enemyView = getGameObjectView(view, it.id)
+        nudge(enemyView, it.id, it.direction)
+    }
+
+    private fun onEnemyMove(
+        view: View,
+        it: EnemyPositionChangeDTO
+    ) {
+        val enemyView = getGameObjectView(view, it.id)
+        val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
+        enemyView?.startAnimation(jumpUpAnimation)
+
+        gameViewModel.onEnemyPositionChange(it)
     }
 
     fun interact() {
-        val endGame = gameViewModel.interact()
-        if (endGame) {
-            this.findNavController().navigate(R.id.action_gameView_to_victoryView)
-            return
-        }
+        gameViewModel.interact()
+
         val charaView = getGameObjectView(view, gameViewModel.chara.id)
         nudge(charaView, gameViewModel.chara.id, gameViewModel.chara.direction)
 
@@ -154,7 +191,7 @@ class GameView : Fragment() {
             chara?.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.chara_back, requireContext().theme))
             return
         }
-        gameViewModel.moveUp(gameViewModel.chara.id)
+        gameViewModel.moveUp()
 
         redraw(charaMoves = true)
     }
@@ -168,7 +205,7 @@ class GameView : Fragment() {
             return
         }
 
-        gameViewModel.moveDown(gameViewModel.chara.id)
+        gameViewModel.moveDown()
 
         redraw(charaMoves = true)
     }
@@ -182,7 +219,7 @@ class GameView : Fragment() {
             return
         }
 
-        gameViewModel.moveLeft(gameViewModel.chara.id)
+        gameViewModel.moveLeft()
 
         redraw(charaMoves = true)
     }
@@ -196,7 +233,7 @@ class GameView : Fragment() {
             return
         }
 
-        gameViewModel.moveRight(gameViewModel.chara.id)
+        gameViewModel.moveRight()
 
         redraw(charaMoves = true)
     }
@@ -284,21 +321,23 @@ class GameView : Fragment() {
     private fun drawObjects(duration: Long) {
         for (x in 0 until gameViewModel.level.field.size) {
             for (y in 0 until gameViewModel.level.field[x].size) {
-                if (gameViewModel.level.field[x][y] != null && gameViewModel.level.field[x][y]?.id != gameViewModel.chara.id) {
-                    moveObject(x, y, duration)
+                val levelObjectList = gameViewModel.level.field[x][y].toMutableList()
+                levelObjectList.forEach {
+                        if ( it.id != gameViewModel.chara.id){
+                            moveObject(it, x, y, duration)
+                    }
                 }
             }
         }
     }
 
-    private fun moveObject(x: Int, y: Int, duration: Long) {
-        val gameObject = gameViewModel.level.field[x][y] ?: return
-        val gameObjectView = getGameObjectView(view, gameObject.id)
+    private fun moveObject(levelObject: LevelObject, x: Int, y: Int, duration: Long) {
+        val gameObjectView = getGameObjectView(view, levelObject.id)
                 ?: return
 
         val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y))
 
-        if(gameObject.type == LevelObjectType.COIN || gameObject.type == LevelObjectType.WEAPON) {
+        if(levelObject.type == LevelObjectType.COIN || levelObject.type == LevelObjectType.WEAPON) {
             val moveLength = convertDpToPixel(Settings.moveLength)
             if(gameObjectView.x.toInt() <= moveLength && gameObjectView.y.toInt() <= moveLength ){
                 gameObjectView.x = xPos
@@ -318,14 +357,14 @@ class GameView : Fragment() {
         gameObjectView.visibility = View.VISIBLE
         gameObjectView.bringToFront()
 
-        if (gameObject is BasicEnemy) {
-            if (gameObject.health <= 0) {
-                gameViewModel.level.field[x][y] = null
+        if (levelObject is BasicEnemy) {
+            if (levelObject.health <= 0) {
+                gameViewModel.level.field[x][y].remove(levelObject)
                 gameObjectView.visibility = View.INVISIBLE
-                gameObject.positionChange.removeObserver(enemyObserver)
+                levelObject.positionChange.removeObserver(enemyObserver)
                 return
             }
-            val drawableId = when((gameViewModel.level.field[x][y] as MovableEntity).direction) {
+            val drawableId = when(levelObject.direction) {
                 Direction.DOWN -> R.drawable.slime_front
                 Direction.UP -> R.drawable.slime_back
                 Direction.LEFT -> R.drawable.slime_left
@@ -365,7 +404,7 @@ class GameView : Fragment() {
     }
 
     private fun hideGameObjectIfRemoved(id: String) {
-        if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it?.id == id }}) {
+        if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}) {
             val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
             gameObjectView?.visibility = View.INVISIBLE
         }

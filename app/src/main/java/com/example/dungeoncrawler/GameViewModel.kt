@@ -3,6 +3,7 @@ package com.example.dungeoncrawler
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.dungeoncrawler.entity.BasicEnemy
+import com.example.dungeoncrawler.entity.CanStandOn
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
@@ -12,15 +13,17 @@ import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import kotlin.reflect.typeOf
 
 class GameViewModel : ViewModel() {
 
     var chara = MainChara()
-    lateinit var killedBy: String
+    var killedBy = ""
 
-    var level = Level(chara)
+    lateinit var level: Level
 
     val attackedEntityAnimation: MutableLiveData<String> by lazy { MutableLiveData() }
+    val endGame: MutableLiveData<Boolean> by lazy { MutableLiveData() }
 
     fun onEnemyPositionChange(enemyPositionChangeDTO: EnemyPositionChangeDTO) {
         if (!movePossible(enemyPositionChangeDTO.newPosition)) {
@@ -31,21 +34,25 @@ class GameViewModel : ViewModel() {
         if(oldCoordinates.x == -1 && oldCoordinates.y == -1) {
             return
         }
-        level.field[oldCoordinates.x][oldCoordinates.y] = null
+        level.field[oldCoordinates.x][oldCoordinates.y].removeAll { it.id == enemyPositionChangeDTO.id }
         val enemy = level.enemies.find { it.id == enemyPositionChangeDTO.id }
-        level.field[enemyPositionChangeDTO.newPosition.x][enemyPositionChangeDTO.newPosition.y] = enemy
+        if (enemy != null) {
+            level.field[enemyPositionChangeDTO.newPosition.x][enemyPositionChangeDTO.newPosition.y].add(enemy)
+            enemy.position = enemyPositionChangeDTO.newPosition
+        }
 
-        enemy?.position = enemyPositionChangeDTO.newPosition
     }
 
     fun onEnemyAttack(damage: Int, enemyId: String) {
         chara.health -= damage
         if (chara.health <= 0) {
+            // TODO: killedby is not set in GameoverView
             killedBy = enemyId
+            endGame.value = false
         }
     }
 
-    fun interact() : Boolean {
+    fun interact() {
         var coordinates = findCoordinate(chara.id)
 
         coordinates = when (chara.direction) {
@@ -55,108 +62,117 @@ class GameViewModel : ViewModel() {
             Direction.RIGHT -> Coordinates(coordinates.x+1, coordinates.y)
         }
 
-        return when (level.field[coordinates.x][coordinates.y]?.type) {
+        val levelObjectList = level.field[coordinates.x][coordinates.y]
+        if(levelObjectList.isEmpty()) {
+            return
+        }
+        val enemy = levelObjectList.find { it.type == LevelObjectType.ENEMY }
+        if (enemy != null) {
+            attack(enemy as BasicEnemy)
+            return
+        }
+        val levelObject = levelObjectList.first()
+        when (levelObject.type) {
             LevelObjectType.TREASURE -> {
-                level.field[coordinates.x][coordinates.y] = null
+                levelObjectList.remove(levelObject)
                 if(level.dropCoin()){
                     placeCoin(coordinates)
                 } else {
                     placeWeapon(coordinates)
                 }
-                false
             }
-            LevelObjectType.LADDER -> true
-            LevelObjectType.ENEMY -> {
-                attack(level.field[coordinates.x][coordinates.y] as BasicEnemy)
-                false
-            }
+            LevelObjectType.LADDER -> endGame.value = true
             LevelObjectType.COIN -> {
                 getRandomReward()
-                level.field[coordinates.x][coordinates.y] = null
-                false
+                levelObjectList.remove(levelObject)
             }
             LevelObjectType.WEAPON -> {
-                val oldWeapon = chara.weapon
-
-                chara.putOnWeapon(level.field[coordinates.x][coordinates.y]!! as Weapon)
-
-                if(chara.weapon != null) {
-                    level.field[coordinates.x][coordinates.y] = oldWeapon
-                } else {
-                    level.field[coordinates.x][coordinates.y] = null
-                }
-                false
+                takeWeapon(coordinates)
             }
-            else -> false
+            else -> {}
 
         }
     }
 
-    fun moveUp(id: String) {
-        val coordinates = findCoordinate(id)
+    private fun takeWeapon(coordinates: Coordinates) {
+        val oldWeapon = chara.weapon
+        val weapon = level.field[coordinates.x][coordinates.y]
+            .find { it.type == LevelObjectType.WEAPON } as Weapon
+
+        chara.putOnWeapon(weapon)
+
+        if (oldWeapon != null) {
+            level.field[coordinates.x][coordinates.y].add(oldWeapon)
+        } else {
+            level.field[coordinates.x][coordinates.y].remove(weapon)
+        }
+    }
+
+    fun moveUp() {
+        val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x, coordinates.y-1)
 
-        if (!movePossible(newCoordinates)) {
-            return
-        }
-
-        level.field[coordinates.x][coordinates.y] = null
-        level.field[newCoordinates.x][newCoordinates.y] = chara
-        return
+        moveIfPossible(newCoordinates, coordinates)
     }
 
-    fun moveDown(id: String) {
-        val coordinates = findCoordinate(id)
+    fun moveDown() {
+        val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x, coordinates.y+1)
-        if (!movePossible(newCoordinates)) {
-            return
-        }
-
-        level.field[coordinates.x][coordinates.y] = null
-        level.field[newCoordinates.x][newCoordinates.y] = chara
-        return
+        moveIfPossible(newCoordinates, coordinates)
     }
 
-    fun moveLeft(id: String) {
-        val coordinates = findCoordinate(id)
+    fun moveLeft() {
+        val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x-1, coordinates.y)
-        if (!movePossible(newCoordinates)) {
-            return
-        }
-
-        level.field[coordinates.x][coordinates.y] = null
-        level.field[newCoordinates.x][newCoordinates.y] = chara
-        return
+        moveIfPossible(newCoordinates, coordinates)
     }
 
-    fun moveRight(id: String) {
-        val coordinates = findCoordinate(id)
+    fun moveRight() {
+        val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x+1, coordinates.y)
+        moveIfPossible(newCoordinates, coordinates)
+
+    }
+
+    private fun moveIfPossible(
+        newCoordinates: Coordinates,
+        coordinates: Coordinates
+    ) {
         if (!movePossible(newCoordinates)) {
             return
         }
 
-        level.field[coordinates.x][coordinates.y] = null
-        level.field[newCoordinates.x][newCoordinates.y] = chara
-        return
+        val levelObjectList = level.field[coordinates.x][coordinates.y]
+        levelObjectList.remove(chara)
+        levelObjectList.forEach {
+            when (it.type) {
+                LevelObjectType.COIN -> getRandomReward()
+                // TODO: does not trigger?
+                LevelObjectType.LADDER -> endGame.value = true
+                LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
 
+                else -> {}
+            }
+        }
+
+        level.field[newCoordinates.x][newCoordinates.y].add(chara)
     }
 
     fun findCoordinate(id: String): Coordinates {
         for (row in 0 until level.field.size) {
-            val index = level.field[row].indexOfFirst { it?.id == id }
+            val index = level.field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == id  } != -1}
             if ( index != -1) {
                 return Coordinates(row, index)
             }
@@ -186,6 +202,7 @@ class GameViewModel : ViewModel() {
     fun reset() {
         chara = MainChara()
         level = Level(chara)
+        endGame.value = null
     }
 
     private fun getRandomReward() {
@@ -194,13 +211,13 @@ class GameViewModel : ViewModel() {
 
     private fun placeCoin(position: Coordinates){
         val coin = level.coinStack.removeFirst()
-        level.field[position.x][position.y] = Coin(coin)
+        level.field[position.x][position.y].add(Coin(coin))
         level.coinStack.addLast(coin)
     }
 
     private fun placeWeapon(position: Coordinates){
         val weapon = level.randomWeapon()
-        level.field[position.x][position.y] = weapon
+        level.field[position.x][position.y].add(weapon)
     }
 
     private fun movePossible(coordinates: Coordinates) : Boolean {
@@ -210,7 +227,8 @@ class GameViewModel : ViewModel() {
         if (coordinates.y >= level.field[coordinates.x].size || coordinates.y < 0) {
             return false
         }
-        if ( level.field[coordinates.x][coordinates.y] != null) {
+        val levelObjectList = level.field[coordinates.x][coordinates.y]
+        if ( levelObjectList.isNotEmpty() && levelObjectList.any { it !is CanStandOn} ) {
             return false
         }
         return true

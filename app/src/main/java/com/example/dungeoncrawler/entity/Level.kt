@@ -10,8 +10,8 @@ class Level(
     chara: MainChara
 ) {
 
-    val field: Array<Array<LevelObject?>> = Array(Settings.fieldSize) {
-        (Array(Settings.fieldSize) {null})
+    val field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
+        (Array(Settings.fieldSize) { mutableListOf() })
     }
 
     lateinit var enemies: MutableList<BasicEnemy>
@@ -21,7 +21,7 @@ class Level(
     private var random: Random = Random(System.currentTimeMillis())
 
     init {
-        field[1][1] = chara
+        field[1][1].add(chara)
         placeWalls()
         placeTreasures()
         placeLadder()
@@ -34,7 +34,7 @@ class Level(
         for (row in field.indices) {
             for (column in field[row].indices) {
                 if (row == 0 || column == 0 || row == field.size-1 || column == field[row].size-1){
-                    field[row][column] = Wall()
+                    field[row][column].add(Wall())
                 }
             }
         }
@@ -46,22 +46,22 @@ class Level(
         for (i in 0..treasureCount) {
 
             var coordinates = getRandomCoordinates()
-            while (field[coordinates.x][coordinates.y] != null) {
+            while (field[coordinates.x][coordinates.y].isNotEmpty()) {
                 coordinates = getRandomCoordinates()
             }
 
             val treasureId = "treasure$i"
 
-            field[coordinates.x][coordinates.y] = Treasure(treasureId)
+            field[coordinates.x][coordinates.y].add(Treasure(treasureId))
         }
     }
 
     private fun placeLadder() {
         var coordinates = getRandomCoordinates()
-        while (field[coordinates.x][coordinates.y] != null) {
+        while (field[coordinates.x][coordinates.y].isNotEmpty()) {
             coordinates = getRandomCoordinates()
         }
-        field[coordinates.x][coordinates.y] = Ladder()
+        field[coordinates.x][coordinates.y].add(Ladder())
 
     }
 
@@ -69,11 +69,13 @@ class Level(
         val enemyList = ArrayList<BasicEnemy>()
         for (i in 0 until Settings.enemiesAmount) {
             var coordinates = getRandomCoordinates()
-            while (field[coordinates.x][coordinates.y] != null) {
+            var levelObjectsList = field[coordinates.x][coordinates.y]
+            while (levelObjectsList.isNotEmpty() || levelObjectsList.any { it !is CanStandOn }) {
                 coordinates = getRandomCoordinates()
+                levelObjectsList = field[coordinates.x][coordinates.y]
             }
             val enemy = BasicEnemy("basicEnemy$i", field)
-            field[coordinates.x][coordinates.y] = enemy
+            field[coordinates.x][coordinates.y].add(enemy)
             enemy.position = coordinates
             enemy.direction = randomDirection()
             enemyList.add(enemy)
