@@ -85,15 +85,13 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageView
-            android:id="@+id/background"
-            android:layout_width="950dp"
-            android:layout_height="950dp"
-            android:layout_marginStart="-16dp"
-            android:contentDescription="@string/background"
-            app:layout_constraintLeft_toLeftOf="@+id/character"
-            app:layout_constraintTop_toTopOf="@+id/character"
-            app:srcCompat="@drawable/dungeon_background" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/background_container"
+            android:layout_width="1000dp"
+            android:layout_height="1000dp"
+            android:name="com.example.dungeoncrawler.BackgroundFragment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <ImageView
             android:id="@+id/character"
@@ -114,8 +112,8 @@
             android:layout_marginTop="16dp"
             android:visibility="invisible"
             app:srcCompat="@drawable/treasure"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/treasure" />
 
         <ImageView
@@ -126,8 +124,8 @@
             android:layout_marginTop="16dp"
             android:visibility="invisible"
             app:srcCompat="@drawable/treasure"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/treasure" />
 
         <ImageView
@@ -138,8 +136,8 @@
             android:layout_marginTop="16dp"
             android:visibility="invisible"
             app:srcCompat="@drawable/treasure"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/treasure" />
 
         <ImageView
@@ -150,8 +148,8 @@
             android:layout_marginTop="16dp"
             android:visibility="invisible"
             app:srcCompat="@drawable/treasure"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/treasure" />
 
         <TextView
@@ -190,6 +188,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/level"
+            android:layout_width="85dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="72dp"
+            android:background="#B4212C68"
+            android:fontFamily="sans-serif-smallcaps"
+            android:padding="4dp"
+            android:paddingLeft="4dp"
+            android:paddingTop="4dp"
+            android:paddingRight="4dp"
+            android:paddingBottom="4dp"
+            android:text="@{@string/level(gameFragment.gameViewModel.level.levelCount)}"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/ladder"
             android:layout_width="70dp"
@@ -197,8 +213,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:src="@drawable/ladder"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/ladder" />
 
         <ImageView
@@ -208,8 +224,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:src="@drawable/slime_front"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy" />
 
         <ImageView
@@ -219,8 +235,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:src="@drawable/slime_front"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy" />
         <ImageView
             android:id="@+id/basicEnemy2"
@@ -229,8 +245,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:src="@drawable/slime_front"
-            app:layout_constraintStart_toStartOf="@+id/background"
-            app:layout_constraintTop_toTopOf="@+id/background"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy" />
 
         <ImageView

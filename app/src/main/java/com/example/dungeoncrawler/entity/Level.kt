@@ -3,7 +3,6 @@ package com.example.dungeoncrawler.entity
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
-import java.util.Deque
 import kotlin.random.Random
 
 class Level(
@@ -17,6 +16,7 @@ class Level(
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
     val swordIds = listOf("sword_wooden", "sword_diamond")
+    val levelCount = 1
 
     private var random: Random = Random(System.currentTimeMillis())
 

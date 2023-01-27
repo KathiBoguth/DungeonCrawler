@@ -13,8 +13,8 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
@@ -25,7 +25,6 @@ import com.example.dungeoncrawler.entity.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
-import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -54,8 +53,8 @@ class GameView : Fragment() {
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
             if (backgroundPos.x == -1) {
-                val background = view?.findViewById<ImageView>(R.id.background)
-                backgroundPos = Coordinates(background?.x?.toInt() ?: -1, background?.y?.toInt() ?: -1)
+                val character = view?.findViewById<ImageView>(R.id.character)
+                backgroundPos = Coordinates(character?.x?.toInt() ?: -1, character?.y?.toInt() ?: -1)
                 backgroundOrigPos = backgroundPos
                 redraw(0)
             } else {
@@ -253,7 +252,7 @@ class GameView : Fragment() {
     }
 
     private fun redraw(duration: Long = Settings.animDuration, charaMoves: Boolean = false) {
-        val background = view?.findViewById<ImageView>(R.id.background)
+        val background = view?.findViewById<FragmentContainerView>(R.id.background_container)
         val chara = view?.findViewById<ImageView>(R.id.character)
 
 
@@ -456,8 +455,6 @@ class GameView : Fragment() {
     }
 
     private fun getGameObjectView(view: View?, objectId: String): ImageView? {
-        //val coordinates = gameViewModel.findCoordinate(objectId)
-        //val id = gameViewModel.level.field[coordinates.x][coordinates.y]?.id
         return view?.findViewById(
             resources.getIdentifier(
                 objectId,

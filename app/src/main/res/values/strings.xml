@@ -9,9 +9,11 @@
     <string name="start_game">Start Game</string>
     <string name="main_menu">Main Menu</string>
     <string name="background">background</string>
+    <string name="ground">ground</string>
     <string name="treasure">treasure</string>
     <string name="gold">Gold: %1$s</string>
     <string name="health">HP: %1$s</string>
+    <string name="level">Level: %1$s</string>
     <string name="victory">Victory!</string>
     <string name="restart">Restart</string>
     <string name="ladder">ladder</string>
