@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.entity
 
+import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
@@ -16,7 +17,8 @@ class Level(
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
     val swordIds = listOf("sword_wooden", "sword_diamond")
-    val levelCount = 1
+    val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
+    var levelCount = 1
 
     private var random: Random = Random(System.currentTimeMillis())
 

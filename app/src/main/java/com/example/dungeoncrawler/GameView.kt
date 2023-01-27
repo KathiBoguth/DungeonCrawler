@@ -49,6 +49,7 @@ class GameView : Fragment() {
     private lateinit var attackedEntityAnimationObserver: Observer<String>
     private lateinit var endGameObserver: Observer<Boolean>
     private lateinit var updateLevelObserver: Observer<Boolean>
+    private lateinit var nextLevelObserver: Observer<Int>
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -145,6 +146,22 @@ class GameView : Fragment() {
         gameViewModel.updateLevel.observe(
             viewLifecycleOwner,
             updateLevelObserver
+        )
+
+        nextLevelObserver = Observer<Int> {
+            backgroundPos = Coordinates(-1,-1)
+            fadeView()
+            binding?.level?.text = String.format(
+                resources.getString(
+                    (R.string.level),
+                    gameViewModel.level.levelCount.toString()
+                )
+            )
+        }
+
+        gameViewModel.level.nextLevel.observe(
+            viewLifecycleOwner,
+            nextLevelObserver
         )
 
     }
@@ -251,6 +268,12 @@ class GameView : Fragment() {
         redraw(charaMoves = true)
     }
 
+    private fun fadeView() {
+        view?.animate()?.alpha(0F)?.setDuration(300L)?.withEndAction{
+            view?.animate()?.alpha(1F)?.setDuration(300L)
+        }
+    }
+
     private fun redraw(duration: Long = Settings.animDuration, charaMoves: Boolean = false) {
         val background = view?.findViewById<FragmentContainerView>(R.id.background_container)
         val chara = view?.findViewById<ImageView>(R.id.character)
@@ -332,9 +355,10 @@ class GameView : Fragment() {
     }
 
     private fun drawObjects(duration: Long) {
-        for (x in 0 until gameViewModel.level.field.size) {
-            for (y in 0 until gameViewModel.level.field[x].size) {
-                val levelObjectList = gameViewModel.level.field[x][y].toMutableList()
+        val fieldCopy = gameViewModel.level.field.clone()
+        fieldCopy.forEachIndexed { x, row ->
+            row.forEachIndexed { y, levelObjects ->
+                val levelObjectList = levelObjects.toMutableList()
                 levelObjectList.forEach {
                         if ( it.id != gameViewModel.chara.id){
                             moveObject(it, x, y, duration)

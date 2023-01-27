@@ -1,5 +1,7 @@
 package com.example.dungeoncrawler
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.dungeoncrawler.entity.BasicEnemy
@@ -11,9 +13,7 @@ import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
-import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
-import kotlin.reflect.typeOf
 
 class GameViewModel : ViewModel() {
 
@@ -81,7 +81,9 @@ class GameViewModel : ViewModel() {
                     placeWeapon(coordinates)
                 }
             }
-            LevelObjectType.LADDER -> endGame.value = true
+            LevelObjectType.LADDER -> {
+                nextLevel()
+            }
             LevelObjectType.COIN -> {
                 getRandomReward()
                 levelObjectList.remove(levelObject)
@@ -90,6 +92,21 @@ class GameViewModel : ViewModel() {
                 takeWeapon(coordinates)
             }
             else -> {}
+
+        }
+    }
+
+    private fun nextLevel() {
+        val levelCount = level.levelCount +1
+        if (levelCount > Settings.levelsMax) {
+            endGame.value = true
+        } else {
+            val handler = Handler(Looper.getMainLooper())
+            level.nextLevel.value = levelCount
+            handler.postDelayed( {
+                reset(false)
+                level.levelCount = levelCount
+            }, 50)
 
         }
     }
@@ -162,7 +179,7 @@ class GameViewModel : ViewModel() {
                     getRandomReward()
                     levelObjectList.remove(it)
                 }
-                LevelObjectType.LADDER -> endGame.value = true
+                LevelObjectType.LADDER -> nextLevel()
                 LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
 
                 else -> {}
@@ -202,8 +219,10 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun reset() {
-        chara = MainChara()
+    fun reset(newGame: Boolean = true) {
+        if (newGame) {
+            chara = MainChara()
+        }
         level = Level(chara)
         endGame.value = null
     }

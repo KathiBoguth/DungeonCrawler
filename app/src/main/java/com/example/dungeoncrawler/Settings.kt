@@ -12,5 +12,6 @@ class Settings {
         const val enemiesAmount = 3
         const val nudgeWidth = 20f
         const val animDuration = 100L
+        const val levelsMax = 3
     }
 }
