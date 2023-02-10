@@ -218,7 +218,7 @@
             android:contentDescription="@string/ladder" />
 
         <ImageView
-            android:id="@+id/basicEnemy0"
+            android:id="@+id/slime0"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
@@ -226,10 +226,11 @@
             android:src="@drawable/slime_front"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
+            android:visibility="invisible"
             android:contentDescription="@string/enemy" />
 
         <ImageView
-            android:id="@+id/basicEnemy1"
+            android:id="@+id/slime1"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
@@ -237,9 +238,10 @@
             android:src="@drawable/slime_front"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
+            android:visibility="invisible"
             android:contentDescription="@string/enemy" />
         <ImageView
-            android:id="@+id/basicEnemy2"
+            android:id="@+id/slime2"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
@@ -247,7 +249,43 @@
             android:src="@drawable/slime_front"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
-            android:contentDescription="@string/enemy" />
+            android:contentDescription="@string/enemy"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/wolf0"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/wolf_front"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
+            android:contentDescription="@string/enemy"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/wolf1"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/wolf_front"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
+            android:contentDescription="@string/enemy"
+            android:visibility="invisible" />
+        <ImageView
+            android:id="@+id/wolf2"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/wolf_front"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
+            android:contentDescription="@string/enemy"
+            android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/coin0"

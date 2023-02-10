@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,11 +19,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
-import com.example.dungeoncrawler.entity.BasicEnemy
+import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
-import com.example.dungeoncrawler.entity.EnemyDamageDTO
-import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
+import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
+import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.weapon.Weapon
@@ -95,9 +96,7 @@ class GameView : Fragment() {
             onEnemyMove(view, it)
         }
 
-        gameViewModel.level.enemies.forEach {
-            it.positionChange.observe(viewLifecycleOwner, enemyObserver)
-        }
+        setupEnemyObservers()
 
         enemyDamageObserver = Observer<EnemyDamageDTO> {
             onEnemyAttack(it, view)
@@ -125,8 +124,10 @@ class GameView : Fragment() {
 
         endGameObserver = Observer<Boolean> { victory ->
             if (victory == null) {
+                setupEnemyObservers()
                 return@Observer
             }
+            hideAllEnemies()
             if (victory) {
                 this.findNavController().navigate(R.id.action_gameView_to_victoryView)
             } else {
@@ -149,8 +150,11 @@ class GameView : Fragment() {
         )
 
         nextLevelObserver = Observer<Int> {
+            hideAllEnemies()
             backgroundPos = Coordinates(-1,-1)
             fadeView()
+            gameViewModel.reset(false,gameViewModel.level.levelCount)
+            setupEnemyObservers()
             binding?.level?.text = String.format(
                 resources.getString(
                     (R.string.level),
@@ -164,6 +168,28 @@ class GameView : Fragment() {
             nextLevelObserver
         )
 
+    }
+
+    private fun removeEnemyObservers() {
+        gameViewModel.level.enemies.forEach {
+            it.positionChange.removeObservers(this)
+        }
+    }
+
+    private fun setupEnemyObservers() {
+        gameViewModel.level.enemies.forEach {
+            it.positionChange.observe(viewLifecycleOwner, enemyObserver)
+        }
+    }
+
+    private fun hideAllEnemies() {
+        gameViewModel.level.enemies.forEach{
+            it.positionChange.removeObserver(enemyObserver)
+            if (view != null) {
+                val enemyView = getGameObjectView(view, it.id)
+                enemyView?.visibility = View.INVISIBLE
+            }
+        }
     }
 
     private fun updateLevel() {
@@ -401,13 +427,20 @@ class GameView : Fragment() {
                 levelObject.positionChange.removeObserver(enemyObserver)
                 return
             }
-            val drawableId = when(levelObject.direction) {
-                Direction.DOWN -> R.drawable.slime_front
-                Direction.UP -> R.drawable.slime_back
-                Direction.LEFT -> R.drawable.slime_left
-                Direction.RIGHT -> R.drawable.slime_right
+            val drawableName = when(levelObject.direction) {
+                Direction.DOWN -> "${levelObject.skin}_front"
+                Direction.UP -> "${levelObject.skin}_back"
+                Direction.LEFT -> "${levelObject.skin}_left"
+                Direction.RIGHT -> "${levelObject.skin}_right"
 
             }
+            val drawableId = resources.getIdentifier(
+                drawableName,
+                "drawable",
+                requireContext().packageName
+            )
+
+            // TODO: catch exceptions
             gameObjectView.setImageDrawable(ResourcesCompat.getDrawable(resources, drawableId, requireContext().theme))
 
         }

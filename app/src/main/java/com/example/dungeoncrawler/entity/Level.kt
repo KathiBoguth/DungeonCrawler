@@ -1,13 +1,19 @@
 package com.example.dungeoncrawler.entity
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.entity.enemy.BasicEnemy
+import com.example.dungeoncrawler.entity.enemy.EnemyEnum
+import com.example.dungeoncrawler.entity.enemy.Slime
+import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.random.Random
 
 class Level(
-    chara: MainChara
+    chara: MainChara,
+    var levelCount: Int
 ) {
 
     val field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
@@ -18,7 +24,6 @@ class Level(
     val coinStack = ArrayDeque<String>()
     val swordIds = listOf("sword_wooden", "sword_diamond")
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
-    var levelCount = 1
 
     private var random: Random = Random(System.currentTimeMillis())
 
@@ -69,21 +74,42 @@ class Level(
 
     private fun placeEnemies() {
         val enemyList = ArrayList<BasicEnemy>()
-        for (i in 0 until Settings.enemiesAmount) {
+        Settings.enemiesPerLevel[levelCount]?.forEachIndexed { i, enemyType ->
             var coordinates = getRandomCoordinates()
             var levelObjectsList = field[coordinates.x][coordinates.y]
-            while (levelObjectsList.isNotEmpty() || levelObjectsList.any { it !is CanStandOn }) {
+            while (levelObjectsList.isNotEmpty() || levelObjectsList.any { !it.type.isSteppableObject() }) {
                 coordinates = getRandomCoordinates()
                 levelObjectsList = field[coordinates.x][coordinates.y]
             }
-            val enemy = BasicEnemy("basicEnemy$i", field)
+            val enemy = when(enemyType) {
+                // TODO: improve iterator (currently: slime1, slime2, wolf3, desired: slime1, slime2, wolf1)
+                EnemyEnum.SLIME -> Slime("slime$i")
+                EnemyEnum.WOLF -> Wolf("wolf$i")
+
+            }
+            setMoveRunnable(enemy)
+
+            Log.i(this::class.simpleName, enemy.id)
             field[coordinates.x][coordinates.y].add(enemy)
             enemy.position = coordinates
             enemy.direction = randomDirection()
             enemyList.add(enemy)
         }
+        for (enemyType in Settings.enemiesPerLevel[levelCount]!!) {
+
+        }
         enemies = enemyList.toMutableList()
 
+    }
+
+    private fun setMoveRunnable(enemy: BasicEnemy) {
+        val runnableCode: Runnable = object : Runnable {
+            override fun run() {
+                enemy.move(field)
+                enemy.handler.postDelayed(this, enemy.speed.toLong())
+            }
+        }
+        enemy.handler.postDelayed(runnableCode, enemy.speed.toLong())
     }
 
     private fun fillCoinStack() {

@@ -4,12 +4,11 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.dungeoncrawler.entity.BasicEnemy
-import com.example.dungeoncrawler.entity.CanStandOn
+import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
-import com.example.dungeoncrawler.entity.EnemyPositionChangeDTO
+import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
@@ -101,12 +100,7 @@ class GameViewModel : ViewModel() {
         if (levelCount > Settings.levelsMax) {
             endGame.value = true
         } else {
-            val handler = Handler(Looper.getMainLooper())
             level.nextLevel.value = levelCount
-            handler.postDelayed( {
-                reset(false)
-                level.levelCount = levelCount
-            }, 50)
 
         }
     }
@@ -219,11 +213,11 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun reset(newGame: Boolean = true) {
+    fun reset(newGame: Boolean = true, levelCount: Int = 1) {
         if (newGame) {
             chara = MainChara()
         }
-        level = Level(chara)
+        level = Level(chara, levelCount)
         endGame.value = null
     }
 
@@ -250,7 +244,7 @@ class GameViewModel : ViewModel() {
             return false
         }
         val levelObjectList = level.field[coordinates.x][coordinates.y]
-        if ( levelObjectList.isNotEmpty() && levelObjectList.any { it !is CanStandOn} ) {
+        if ( levelObjectList.isNotEmpty() && levelObjectList.any { !it.type.isSteppableObject()} ) {
             return false
         }
         return true

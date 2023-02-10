@@ -1,4 +1,7 @@
-package com.example.dungeoncrawler.entity
+package com.example.dungeoncrawler.entity.enemy
+
+import com.example.dungeoncrawler.entity.Coordinates
+import com.example.dungeoncrawler.entity.Direction
 
 data class EnemyPositionChangeDTO(
     val newPosition: Coordinates,
