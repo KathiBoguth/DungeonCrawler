@@ -25,6 +25,7 @@ import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
+import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +47,7 @@ class GameView : Fragment() {
     private lateinit var enemyObserver: Observer<EnemyPositionChangeDTO>
     private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
     private lateinit var charaWeaponObserver: Observer<Weapon>
+    private lateinit var charaArmorObserver: Observer<Armor>
     private lateinit var attackedEntityAnimationObserver: Observer<String>
     private lateinit var endGameObserver: Observer<Boolean>
     private lateinit var updateLevelObserver: Observer<Boolean>
@@ -104,8 +106,12 @@ class GameView : Fragment() {
         charaWeaponObserver = Observer<Weapon> {
             showWeapon(it.id)
         }
+        charaArmorObserver = Observer<Armor> {
+            showArmor(it.id)
+        }
 
         gameViewModel.chara.weaponObservable.observe(viewLifecycleOwner, charaWeaponObserver)
+        gameViewModel.chara.armorObservable.observe(viewLifecycleOwner, charaArmorObserver)
 
         attackedEntityAnimationObserver = Observer<String> {
             val enemyView = getGameObjectView(view, it)
@@ -197,6 +203,7 @@ class GameView : Fragment() {
         removeEnemies()
         removeCoins()
         removeWeapons()
+        removeArmor()
         updateStats()
     }
 
@@ -468,7 +475,12 @@ class GameView : Fragment() {
 
     private fun removeWeapons() {
         for (id in gameViewModel.level.swordIds) {
+            hideGameObjectIfRemoved(id)
+        }
+    }
 
+    private fun removeArmor() {
+        for (id in gameViewModel.level.armorIds) {
             hideGameObjectIfRemoved(id)
         }
     }
@@ -509,6 +521,30 @@ class GameView : Fragment() {
             )
         )
         weaponView?.visibility = View.VISIBLE
+    }
+
+    private fun showArmor(id: String) {
+        for (i in gameViewModel.level.armorIds) {
+            val armorId = "gui_$i"
+            val armorView = view?.findViewById<View>(
+                resources.getIdentifier(
+                    armorId,
+                    "id",
+                    requireContext().packageName
+                )
+            )
+            armorView?.visibility = View.INVISIBLE
+        }
+
+        val armorId = "gui_$id"
+        val armorView = view?.findViewById<View>(
+            resources.getIdentifier(
+                armorId,
+                "id",
+                requireContext().packageName
+            )
+        )
+        armorView?.visibility = View.VISIBLE
     }
 
     private fun getGameObjectView(view: View?, objectId: String): ImageView? {

@@ -10,6 +10,7 @@ import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
+import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Weapon
 
 class GameViewModel : ViewModel() {
@@ -42,7 +43,8 @@ class GameViewModel : ViewModel() {
     }
 
     fun onEnemyAttack(damage: Int, enemyId: String) {
-        chara.health -= damage
+        val protection = chara.armor?.protection ?: 0
+        chara.health -= (damage - protection)
         if (chara.health <= 0) {
             killedBy = enemyId
             endGame.value = false
@@ -72,10 +74,11 @@ class GameViewModel : ViewModel() {
         when (levelObject.type) {
             LevelObjectType.TREASURE -> {
                 levelObjectList.remove(levelObject)
-                if(level.dropCoin()){
-                    placeCoin(coordinates)
-                } else {
-                    placeWeapon(coordinates)
+                when (level.drop()) {
+                    LevelObjectType.COIN -> placeCoin(coordinates)
+                    LevelObjectType.WEAPON -> placeWeapon(coordinates)
+                    LevelObjectType.ARMOR -> placeArmor(coordinates)
+                    else -> {placeCoin(coordinates)}
                 }
             }
             LevelObjectType.LADDER -> {
@@ -87,6 +90,9 @@ class GameViewModel : ViewModel() {
             }
             LevelObjectType.WEAPON -> {
                 takeWeapon(coordinates)
+            }
+            LevelObjectType.ARMOR -> {
+                takeArmor(coordinates)
             }
             else -> {}
 
@@ -114,6 +120,20 @@ class GameViewModel : ViewModel() {
             level.field[coordinates.x][coordinates.y].add(oldWeapon)
         } else {
             level.field[coordinates.x][coordinates.y].remove(weapon)
+        }
+    }
+
+    private fun takeArmor(coordinates: Coordinates) {
+        val oldArmor = chara.armor
+        val armor = level.field[coordinates.x][coordinates.y]
+            .find { it.type == LevelObjectType.ARMOR } as Armor
+
+        chara.putOnArmor(armor)
+
+        if (oldArmor != null) {
+            level.field[coordinates.x][coordinates.y].add(oldArmor)
+        } else {
+            level.field[coordinates.x][coordinates.y].remove(armor)
         }
     }
 
@@ -173,6 +193,7 @@ class GameViewModel : ViewModel() {
                 }
                 LevelObjectType.LADDER -> nextLevel()
                 LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
+                LevelObjectType.ARMOR -> takeArmor(newCoordinates)
 
                 else -> {}
             }
@@ -232,6 +253,11 @@ class GameViewModel : ViewModel() {
     private fun placeWeapon(position: Coordinates){
         val weapon = level.randomWeapon()
         level.field[position.x][position.y].add(weapon)
+    }
+
+    private fun placeArmor(position: Coordinates){
+        val armor = level.randomArmor()
+        level.field[position.x][position.y].add(armor)
     }
 
     private fun movePossible(coordinates: Coordinates) : Boolean {

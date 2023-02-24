@@ -24,4 +24,7 @@
     <string name="coin">coin</string>
     <string name="diamond_sword">Diamond Sword</string>
     <string name="wooden_sword">wooden Sword</string>
+    <string name="rag">Rag</string>
+    <string name="iron_cuirass">Iron Cuirass</string>
+    <string name="diamond_cuirass">Diamond Cuirass</string>
 </resources>

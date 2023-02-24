@@ -373,6 +373,84 @@
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/wooden_sword" />
 
+        <ImageView
+            android:id="@+id/cuirass_rag"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/cuirass_rag"
+            tools:layout_editor_absoluteX="453dp"
+            tools:layout_editor_absoluteY="173dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/rag" />
+
+        <ImageView
+            android:id="@+id/gui_cuirass_rag"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/cuirass_rag"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/gui_sword_diamond"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/rag" />
+
+        <ImageView
+            android:id="@+id/cuirass_iron"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/cuirass_iron"
+            tools:layout_editor_absoluteX="453dp"
+            tools:layout_editor_absoluteY="173dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/iron_cuirass" />
+
+        <ImageView
+            android:id="@+id/gui_cuirass_iron"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/cuirass_iron"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/gui_sword_diamond"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/iron_cuirass" />
+
+        <ImageView
+            android:id="@+id/cuirass_diamond"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/cuirass_diamond"
+            tools:layout_editor_absoluteX="453dp"
+            tools:layout_editor_absoluteY="173dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/diamond_cuirass" />
+
+        <ImageView
+            android:id="@+id/gui_cuirass_diamond"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/cuirass_diamond"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/gui_sword_diamond"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/diamond_cuirass" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

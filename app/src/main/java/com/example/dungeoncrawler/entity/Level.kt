@@ -3,6 +3,8 @@ package com.example.dungeoncrawler.entity
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.entity.armor.Armor
+import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.entity.enemy.Slime
@@ -21,7 +23,9 @@ class Level(
 
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
+    // TODO: rewrite so they hold attack/protection value as well
     val swordIds = listOf("sword_wooden", "sword_diamond")
+    val armorIds = listOf("cuirass_rag", "cuirass_iron" ,"cuirass_diamond")
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 
     private var random: Random = Random(System.currentTimeMillis())
@@ -35,12 +39,16 @@ class Level(
         field = Array(Settings.fieldSize) {
             (Array(Settings.fieldSize) { mutableListOf() })
         }
-        field[1][1].add(chara)
         placeWalls()
         placeTreasures()
         placeLadder()
         placeEnemies()
         fillCoinStack()
+        var randomStartCoordinates = getRandomCoordinates()
+        while (field[randomStartCoordinates.x][randomStartCoordinates.y].isNotEmpty()) {
+            randomStartCoordinates = getRandomCoordinates()
+        }
+        field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara)
     }
 
     private fun placeWalls() {
@@ -142,18 +150,34 @@ class Level(
         }
     }
 
-    fun dropCoin(): Boolean {
-        return random.nextBoolean()
+    fun drop(): LevelObjectType {
+        val randomValue = random.nextFloat()
+        if (randomValue < 0.4) {
+            return LevelObjectType.COIN
+        } else if (randomValue < 0.6) {
+            return LevelObjectType.WEAPON
+        }
+        return LevelObjectType.ARMOR
 
     }
 
     fun randomWeapon(): Weapon {
-        return if (random.nextInt() > 0.8) {
-            Sword(50, "sword_diamond")
+        return if (random.nextFloat() > 0.8) {
+            Sword(50, swordIds[1])
         } else {
-            Sword(10, "sword_wooden")
+            Sword(10, swordIds[0])
         }
+    }
 
+    fun randomArmor(): Armor {
+        val randomValue = random.nextFloat()
+
+        if (randomValue < 0.5) {
+            return Cuirass(10, armorIds[0])
+        } else if (randomValue < 0.8) {
+            return Cuirass(25, armorIds[1])
+        }
+        return Cuirass(50, armorIds[2])
     }
 
 }
