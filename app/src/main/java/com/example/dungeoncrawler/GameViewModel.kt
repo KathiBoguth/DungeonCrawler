@@ -1,7 +1,5 @@
 package com.example.dungeoncrawler
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
@@ -96,12 +94,12 @@ class GameViewModel : ViewModel() {
     }
 
     private fun nextLevel() {
-        val levelCount = level.levelCount +1
+        val levelCount = level.levelCount
+        level.levelCount = levelCount +1
         if (levelCount > Settings.levelsMax) {
             endGame.value = true
         } else {
             level.nextLevel.value = levelCount
-
         }
     }
 
@@ -213,11 +211,11 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun reset(newGame: Boolean = true, levelCount: Int = 1) {
+    fun reset(newGame: Boolean = true) {
         if (newGame) {
             chara = MainChara()
+            level = Level(chara)
         }
-        level = Level(chara, levelCount)
         endGame.value = null
     }
 

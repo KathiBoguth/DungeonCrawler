@@ -17,7 +17,7 @@ class Wolf(wolfId: String) : BasicEnemy(wolfId, "wolf") {
             return
         }
 
-        val turn = if (canWalk(field)) true else random.nextFloat() > 0.5
+        val turn = if (canWalk(field)) false else random.nextFloat() > 0.5
 
         if (turn) {
             direction = when(random.nextInt(4)) {

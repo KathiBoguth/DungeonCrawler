@@ -12,11 +12,10 @@ import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.random.Random
 
 class Level(
-    chara: MainChara,
-    var levelCount: Int
+    private var chara: MainChara,
 ) {
 
-    val field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
+    var field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
         (Array(Settings.fieldSize) { mutableListOf() })
     }
 
@@ -26,15 +25,22 @@ class Level(
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 
     private var random: Random = Random(System.currentTimeMillis())
+    var levelCount = 1
 
     init {
+        initLevel()
+    }
+
+    fun initLevel() {
+        field = Array(Settings.fieldSize) {
+            (Array(Settings.fieldSize) { mutableListOf() })
+        }
         field[1][1].add(chara)
         placeWalls()
         placeTreasures()
         placeLadder()
         placeEnemies()
         fillCoinStack()
-
     }
 
     private fun placeWalls() {
@@ -94,9 +100,6 @@ class Level(
             enemy.position = coordinates
             enemy.direction = randomDirection()
             enemyList.add(enemy)
-        }
-        for (enemyType in Settings.enemiesPerLevel[levelCount]!!) {
-
         }
         enemies = enemyList.toMutableList()
 

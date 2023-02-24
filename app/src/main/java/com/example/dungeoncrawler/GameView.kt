@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,14 +95,11 @@ class GameView : Fragment() {
             onEnemyMove(view, it)
         }
 
-        setupEnemyObservers()
-
         enemyDamageObserver = Observer<EnemyDamageDTO> {
             onEnemyAttack(it, view)
         }
-        gameViewModel.level.enemies.forEach {
-            it.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
-        }
+
+        setupEnemyObservers()
 
         charaWeaponObserver = Observer<Weapon> {
             showWeapon(it.id)
@@ -150,10 +146,13 @@ class GameView : Fragment() {
         )
 
         nextLevelObserver = Observer<Int> {
+            removeEnemyObservers()
             hideAllEnemies()
-            backgroundPos = Coordinates(-1,-1)
             fadeView()
-            gameViewModel.reset(false,gameViewModel.level.levelCount)
+            backgroundPos = Coordinates(-1,-1)
+
+            gameViewModel.level.initLevel()
+
             setupEnemyObservers()
             binding?.level?.text = String.format(
                 resources.getString(
@@ -161,30 +160,31 @@ class GameView : Fragment() {
                     gameViewModel.level.levelCount.toString()
                 )
             )
+            redraw(0, true)
         }
 
         gameViewModel.level.nextLevel.observe(
             viewLifecycleOwner,
             nextLevelObserver
         )
-
     }
 
     private fun removeEnemyObservers() {
         gameViewModel.level.enemies.forEach {
-            it.positionChange.removeObservers(this)
+            it.positionChange.removeObservers(viewLifecycleOwner)
+            it.attackDamage.removeObservers(viewLifecycleOwner)
         }
     }
 
     private fun setupEnemyObservers() {
         gameViewModel.level.enemies.forEach {
             it.positionChange.observe(viewLifecycleOwner, enemyObserver)
+            it.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
         }
     }
 
     private fun hideAllEnemies() {
         gameViewModel.level.enemies.forEach{
-            it.positionChange.removeObserver(enemyObserver)
             if (view != null) {
                 val enemyView = getGameObjectView(view, it.id)
                 enemyView?.visibility = View.INVISIBLE
