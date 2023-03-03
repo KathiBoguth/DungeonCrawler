@@ -17,15 +17,25 @@ class Level(
     private var chara: MainChara,
 ) {
 
+    companion object
+    {
+        private const val SWORD_WOODEN = "sword_wooden"
+        private const val SWORD_DIAMOND = "sword_diamond"
+        private const val CUIRASS_RAG = "cuirass_rag"
+        private const val CUIRASS_IRON = "cuirass_iron"
+        private const val CUIRASS_DIAMOND = "cuirass_diamond"
+    }
     var field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
         (Array(Settings.fieldSize) { mutableListOf() })
     }
 
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
-    // TODO: rewrite so they hold attack/protection value as well
-    val swordIds = listOf("sword_wooden", "sword_diamond")
-    val armorIds = listOf("cuirass_rag", "cuirass_iron" ,"cuirass_diamond")
+    val potionStack = ArrayDeque<String>()
+    lateinit var swords: MutableList<Sword>
+    lateinit var armors: MutableList<Armor>
+    val gameObjectIds: MutableList<String> = mutableListOf()
+
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 
     private var random: Random = Random(System.currentTimeMillis())
@@ -36,14 +46,19 @@ class Level(
     }
 
     fun initLevel() {
+        gameObjectIds.clear()
+        gameObjectIds.addAll(listOf(SWORD_WOODEN, SWORD_DIAMOND, CUIRASS_RAG, CUIRASS_IRON, CUIRASS_DIAMOND))
         field = Array(Settings.fieldSize) {
             (Array(Settings.fieldSize) { mutableListOf() })
         }
+        swords = mutableListOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND))
+        armors = mutableListOf(Cuirass(10, CUIRASS_RAG), Cuirass(25, CUIRASS_IRON), Cuirass(50, CUIRASS_DIAMOND))
         placeWalls()
         placeTreasures()
         placeLadder()
         placeEnemies()
         fillCoinStack()
+        fillPotionStack()
         var randomStartCoordinates = getRandomCoordinates()
         while (field[randomStartCoordinates.x][randomStartCoordinates.y].isNotEmpty()) {
             randomStartCoordinates = getRandomCoordinates()
@@ -74,6 +89,7 @@ class Level(
             val treasureId = "treasure$i"
 
             field[coordinates.x][coordinates.y].add(Treasure(treasureId))
+            gameObjectIds.add(treasureId)
         }
     }
 
@@ -97,8 +113,14 @@ class Level(
             }
             val enemy = when(enemyType) {
                 // TODO: improve iterator (currently: slime1, slime2, wolf3, desired: slime1, slime2, wolf1)
-                EnemyEnum.SLIME -> Slime("slime$i")
-                EnemyEnum.WOLF -> Wolf("wolf$i")
+                EnemyEnum.SLIME -> {
+                    val count = enemyList.count { alreadyAdded ->  alreadyAdded.id.contains("slime") }
+                    Slime("slime$count")
+                }
+                EnemyEnum.WOLF -> {
+                    val count = enemyList.count { alreadyAdded ->  alreadyAdded.id.contains("wolf") }
+                    Wolf("wolf$count")
+                }
 
             }
             setMoveRunnable(enemy)
@@ -108,6 +130,7 @@ class Level(
             enemy.position = coordinates
             enemy.direction = randomDirection()
             enemyList.add(enemy)
+            gameObjectIds.add(enemy.id)
         }
         enemies = enemyList.toMutableList()
 
@@ -124,9 +147,19 @@ class Level(
     }
 
     private fun fillCoinStack() {
-        coinStack.addLast("coin0")
-        coinStack.addLast("coin1")
-        coinStack.addLast("coin2")
+        val coinIds = listOf("coin0", "coin1", "coin2")
+        coinIds.forEach{
+            coinStack.addLast(it)
+        }
+        gameObjectIds.addAll(coinIds)
+    }
+
+    private fun fillPotionStack() {
+        val potionIds = listOf("potion0", "potion1", "potion2")
+        potionIds.forEach{
+            potionStack.addLast(it)
+        }
+        gameObjectIds.addAll(potionIds)
     }
 
     fun randomMoney(max: Int): Int {
@@ -152,20 +185,25 @@ class Level(
 
     fun drop(): LevelObjectType {
         val randomValue = random.nextFloat()
-        if (randomValue < 0.4) {
-            return LevelObjectType.COIN
+        return if (randomValue < 0.35) {
+            LevelObjectType.COIN
         } else if (randomValue < 0.6) {
-            return LevelObjectType.WEAPON
+            LevelObjectType.POTION
+        } else if (randomValue < 0.85){
+            LevelObjectType.ARMOR
+        } else {
+            LevelObjectType.WEAPON
         }
-        return LevelObjectType.ARMOR
 
     }
 
     fun randomWeapon(): Weapon {
         return if (random.nextFloat() > 0.8) {
-            Sword(50, swordIds[1])
+            val sword = swords.find { it.id == SWORD_DIAMOND } ?: swords.first()
+            swords.remove(sword)
+            sword
         } else {
-            Sword(10, swordIds[0])
+            swords.removeAt(0)
         }
     }
 
@@ -173,11 +211,17 @@ class Level(
         val randomValue = random.nextFloat()
 
         if (randomValue < 0.5) {
-            return Cuirass(10, armorIds[0])
+            val armor = armors.find { it.id == CUIRASS_RAG } ?: armors.first()
+            armors.remove(armor)
+            return armor
         } else if (randomValue < 0.8) {
-            return Cuirass(25, armorIds[1])
+            val armor = armors.find { it.id == CUIRASS_IRON } ?: armors.first()
+            armors.remove(armor)
+            return armor
         }
-        return Cuirass(50, armorIds[2])
+        val armor = armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
+        armors.remove(armor)
+        return armor
     }
 
 }

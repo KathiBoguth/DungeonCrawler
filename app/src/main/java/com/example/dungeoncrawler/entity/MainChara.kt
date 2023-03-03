@@ -6,6 +6,7 @@ import com.example.dungeoncrawler.entity.weapon.Weapon
 
 class MainChara: MovableEntity(LevelObjectType.MAIN_CHARA, "character") {
     var health = 100
+    var maxHealth = 100
 
     var gold = 0
 

@@ -10,8 +10,11 @@ import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
+import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import kotlin.math.max
+import kotlin.math.min
 
 class GameViewModel : ViewModel() {
 
@@ -44,7 +47,7 @@ class GameViewModel : ViewModel() {
 
     fun onEnemyAttack(damage: Int, enemyId: String) {
         val protection = chara.armor?.protection ?: 0
-        chara.health -= (damage - protection)
+        chara.health -= max(0, (damage - protection))
         if (chara.health <= 0) {
             killedBy = enemyId
             endGame.value = false
@@ -76,6 +79,7 @@ class GameViewModel : ViewModel() {
                 levelObjectList.remove(levelObject)
                 when (level.drop()) {
                     LevelObjectType.COIN -> placeCoin(coordinates)
+                    LevelObjectType.POTION -> placePotion(coordinates)
                     LevelObjectType.WEAPON -> placeWeapon(coordinates)
                     LevelObjectType.ARMOR -> placeArmor(coordinates)
                     else -> {placeCoin(coordinates)}
@@ -86,6 +90,10 @@ class GameViewModel : ViewModel() {
             }
             LevelObjectType.COIN -> {
                 getRandomReward()
+                levelObjectList.remove(levelObject)
+            }
+            LevelObjectType.POTION -> {
+                heal((levelObject as Potion).hpCure)
                 levelObjectList.remove(levelObject)
             }
             LevelObjectType.WEAPON -> {
@@ -117,7 +125,7 @@ class GameViewModel : ViewModel() {
         chara.putOnWeapon(weapon)
 
         if (oldWeapon != null) {
-            level.field[coordinates.x][coordinates.y].add(oldWeapon)
+            level.field[coordinates.x][coordinates.y].add(0, oldWeapon)
         } else {
             level.field[coordinates.x][coordinates.y].remove(weapon)
         }
@@ -131,7 +139,7 @@ class GameViewModel : ViewModel() {
         chara.putOnArmor(armor)
 
         if (oldArmor != null) {
-            level.field[coordinates.x][coordinates.y].add(oldArmor)
+            level.field[coordinates.x][coordinates.y].add(0, oldArmor)
         } else {
             level.field[coordinates.x][coordinates.y].remove(armor)
         }
@@ -191,6 +199,9 @@ class GameViewModel : ViewModel() {
                     getRandomReward()
                     levelObjectList.remove(it)
                 }
+                LevelObjectType.POTION -> {
+                    heal((it as Potion).hpCure)
+                }
                 LevelObjectType.LADDER -> nextLevel()
                 LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
                 LevelObjectType.ARMOR -> takeArmor(newCoordinates)
@@ -244,10 +255,20 @@ class GameViewModel : ViewModel() {
         chara.gold += level.randomMoney(Settings.treasureMaxMoney)
     }
 
+    private fun heal(hpCure: Int) {
+        chara.health = min(hpCure + chara.health, chara.maxHealth)
+    }
+
     private fun placeCoin(position: Coordinates){
         val coin = level.coinStack.removeFirst()
         level.field[position.x][position.y].add(Coin(coin))
         level.coinStack.addLast(coin)
+    }
+
+    private fun placePotion(position: Coordinates){
+        val potion = level.potionStack.removeFirst()
+        level.field[position.x][position.y].add(Potion(potion))
+        level.coinStack.addLast(potion)
     }
 
     private fun placeWeapon(position: Coordinates){

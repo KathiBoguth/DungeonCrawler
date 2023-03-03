@@ -7,10 +7,11 @@ enum class LevelObjectType {
     LADDER,
     ENEMY,
     COIN,
+    POTION,
     WEAPON,
     ARMOR;
 
     fun isSteppableObject(): Boolean {
-        return this == LADDER || this == COIN || this == WEAPON || this == ARMOR
+        return this == LADDER || this == COIN || this == WEAPON || this == ARMOR || this == POTION
     }
 }

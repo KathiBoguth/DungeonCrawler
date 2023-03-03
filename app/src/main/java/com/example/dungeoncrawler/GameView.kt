@@ -199,11 +199,7 @@ class GameView : Fragment() {
     }
 
     private fun updateLevel() {
-        removeTreasures()
-        removeEnemies()
-        removeCoins()
-        removeWeapons()
-        removeArmor()
+        removeGameObjects()
         updateStats()
     }
 
@@ -217,7 +213,7 @@ class GameView : Fragment() {
 
         binding?.health?.text = String.format(
             resources.getString(
-                (R.string.health),
+                R.string.health,
                 gameViewModel.chara.health.toString()
             )
         )
@@ -453,35 +449,9 @@ class GameView : Fragment() {
         }
     }
 
-    private fun removeTreasures() {
-        for (i in 0..Settings.treasureMax) {
-            val treasureId = "treasure$i"
-            hideGameObjectIfRemoved(treasureId)
-        }
-    }
-
-    private fun removeEnemies() {
-        for (enemy in  gameViewModel.level.enemies) {
-            hideGameObjectIfRemoved(enemy.id)
-        }
-    }
-
-    private fun removeCoins() {
-        for (i in 0..Settings.coinsMax) {
-            val coinId = "coin$i"
-            hideGameObjectIfRemoved(coinId)
-        }
-    }
-
-    private fun removeWeapons() {
-        for (id in gameViewModel.level.swordIds) {
-            hideGameObjectIfRemoved(id)
-        }
-    }
-
-    private fun removeArmor() {
-        for (id in gameViewModel.level.armorIds) {
-            hideGameObjectIfRemoved(id)
+    private fun removeGameObjects() {
+        gameViewModel.level.gameObjectIds.forEach{
+            hideGameObjectIfRemoved(it)
         }
     }
 
@@ -497,10 +467,15 @@ class GameView : Fragment() {
             resources.getString((R.string.gold),
             gameViewModel.chara.gold.toString())
         )
+        binding?.health?.text = String.format(
+            resources.getString((R.string.health),
+                gameViewModel.chara.health.toString())
+        )
     }
 
     private fun showWeapon(id: String) {
-        for (i in gameViewModel.level.swordIds) {
+        for (sword in gameViewModel.level.swords) {
+            val i = sword.id
             val weaponId = "gui_$i"
             val weaponView = view?.findViewById<View>(
                 resources.getIdentifier(
@@ -524,7 +499,8 @@ class GameView : Fragment() {
     }
 
     private fun showArmor(id: String) {
-        for (i in gameViewModel.level.armorIds) {
+        for (armor in gameViewModel.level.armors) {
+            val i = armor.id
             val armorId = "gui_$i"
             val armorView = view?.findViewById<View>(
                 resources.getIdentifier(
