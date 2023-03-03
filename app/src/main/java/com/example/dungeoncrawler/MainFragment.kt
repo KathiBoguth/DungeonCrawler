@@ -34,4 +34,8 @@ class MainFragment : Fragment() {
     fun startGame() {
         this.findNavController().navigate(R.id.action_mainFragment_to_gameView)
     }
+
+    fun upgradeStats() {
+        this.findNavController().navigate(R.id.action_mainFragment_to_statsUpgradeFragment)
+    }
 }

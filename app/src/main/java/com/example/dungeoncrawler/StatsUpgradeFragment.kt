@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.dungeoncrawler.databinding.FragmentGameOverBinding
+import com.example.dungeoncrawler.databinding.FragmentStatsUpgradeBinding
 
-class GameOverView: Fragment() {
+class StatsUpgradeFragment: Fragment() {
 
-    val gameViewModel: GameViewModel by activityViewModels()
+    val statsViewModel: StatsViewModel by activityViewModels()
 
-    private var binding: FragmentGameOverBinding? = null
+    private var binding: FragmentStatsUpgradeBinding? = null
 
 
     override fun onCreateView(
@@ -21,7 +21,7 @@ class GameOverView: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val fragmentBinding = FragmentGameOverBinding.inflate(inflater, container, false)
+        val fragmentBinding = FragmentStatsUpgradeBinding.inflate(inflater, container, false)
         binding = fragmentBinding
 
         return fragmentBinding.root
@@ -31,15 +31,11 @@ class GameOverView: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.apply {
             lifecycleOwner = viewLifecycleOwner
-            gameOverFragment = this@GameOverView
+            upgradeStatsFragment = this@StatsUpgradeFragment
         }
     }
 
-    fun startGame() {
-        this.findNavController().navigate(R.id.action_gameOverView_to_gameView)
-    }
-
-    fun upgradeStats() {
-        this.findNavController().navigate(R.id.action_gameOverView_to_statsUpgradeFragment)
+    fun returnToMain() {
+        this.findNavController().navigate(R.id.action_statsUpgradeFragment_to_mainFragment)
     }
 }

@@ -12,6 +12,9 @@
         <action
             android:id="@+id/action_mainFragment_to_gameView"
             app:destination="@id/gameView" />
+        <action
+            android:id="@+id/action_mainFragment_to_statsUpgradeFragment"
+            app:destination="@id/statsUpgradeFragment" />
     </fragment>
     <fragment
         android:id="@+id/gameView"
@@ -32,6 +35,9 @@
         <action
             android:id="@+id/action_victoryView_to_gameView"
             app:destination="@id/gameView" />
+        <action
+            android:id="@+id/action_victoryView_to_statsUpgradeFragment"
+            app:destination="@id/statsUpgradeFragment" />
     </fragment>
     <fragment
         android:id="@+id/gameOverView"
@@ -40,5 +46,16 @@
         <action
             android:id="@+id/action_gameOverView_to_gameView"
             app:destination="@id/gameView" />
+        <action
+            android:id="@+id/action_gameOverView_to_statsUpgradeFragment"
+            app:destination="@id/statsUpgradeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/statsUpgradeFragment"
+        android:name="com.example.dungeoncrawler.StatsUpgradeFragment"
+        android:label="StatsUpgradeFragment" >
+        <action
+            android:id="@+id/action_statsUpgradeFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
     </fragment>
 </navigation>
