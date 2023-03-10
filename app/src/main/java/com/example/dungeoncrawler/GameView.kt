@@ -214,7 +214,7 @@ class GameView : Fragment() {
         binding?.health?.text = String.format(
             resources.getString(
                 R.string.health,
-                gameViewModel.chara.health.toString()
+                gameViewModel.chara.health
             )
         )
         val enemyView = getGameObjectView(view, it.id)
@@ -465,11 +465,11 @@ class GameView : Fragment() {
     private fun updateStats() {
         binding?.goldCounter?.text = String.format(
             resources.getString((R.string.gold),
-            gameViewModel.chara.gold.toString())
+            gameViewModel.chara.gold)
         )
         binding?.health?.text = String.format(
             resources.getString((R.string.health),
-                gameViewModel.chara.health.toString())
+                gameViewModel.chara.health)
         )
     }
 
