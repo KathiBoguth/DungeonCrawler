@@ -7,12 +7,13 @@ import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
-import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
+import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
+import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.math.max
 import kotlin.math.min
@@ -28,20 +29,20 @@ class GameViewModel : ViewModel() {
     val endGame: MutableLiveData<Boolean> by lazy { MutableLiveData() }
     val updateLevel: MutableLiveData<Boolean> by lazy { MutableLiveData() }
 
-    fun onEnemyPositionChange(enemyPositionChangeDTO: EnemyPositionChangeDTO) {
-        if (!movePossible(enemyPositionChangeDTO.newPosition)) {
+    fun onEnemyPositionChange(levelObjectPositionChangeDTO: LevelObjectPositionChangeDTO) {
+        if (!movePossible(levelObjectPositionChangeDTO.newPosition)) {
             return
         }
 
-        val oldCoordinates = findCoordinate(enemyPositionChangeDTO.id)
+        val oldCoordinates = findCoordinate(levelObjectPositionChangeDTO.id)
         if(oldCoordinates.x == -1 && oldCoordinates.y == -1) {
             return
         }
-        level.field[oldCoordinates.x][oldCoordinates.y].removeAll { it.id == enemyPositionChangeDTO.id }
-        val enemy = level.enemies.find { it.id == enemyPositionChangeDTO.id }
+        level.field[oldCoordinates.x][oldCoordinates.y].removeAll { it.id == levelObjectPositionChangeDTO.id }
+        val enemy = level.enemies.find { it.id == levelObjectPositionChangeDTO.id }
         if (enemy != null) {
-            level.field[enemyPositionChangeDTO.newPosition.x][enemyPositionChangeDTO.newPosition.y].add(enemy)
-            enemy.position = enemyPositionChangeDTO.newPosition
+            level.field[levelObjectPositionChangeDTO.newPosition.x][levelObjectPositionChangeDTO.newPosition.y].add(enemy)
+            enemy.position = levelObjectPositionChangeDTO.newPosition
         }
 
     }
@@ -67,6 +68,9 @@ class GameViewModel : ViewModel() {
 
         val levelObjectList = level.field[coordinates.x][coordinates.y]
         if(levelObjectList.isEmpty()) {
+            if (chara.weapon is Bow){
+                throwArrow(coordinates, chara.direction)
+            }
             return
         }
         val enemy = levelObjectList.find { it.type == LevelObjectType.ENEMY }
@@ -106,6 +110,10 @@ class GameViewModel : ViewModel() {
             else -> {}
 
         }
+    }
+
+    private fun throwArrow(coordinates: Coordinates, direction: Direction) {
+        level.throwArrow(coordinates, direction)
     }
 
     private fun nextLevel() {

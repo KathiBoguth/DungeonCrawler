@@ -410,6 +410,72 @@
             android:contentDescription="@string/wooden_sword" />
 
         <ImageView
+            android:id="@+id/bow_wooden"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/bow"
+            tools:layout_editor_absoluteX="453dp"
+            tools:layout_editor_absoluteY="173dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/wooden_bow" />
+
+        <ImageView
+            android:id="@+id/gui_bow_wooden"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/bow"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/goldCounter"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/wooden_bow" />
+
+        <ImageView
+            android:id="@+id/arrow_left"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:contentDescription="@string/arrow"
+            android:src="@drawable/arrow_left"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@id/character"
+            app:layout_constraintTop_toTopOf="@id/character" />
+
+        <ImageView
+            android:id="@+id/arrow_right"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:contentDescription="@string/arrow"
+            android:src="@drawable/arrow_right"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@id/character"
+            app:layout_constraintTop_toTopOf="@id/character" />
+
+        <ImageView
+            android:id="@+id/arrow_down"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:contentDescription="@string/arrow"
+            android:src="@drawable/arrow_down"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@id/character"
+            app:layout_constraintTop_toTopOf="@id/character" />
+
+        <ImageView
+            android:id="@+id/arrow_up"
+            android:layout_width="55dp"
+            android:layout_height="53dp"
+            android:contentDescription="@string/arrow"
+            android:src="@drawable/arrow_up"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@id/character"
+            app:layout_constraintTop_toTopOf="@id/character" />
+
+        <ImageView
             android:id="@+id/cuirass_rag"
             android:layout_width="55dp"
             android:layout_height="53dp"

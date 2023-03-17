@@ -9,9 +9,10 @@ enum class LevelObjectType {
     COIN,
     POTION,
     WEAPON,
+    ARROW,
     ARMOR;
 
     fun isSteppableObject(): Boolean {
-        return this == LADDER || this == COIN || this == WEAPON || this == ARMOR || this == POTION
+        return this == LADDER || this == COIN || this == WEAPON || this == ARMOR || this == POTION || this == ARROW
     }
 }

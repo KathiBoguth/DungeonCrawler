@@ -6,8 +6,11 @@ import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
+import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
+import com.example.dungeoncrawler.entity.weapon.Arrow
+import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.random.Random
@@ -23,6 +26,8 @@ class Level(
         private const val CUIRASS_RAG = "cuirass_rag"
         private const val CUIRASS_IRON = "cuirass_iron"
         private const val CUIRASS_DIAMOND = "cuirass_diamond"
+        private const val BOW_WOODEN = "bow_wooden"
+        const val ARROW = "arrow"
     }
     var field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
         (Array(Settings.fieldSize) { mutableListOf() })
@@ -31,11 +36,12 @@ class Level(
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
     val potionStack = ArrayDeque<String>()
-    lateinit var swords: MutableList<Sword>
+    lateinit var weapons: MutableList<Weapon>
     lateinit var armors: MutableList<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
 
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
+    val arrowLiveData: MutableLiveData<LevelObjectPositionChangeDTO> by lazy { MutableLiveData() }
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
@@ -46,11 +52,12 @@ class Level(
 
     fun initLevel() {
         gameObjectIds.clear()
-        gameObjectIds.addAll(listOf(SWORD_WOODEN, SWORD_DIAMOND, CUIRASS_RAG, CUIRASS_IRON, CUIRASS_DIAMOND))
+        gameObjectIds.addAll(listOf(SWORD_WOODEN, SWORD_DIAMOND, CUIRASS_RAG, CUIRASS_IRON,
+            CUIRASS_DIAMOND, BOW_WOODEN, "${ARROW}_left", "${ARROW}_right", "${ARROW}_up", "${ARROW}_down"))
         field = Array(Settings.fieldSize) {
             (Array(Settings.fieldSize) { mutableListOf() })
         }
-        swords = mutableListOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND))
+        weapons = mutableListOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND), Bow(10, BOW_WOODEN))
         armors = mutableListOf(Cuirass(10, CUIRASS_RAG), Cuirass(25, CUIRASS_IRON), Cuirass(50, CUIRASS_DIAMOND))
         placeWalls()
         placeTreasures()
@@ -182,6 +189,9 @@ class Level(
     }
 
     fun drop(): LevelObjectType {
+        // TODO remove
+        return LevelObjectType.WEAPON
+
         val randomValue = random.nextFloat()
         return if (randomValue < 0.35) {
             LevelObjectType.COIN
@@ -196,12 +206,25 @@ class Level(
     }
 
     fun randomWeapon(): Weapon {
-        return if (random.nextFloat() > 0.8) {
-            val sword = swords.find { it.id == SWORD_DIAMOND } ?: swords.first()
-            swords.remove(sword)
+        val randomValue = random.nextFloat()
+
+        // TODO: remove
+        val bow = weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
+        weapons.remove(bow)
+        return bow
+
+        return if (randomValue < 0.4) {
+            val bow = weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
+            weapons.remove(bow)
+            bow
+        } else if (randomValue < 0.8){
+            val sword = weapons.find { it.id == SWORD_WOODEN } ?: weapons.first()
+            weapons.remove(sword)
             sword
         } else {
-            swords.removeAt(0)
+            val sword = weapons.find { it.id == SWORD_DIAMOND } ?: weapons.first()
+            weapons.remove(sword)
+            sword
         }
     }
 
@@ -220,6 +243,26 @@ class Level(
         val armor = armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
         armors.remove(armor)
         return armor
+    }
+
+    fun throwArrow(coordinates: Coordinates, direction: Direction) {
+
+        val id = when(direction){
+            Direction.UP -> "arrow_up"
+            Direction.LEFT -> "arrow_left"
+            Direction.DOWN -> "arrow_down"
+            Direction.RIGHT -> "arrow_right"
+        }
+        val arrow = Arrow(id, direction, coordinates)
+        field[coordinates.x][coordinates.y].add(arrow)
+
+        val runnableCode: Runnable = object : Runnable {
+            override fun run() {
+                arrow.move(field)
+                arrow.handler.postDelayed(this, arrow.speed.toLong())
+            }
+        }
+        arrow.handler.postDelayed(runnableCode, arrow.speed.toLong())
     }
 
 }

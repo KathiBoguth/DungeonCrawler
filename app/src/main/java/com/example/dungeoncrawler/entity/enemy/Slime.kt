@@ -47,7 +47,7 @@ class Slime(slimeId: String) : BasicEnemy(slimeId, "slime") {
                 }
 
             }
-            positionChange.value = EnemyPositionChangeDTO(newPosition, id)
+            positionChange.value = LevelObjectPositionChangeDTO(newPosition, id)
         }
     }
 }

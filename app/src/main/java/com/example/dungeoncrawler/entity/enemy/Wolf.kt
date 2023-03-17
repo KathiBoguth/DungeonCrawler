@@ -46,7 +46,7 @@ class Wolf(wolfId: String) : BasicEnemy(wolfId, "wolf") {
                 }
 
             }
-            positionChange.value = EnemyPositionChangeDTO(newPosition, id)
+            positionChange.value = LevelObjectPositionChangeDTO(newPosition, id)
         }
     }
 }

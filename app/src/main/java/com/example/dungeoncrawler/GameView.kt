@@ -23,11 +23,13 @@ import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
-import com.example.dungeoncrawler.entity.enemy.EnemyPositionChangeDTO
+import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.armor.Armor
+import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +48,7 @@ class GameView : Fragment() {
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private var handler = Handler(Looper.getMainLooper())
-    private lateinit var enemyObserver: Observer<EnemyPositionChangeDTO>
+    private lateinit var enemyObserver: Observer<LevelObjectPositionChangeDTO>
     private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
     private lateinit var charaWeaponObserver: Observer<Weapon>
     private lateinit var charaArmorObserver: Observer<Armor>
@@ -96,7 +98,7 @@ class GameView : Fragment() {
     }
 
     private fun setupObserver(view: View) {
-        enemyObserver = Observer<EnemyPositionChangeDTO> {
+        enemyObserver = Observer<LevelObjectPositionChangeDTO> {
             onEnemyMove(view, it)
         }
 
@@ -237,7 +239,7 @@ class GameView : Fragment() {
 
     private fun onEnemyMove(
         view: View,
-        it: EnemyPositionChangeDTO
+        it: LevelObjectPositionChangeDTO
     ) {
         val enemyView = getGameObjectView(view, it.id)
         val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
@@ -430,7 +432,12 @@ class GameView : Fragment() {
             val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
 
             if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth){
-                gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+                if (levelObject.type == LevelObjectType.ARROW) {
+                    gameObjectView.animate().x(xPos).y(yPos)
+                        .setDuration((levelObject as Arrow).speed.toLong()-10)
+                } else {
+                    gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+                }
             }
         }
 
@@ -457,6 +464,8 @@ class GameView : Fragment() {
                 requireContext().packageName
             )
 
+            removeGameObjects()
+
             // TODO: catch exceptions
             gameObjectView.setImageDrawable(ResourcesCompat.getDrawable(resources, drawableId, requireContext().theme))
 
@@ -473,6 +482,11 @@ class GameView : Fragment() {
         if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}) {
             val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
             gameObjectView?.visibility = View.INVISIBLE
+            if (id.contains(Level.ARROW)) {
+                val charaView = getGameObjectView(view, gameViewModel.chara.id)
+                gameObjectView?.x = charaView?.x ?: 0F
+                gameObjectView?.y = charaView?.y ?: 0F
+            }
         }
     }
 
@@ -488,7 +502,7 @@ class GameView : Fragment() {
     }
 
     private fun showWeapon(id: String) {
-        for (sword in gameViewModel.level.swords) {
+        for (sword in gameViewModel.level.weapons) {
             val i = sword.id
             val weaponId = "gui_$i"
             val weaponView = view?.findViewById<View>(

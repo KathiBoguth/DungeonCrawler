@@ -9,7 +9,6 @@ import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.Wall
-import org.w3c.dom.Entity
 import kotlin.random.Random
 
 abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
@@ -22,7 +21,7 @@ abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
     abstract var speed: Int
     abstract var power: Int
 
-    val positionChange: MutableLiveData<EnemyPositionChangeDTO> by lazy { MutableLiveData() }
+    val positionChange: MutableLiveData<LevelObjectPositionChangeDTO> by lazy { MutableLiveData() }
     val attackDamage: MutableLiveData<EnemyDamageDTO> by lazy { MutableLiveData() }
 
     var handler = Handler(Looper.getMainLooper())
