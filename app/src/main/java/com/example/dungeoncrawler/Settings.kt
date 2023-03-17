@@ -6,7 +6,7 @@ class Settings {
 
     companion object {
         const val healthBaseValue = 100
-        const val attackBaseValue = 20
+        const val attackBaseValue = 10
         const val defenseBaseValue = 0
         const val moveLength = 80f
         const val fieldSize = 12

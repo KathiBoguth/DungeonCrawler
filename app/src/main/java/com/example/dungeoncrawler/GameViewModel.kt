@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler
 
+import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
@@ -47,7 +48,7 @@ class GameViewModel : ViewModel() {
 
     fun onEnemyAttack(damage: Int, enemyId: String) {
         val protection = chara.armor?.protection ?: 0
-        chara.health -= max(0, (damage - protection))
+        chara.health -= max(0, (damage - (chara.baseDefense+protection)))
         if (chara.health <= 0) {
             killedBy = enemyId
             endGame.value = false
@@ -193,6 +194,7 @@ class GameViewModel : ViewModel() {
 
         level.field[coordinates.x][coordinates.y].remove(chara)
         val levelObjectList = level.field[newCoordinates.x][newCoordinates.y]
+        //TODO: ConcurrentModificationException
         levelObjectList.forEach {
             when (it.type) {
                 LevelObjectType.COIN -> {
@@ -243,9 +245,10 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun reset(newGame: Boolean = true) {
+    fun reset(newGame: Boolean = true, stats: SharedPreferences) {
         if (newGame) {
             chara = MainChara()
+            chara.setBaseValues(stats)
             level = Level(chara)
         }
         endGame.value = null

@@ -1,6 +1,5 @@
 package com.example.dungeoncrawler
 
-import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -19,13 +18,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         navController = navHostFragment.navController
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.hide(WindowInsets.Type.statusBars())
-        }
-
-        // TODO: remove
-        val stats = applicationContext.getSharedPreferences("savedStats", Context.MODE_PRIVATE)
-        with(stats.edit()) {
-            putInt("goldValue", 100)
-            apply()
         }
 
     }

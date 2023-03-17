@@ -1,6 +1,5 @@
 package com.example.dungeoncrawler.entity
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.armor.Armor
@@ -125,7 +124,6 @@ class Level(
             }
             setMoveRunnable(enemy)
 
-            Log.i(this::class.simpleName, enemy.id)
             field[coordinates.x][coordinates.y].add(enemy)
             enemy.position = coordinates
             enemy.direction = randomDirection()

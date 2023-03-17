@@ -2,6 +2,8 @@ package com.example.dungeoncrawler
 
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.REVERSE
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -73,7 +75,8 @@ class GameView : Fragment() {
     ): View {
         val fragmentBinding = FragmentGameViewBinding.inflate(inflater, container, false)
         binding = fragmentBinding
-        gameViewModel.reset()
+        val stats: SharedPreferences = requireContext().getSharedPreferences(StatsViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
+        gameViewModel.reset(stats = stats)
 
         return fragmentBinding.root
     }
@@ -130,6 +133,7 @@ class GameView : Fragment() {
                 return@Observer
             }
             hideAllEnemies()
+            saveGold()
             if (victory) {
                 this.findNavController().navigate(R.id.action_gameView_to_victoryView)
             } else {
@@ -195,6 +199,16 @@ class GameView : Fragment() {
                 val enemyView = getGameObjectView(view, it.id)
                 enemyView?.visibility = View.INVISIBLE
             }
+        }
+    }
+
+    private fun saveGold() {
+        val stats: SharedPreferences = requireContext().getSharedPreferences(StatsViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
+        val oldGold = stats.getInt(StatsViewModel.GOLD_KEY, 0)
+        val newGold = oldGold + gameViewModel.chara.gold
+        with(stats.edit()){
+            putInt(StatsViewModel.GOLD_KEY, newGold)
+            apply()
         }
     }
 

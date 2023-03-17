@@ -145,6 +145,12 @@ class StatsViewModel: ViewModel() {
 
     fun getHealthUpgradeMultiplier() : Int = HEALTH_UPGRADE_MULTIPLIER
 
+    fun getCurrentHealthUpgrade(): Int = healthUpgrade - initialUpgradeCount.health
+
+    fun getCurrentAttackUpgrade(): Int = attackUpgrade - initialUpgradeCount.attack
+
+    fun getCurrentDefenseUpgrade(): Int = defenseUpgrade - initialUpgradeCount.defense
+
 
     private fun calcCost(upgradeCount: Int): Int = ((upgradeCount+1).toDouble().pow(2.0) * COST_PER_UPGRADE).toInt()
 }

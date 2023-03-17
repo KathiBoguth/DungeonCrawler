@@ -99,13 +99,13 @@ class StatsUpgradeFragment: Fragment() {
     fun reset() {
         statsViewModel.reset()
         binding?.healthUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.healthUpgrade*statsViewModel.getHealthUpgradeMultiplier())
+            resources.getString(R.string.upgrade, statsViewModel.getCurrentHealthUpgrade()*statsViewModel.getHealthUpgradeMultiplier())
         )
         binding?.attackUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.attackUpgrade)
+            resources.getString(R.string.upgrade, statsViewModel.getCurrentAttackUpgrade())
         )
         binding?.defenseUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.defenseUpgrade)
+            resources.getString(R.string.upgrade, statsViewModel.getCurrentDefenseUpgrade())
         )
         updateGoldCost()
         updateButtonsEnabled()
