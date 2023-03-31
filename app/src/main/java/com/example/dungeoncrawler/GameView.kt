@@ -199,7 +199,7 @@ class GameView : Fragment() {
         gameViewModel.level.enemies.forEach{
             if (view != null) {
                 val enemyView = getGameObjectView(view, it.id)
-                enemyView?.visibility = View.INVISIBLE
+                enemyView?.visibility = View.GONE
             }
         }
     }
@@ -447,7 +447,7 @@ class GameView : Fragment() {
         if (levelObject is BasicEnemy) {
             if (levelObject.health <= 0) {
                 gameViewModel.level.field[x][y].remove(levelObject)
-                gameObjectView.visibility = View.INVISIBLE
+                gameObjectView.visibility = View.GONE
                 levelObject.positionChange.removeObserver(enemyObserver)
                 return
             }
@@ -481,7 +481,7 @@ class GameView : Fragment() {
     private fun hideGameObjectIfRemoved(id: String) {
         if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}) {
             val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
-            gameObjectView?.visibility = View.INVISIBLE
+            gameObjectView?.visibility = View.GONE
             if (id.contains(Level.ARROW)) {
                 val charaView = getGameObjectView(view, gameViewModel.chara.id)
                 gameObjectView?.x = charaView?.x ?: 0F
@@ -512,7 +512,7 @@ class GameView : Fragment() {
                     requireContext().packageName
                 )
             )
-            weaponView?.visibility = View.INVISIBLE
+            weaponView?.visibility = View.GONE
         }
 
         val weaponId = "gui_$id"
@@ -537,7 +537,7 @@ class GameView : Fragment() {
                     requireContext().packageName
                 )
             )
-            armorView?.visibility = View.INVISIBLE
+            armorView?.visibility = View.GONE
         }
 
         val armorId = "gui_$id"

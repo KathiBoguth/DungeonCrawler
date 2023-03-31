@@ -6,7 +6,6 @@ import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
-import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Arrow
@@ -16,7 +15,7 @@ import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.random.Random
 
 class Level(
-    private var chara: MainChara,
+    private var chara: MainChara
 ) {
 
     companion object
@@ -36,12 +35,11 @@ class Level(
     lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
     val potionStack = ArrayDeque<String>()
-    lateinit var weapons: MutableList<Weapon>
-    lateinit var armors: MutableList<Armor>
+    lateinit var weapons: List<Weapon>
+    lateinit var armors: List<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
 
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
-    val arrowLiveData: MutableLiveData<LevelObjectPositionChangeDTO> by lazy { MutableLiveData() }
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
@@ -57,8 +55,8 @@ class Level(
         field = Array(Settings.fieldSize) {
             (Array(Settings.fieldSize) { mutableListOf() })
         }
-        weapons = mutableListOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND), Bow(10, BOW_WOODEN))
-        armors = mutableListOf(Cuirass(10, CUIRASS_RAG), Cuirass(25, CUIRASS_IRON), Cuirass(50, CUIRASS_DIAMOND))
+        weapons = listOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND), Bow(10, BOW_WOODEN))
+        armors = listOf(Cuirass(10, CUIRASS_RAG), Cuirass(25, CUIRASS_IRON), Cuirass(50, CUIRASS_DIAMOND))
         placeWalls()
         placeTreasures()
         placeLadder()
@@ -110,7 +108,7 @@ class Level(
 
     private fun placeEnemies() {
         val enemyList = ArrayList<BasicEnemy>()
-        Settings.enemiesPerLevel[levelCount]?.forEachIndexed { i, enemyType ->
+        Settings.enemiesPerLevel[levelCount]?.forEach { enemyType ->
             var coordinates = getRandomCoordinates()
             var levelObjectsList = field[coordinates.x][coordinates.y]
             while (levelObjectsList.isNotEmpty() || levelObjectsList.any { !it.type.isSteppableObject() }) {
@@ -118,7 +116,6 @@ class Level(
                 levelObjectsList = field[coordinates.x][coordinates.y]
             }
             val enemy = when(enemyType) {
-                // TODO: improve iterator (currently: slime1, slime2, wolf3, desired: slime1, slime2, wolf1)
                 EnemyEnum.SLIME -> {
                     val count = enemyList.count { alreadyAdded ->  alreadyAdded.id.contains("slime") }
                     Slime("slime$count")
@@ -189,8 +186,6 @@ class Level(
     }
 
     fun drop(): LevelObjectType {
-        // TODO remove
-        return LevelObjectType.WEAPON
 
         val randomValue = random.nextFloat()
         return if (randomValue < 0.35) {
@@ -207,24 +202,14 @@ class Level(
 
     fun randomWeapon(): Weapon {
         val randomValue = random.nextFloat()
-
-        // TODO: remove
-        val bow = weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
-        weapons.remove(bow)
-        return bow
+        // TODO: probably display issues?
 
         return if (randomValue < 0.4) {
-            val bow = weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
-            weapons.remove(bow)
-            bow
-        } else if (randomValue < 0.8){
-            val sword = weapons.find { it.id == SWORD_WOODEN } ?: weapons.first()
-            weapons.remove(sword)
-            sword
+            weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
+        } else if (randomValue < 0.8) {
+            weapons.find { it.id == SWORD_WOODEN } ?: weapons.first()
         } else {
-            val sword = weapons.find { it.id == SWORD_DIAMOND } ?: weapons.first()
-            weapons.remove(sword)
-            sword
+            weapons.find { it.id == SWORD_DIAMOND } ?: weapons.first()
         }
     }
 
@@ -232,34 +217,33 @@ class Level(
         val randomValue = random.nextFloat()
 
         if (randomValue < 0.5) {
-            val armor = armors.find { it.id == CUIRASS_RAG } ?: armors.first()
-            armors.remove(armor)
-            return armor
+            return armors.find { it.id == CUIRASS_RAG } ?: armors.first()
         } else if (randomValue < 0.8) {
-            val armor = armors.find { it.id == CUIRASS_IRON } ?: armors.first()
-            armors.remove(armor)
-            return armor
+            return armors.find { it.id == CUIRASS_IRON } ?: armors.first()
         }
-        val armor = armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
-        armors.remove(armor)
-        return armor
+        return armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
     }
 
-    fun throwArrow(coordinates: Coordinates, direction: Direction) {
+    fun throwArrow(coordinates: Coordinates, direction: Direction, attack: (enemy: BasicEnemy) -> Unit) {
 
         val id = when(direction){
-            Direction.UP -> "arrow_up"
-            Direction.LEFT -> "arrow_left"
-            Direction.DOWN -> "arrow_down"
-            Direction.RIGHT -> "arrow_right"
+            Direction.UP -> "${ARROW}_up"
+            Direction.LEFT -> "${ARROW}_left"
+            Direction.DOWN -> "${ARROW}_down"
+            Direction.RIGHT -> "${ARROW}_right"
         }
         val arrow = Arrow(id, direction, coordinates)
         field[coordinates.x][coordinates.y].add(arrow)
 
         val runnableCode: Runnable = object : Runnable {
             override fun run() {
-                arrow.move(field)
-                arrow.handler.postDelayed(this, arrow.speed.toLong())
+                val enemy = arrow.move(field)
+                if (enemy != null) {
+                    attack(enemy)
+                }
+                if (arrow.isActive) {
+                    arrow.handler.postDelayed(this, arrow.speed.toLong())
+                }
             }
         }
         arrow.handler.postDelayed(runnableCode, arrow.speed.toLong())
@@ -267,7 +251,7 @@ class Level(
 
 }
 
-class Coordinates(
+data class Coordinates(
     val x: Int,
     val y: Int
 )

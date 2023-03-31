@@ -110,7 +110,7 @@
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:srcCompat="@drawable/treasure"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
@@ -122,7 +122,7 @@
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:srcCompat="@drawable/treasure"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
@@ -134,7 +134,7 @@
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:srcCompat="@drawable/treasure"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
@@ -146,7 +146,7 @@
             android:layout_height="70dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:srcCompat="@drawable/treasure"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
@@ -226,7 +226,7 @@
             android:src="@drawable/slime_front"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:contentDescription="@string/enemy" />
 
         <ImageView
@@ -238,7 +238,7 @@
             android:src="@drawable/slime_front"
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:contentDescription="@string/enemy" />
         <ImageView
             android:id="@+id/slime2"
@@ -250,7 +250,7 @@
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy"
-            android:visibility="invisible" />
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/wolf0"
@@ -262,7 +262,7 @@
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy"
-            android:visibility="invisible" />
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/wolf1"
@@ -274,7 +274,7 @@
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy"
-            android:visibility="invisible" />
+            android:visibility="gone" />
         <ImageView
             android:id="@+id/wolf2"
             android:layout_width="70dp"
@@ -285,7 +285,7 @@
             app:layout_constraintStart_toStartOf="@+id/background_container"
             app:layout_constraintTop_toTopOf="@+id/background_container"
             android:contentDescription="@string/enemy"
-            android:visibility="invisible" />
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/coin0"
@@ -295,7 +295,7 @@
             android:layout_marginTop="32dp"
             android:contentDescription="@string/coin"
             android:src="@drawable/coin"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -307,7 +307,7 @@
             android:layout_marginTop="32dp"
             android:contentDescription="@string/coin"
             android:src="@drawable/coin"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -319,7 +319,7 @@
             android:layout_marginTop="16dp"
             android:contentDescription="@string/coin"
             android:src="@drawable/coin"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -331,7 +331,7 @@
             android:layout_marginTop="32dp"
             android:contentDescription="@string/potion"
             android:src="@drawable/potion"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -343,7 +343,7 @@
             android:layout_marginTop="32dp"
             android:contentDescription="@string/potion"
             android:src="@drawable/potion"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -355,7 +355,7 @@
             android:layout_marginTop="16dp"
             android:contentDescription="@string/potion"
             android:src="@drawable/potion"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -367,7 +367,7 @@
             android:layout_marginTop="32dp"
             android:contentDescription="@string/diamond_sword"
             android:src="@drawable/sword_diamond"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -378,7 +378,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/sword_diamond"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/goldCounter"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/diamond_sword" />
@@ -392,7 +392,7 @@
             android:src="@drawable/sword_wooden"
             tools:layout_editor_absoluteX="453dp"
             tools:layout_editor_absoluteY="173dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/wooden_sword" />
@@ -404,7 +404,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/sword_wooden"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/goldCounter"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/wooden_sword" />
@@ -418,7 +418,7 @@
             android:src="@drawable/bow"
             tools:layout_editor_absoluteX="453dp"
             tools:layout_editor_absoluteY="173dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/wooden_bow" />
@@ -430,7 +430,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/bow"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/goldCounter"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/wooden_bow" />
@@ -441,7 +441,7 @@
             android:layout_height="53dp"
             android:contentDescription="@string/arrow"
             android:src="@drawable/arrow_left"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/character"
             app:layout_constraintTop_toTopOf="@id/character" />
 
@@ -451,7 +451,7 @@
             android:layout_height="53dp"
             android:contentDescription="@string/arrow"
             android:src="@drawable/arrow_right"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/character"
             app:layout_constraintTop_toTopOf="@id/character" />
 
@@ -461,7 +461,7 @@
             android:layout_height="53dp"
             android:contentDescription="@string/arrow"
             android:src="@drawable/arrow_down"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/character"
             app:layout_constraintTop_toTopOf="@id/character" />
 
@@ -471,7 +471,7 @@
             android:layout_height="53dp"
             android:contentDescription="@string/arrow"
             android:src="@drawable/arrow_up"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/character"
             app:layout_constraintTop_toTopOf="@id/character" />
 
@@ -484,7 +484,7 @@
             android:src="@drawable/cuirass_rag"
             tools:layout_editor_absoluteX="453dp"
             tools:layout_editor_absoluteY="173dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/rag" />
@@ -496,7 +496,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/cuirass_rag"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/gui_sword_diamond"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/rag" />
@@ -510,7 +510,7 @@
             android:src="@drawable/cuirass_iron"
             tools:layout_editor_absoluteX="453dp"
             tools:layout_editor_absoluteY="173dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/iron_cuirass" />
@@ -522,7 +522,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/cuirass_iron"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/gui_sword_diamond"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/iron_cuirass" />
@@ -536,7 +536,7 @@
             android:src="@drawable/cuirass_diamond"
             tools:layout_editor_absoluteX="453dp"
             tools:layout_editor_absoluteY="173dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/diamond_cuirass" />
@@ -548,7 +548,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:src="@drawable/cuirass_diamond"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/gui_sword_diamond"
             app:layout_constraintTop_toTopOf="parent"
             android:contentDescription="@string/diamond_cuirass" />

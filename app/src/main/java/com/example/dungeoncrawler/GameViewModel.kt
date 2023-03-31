@@ -69,7 +69,9 @@ class GameViewModel : ViewModel() {
         val levelObjectList = level.field[coordinates.x][coordinates.y]
         if(levelObjectList.isEmpty()) {
             if (chara.weapon is Bow){
-                throwArrow(coordinates, chara.direction)
+                if (!isArrowOnField()) {
+                    throwArrow(coordinates, chara.direction)
+                }
             }
             return
         }
@@ -112,8 +114,14 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    private fun isArrowOnField(): Boolean {
+        return listOf("${Level.ARROW}_up", "${Level.ARROW}_up", "${Level.ARROW}_left", "${Level.ARROW}_right").any{
+            findCoordinate(it) != Coordinates(-1, -1)
+        }
+    }
+
     private fun throwArrow(coordinates: Coordinates, direction: Direction) {
-        level.throwArrow(coordinates, direction)
+        level.throwArrow(coordinates, direction, ::attack)
     }
 
     private fun nextLevel() {
@@ -247,6 +255,11 @@ class GameViewModel : ViewModel() {
         val weaponBonus = chara.weapon?.attack ?: 0
         attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
         attackedEntityAnimation.value = attackedEnemy.id
+        placeCoinIfEnemyDefeated(attackedEnemy)
+
+    }
+
+    private fun placeCoinIfEnemyDefeated(attackedEnemy: BasicEnemy) {
         if (attackedEnemy.health <= 0) {
             placeCoin(attackedEnemy.position)
             attackedEnemy.position = Coordinates(-1, -1)
