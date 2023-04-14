@@ -37,9 +37,24 @@ class VictoryView: Fragment() {
         statsViewModel.startMediaPlayer()
     }
 
+    override fun onPause() {
+        super.onPause()
+        statsViewModel.pauseMediaPlayer()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        statsViewModel.startMediaPlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        statsViewModel.releaseMediaPlayer()
+    }
+
     fun startGame() {
         this.findNavController().navigate(R.id.action_victoryView_to_gameView)
-        statsViewModel.stopMediaPlayer()
+        statsViewModel.pauseMediaPlayer()
     }
 
     fun upgradeStats() {

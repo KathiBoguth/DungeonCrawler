@@ -41,6 +41,17 @@ class StatsUpgradeFragment: Fragment() {
         statsViewModel.loadStats(requireContext())
         updateInitialValues()
         updateButtonsEnabled()
+        statsViewModel.startMediaPlayer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        statsViewModel.pauseMediaPlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        statsViewModel.releaseMediaPlayer()
     }
 
     fun onHealthPlusButtonClicked() {

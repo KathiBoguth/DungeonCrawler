@@ -33,7 +33,7 @@ abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
         health -= damage
     }
 
-    fun attack() {
+    open fun attack() {
         if (health > 0) {
             attackDamage.value = EnemyDamageDTO(random.nextInt(power-10, power+10), direction, id)
         }
@@ -104,6 +104,28 @@ abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
             listOf(Wall())
         } else {
             field[posBeforeMe.x][posBeforeMe.y]
+        }
+    }
+
+    fun moveOneStep(): Coordinates {
+        return when (direction) {
+            Direction.UP -> {
+                val posY = position.y -1
+                Coordinates(position.x, posY)
+            }
+            Direction.DOWN -> {
+                val posY = position.y+1
+                Coordinates(position.x, posY)
+            }
+            Direction.LEFT -> {
+                val posX = position.x-1
+                Coordinates(posX, position.y)
+            }
+            Direction.RIGHT -> {
+                val posX = position.x +1
+                Coordinates(posX, position.y)
+            }
+
         }
     }
 }

@@ -30,6 +30,7 @@ import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.armor.Armor
+import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlin.math.abs
@@ -58,7 +59,8 @@ class GameView : Fragment() {
     private lateinit var updateLevelObserver: Observer<Boolean>
     private lateinit var nextLevelObserver: Observer<Int>
 
-    private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var mediaPlayerDungeon: MediaPlayer
+    private lateinit var mediaPlayerBoss: MediaPlayer
 
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -99,14 +101,34 @@ class GameView : Fragment() {
 
         setupObserver(view)
 
-        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.dungeon)
-        mediaPlayer.isLooping = true
-        mediaPlayer.start()
+        mediaPlayerDungeon = MediaPlayer.create(requireContext(), R.raw.dungeon)
+        mediaPlayerDungeon.isLooping = true
+        mediaPlayerDungeon.start()
+        mediaPlayerBoss = MediaPlayer.create(requireContext(), R.raw.boss)
+        mediaPlayerBoss.isLooping = true
     }
 
-    override fun onStop() {
-        super.onStop()
-        mediaPlayer.stop()
+    override fun onPause() {
+        super.onPause()
+        mediaPlayerDungeon.pause()
+        mediaPlayerBoss.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
+            mediaPlayerBoss.start()
+        } else {
+            mediaPlayerDungeon.start()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayerDungeon.stop()
+        mediaPlayerBoss.stop()
+        mediaPlayerDungeon.release()
+        mediaPlayerBoss.release()
     }
 
     private fun setupObserver(view: View) {
@@ -185,6 +207,11 @@ class GameView : Fragment() {
                 )
             )
             redraw(0, true)
+
+            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
+                mediaPlayerDungeon.pause()
+                mediaPlayerBoss.start()
+            }
         }
 
         gameViewModel.level.nextLevel.observe(
@@ -404,10 +431,14 @@ class GameView : Fragment() {
 
     }
 
-    private fun getPositionFromCoordinates(coords: Coordinates): Pair<Float, Float> {
+    private fun getPositionFromCoordinates(coords: Coordinates, isOgre: Boolean = false): Pair<Float, Float> {
         val moveLength = convertDpToPixel(Settings.moveLength)
-        val xPos = coords.x * moveLength + backgroundPos.x + Settings.margin
-        val yPos = coords.y * moveLength + backgroundPos.y + Settings.margin
+        var xPos = coords.x * moveLength + backgroundPos.x + Settings.margin
+        var yPos = coords.y * moveLength + backgroundPos.y + Settings.margin
+        if (isOgre) {
+            xPos -= convertDpToPixel(70f)
+            yPos -= convertDpToPixel(70f)
+        }
         return Pair(xPos, yPos)
     }
 
@@ -429,7 +460,7 @@ class GameView : Fragment() {
         val gameObjectView = getGameObjectView(view, levelObject.id)
                 ?: return
 
-        val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y))
+        val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y), (levelObject is Ogre))
 
         if(levelObject.type == LevelObjectType.COIN || levelObject.type == LevelObjectType.WEAPON) {
             val moveLength = convertDpToPixel(Settings.moveLength)
@@ -461,14 +492,21 @@ class GameView : Fragment() {
                 gameViewModel.level.field[x][y].remove(levelObject)
                 gameObjectView.visibility = View.GONE
                 levelObject.positionChange.removeObserver(enemyObserver)
+                if (levelObject.id == "ogre"){
+                    gameViewModel.level.endBossDefeated()
+                }
                 return
             }
-            val drawableName = when(levelObject.direction) {
-                Direction.DOWN -> "${levelObject.skin}_front"
-                Direction.UP -> "${levelObject.skin}_back"
-                Direction.LEFT -> "${levelObject.skin}_left"
-                Direction.RIGHT -> "${levelObject.skin}_right"
+            val drawableName = if(levelObject is Ogre && levelObject.attackCharged) {
+                "${levelObject.skin}_attack"
+            } else {
+                when(levelObject.direction) {
+                    Direction.DOWN -> "${levelObject.skin}_front"
+                    Direction.UP -> "${levelObject.skin}_back"
+                    Direction.LEFT -> "${levelObject.skin}_left"
+                    Direction.RIGHT -> "${levelObject.skin}_right"
 
+                }
             }
             val drawableId = resources.getIdentifier(
                 drawableName,

@@ -21,6 +21,7 @@ class Settings {
             1 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.SLIME),
             2 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.WOLF),
             3 to arrayOf(EnemyEnum.WOLF, EnemyEnum.WOLF, EnemyEnum.WOLF),
+            4 to arrayOf(EnemyEnum.OGRE)
         )
     }
 }

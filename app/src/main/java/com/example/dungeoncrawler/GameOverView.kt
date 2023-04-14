@@ -36,8 +36,23 @@ class GameOverView: Fragment() {
         statsViewModel.startMediaPlayer()
     }
 
+    override fun onPause() {
+        super.onPause()
+        statsViewModel.pauseMediaPlayer()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        statsViewModel.startMediaPlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        statsViewModel.releaseMediaPlayer()
+    }
+
     fun startGame() {
-        statsViewModel.stopMediaPlayer()
+        statsViewModel.pauseMediaPlayer()
         this.findNavController().navigate(R.id.action_gameOverView_to_gameView)
     }
 

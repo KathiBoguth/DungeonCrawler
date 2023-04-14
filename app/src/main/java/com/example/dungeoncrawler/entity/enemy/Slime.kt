@@ -1,6 +1,5 @@
 package com.example.dungeoncrawler.entity.enemy
 
-import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 
@@ -28,25 +27,7 @@ class Slime(slimeId: String) : BasicEnemy(slimeId, "slime") {
                 else -> Direction.UP
             }
         } else {
-            val newPosition = when (direction) {
-                Direction.UP -> {
-                    val posY = position.y -1
-                    Coordinates(position.x, posY)
-                }
-                Direction.DOWN -> {
-                    val posY = position.y+1
-                    Coordinates(position.x, posY)
-                }
-                Direction.LEFT -> {
-                    val posX = position.x-1
-                    Coordinates(posX, position.y)
-                }
-                Direction.RIGHT -> {
-                    val posX = position.x +1
-                    Coordinates(posX, position.y)
-                }
-
-            }
+            val newPosition = moveOneStep()
             positionChange.value = LevelObjectPositionChangeDTO(newPosition, id)
         }
     }

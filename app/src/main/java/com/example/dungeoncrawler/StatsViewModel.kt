@@ -168,7 +168,11 @@ class StatsViewModel: ViewModel() {
         mediaPlayer.start()
     }
 
-    fun stopMediaPlayer() {
+    fun pauseMediaPlayer() {
         mediaPlayer.pause()
+    }
+
+    fun releaseMediaPlayer() {
+        mediaPlayer.release()
     }
 }

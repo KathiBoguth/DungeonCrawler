@@ -288,6 +288,18 @@
             android:visibility="gone" />
 
         <ImageView
+            android:id="@+id/ogre"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ogre_front"
+            app:layout_constraintStart_toStartOf="@+id/background_container"
+            app:layout_constraintTop_toTopOf="@+id/background_container"
+            android:contentDescription="@string/enemy"
+            android:visibility="gone" />
+
+        <ImageView
             android:id="@+id/coin0"
             android:layout_width="74dp"
             android:layout_height="74dp"

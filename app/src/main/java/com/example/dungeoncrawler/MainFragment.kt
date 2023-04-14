@@ -35,8 +35,23 @@ class MainFragment : Fragment() {
         statsViewModel.setupMediaPlayer(requireContext())
     }
 
+    override fun onPause() {
+        super.onPause()
+        statsViewModel.pauseMediaPlayer()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        statsViewModel.startMediaPlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        statsViewModel.releaseMediaPlayer()
+    }
+
     fun startGame() {
-        statsViewModel.stopMediaPlayer()
+        statsViewModel.pauseMediaPlayer()
         this.findNavController().navigate(R.id.action_mainFragment_to_gameView)
     }
 

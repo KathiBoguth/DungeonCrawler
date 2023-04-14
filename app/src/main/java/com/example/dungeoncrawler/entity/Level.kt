@@ -6,6 +6,7 @@ import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
+import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Arrow
@@ -18,8 +19,7 @@ class Level(
     private var chara: MainChara
 ) {
 
-    companion object
-    {
+    companion object {
         private const val SWORD_WOODEN = "sword_wooden"
         private const val SWORD_DIAMOND = "sword_diamond"
         private const val CUIRASS_RAG = "cuirass_rag"
@@ -27,7 +27,10 @@ class Level(
         private const val CUIRASS_DIAMOND = "cuirass_diamond"
         private const val BOW_WOODEN = "bow_wooden"
         const val ARROW = "arrow"
+        private const val LADDER = "ladder"
+        private const val TREASURE = "treasure"
     }
+
     var field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
         (Array(Settings.fieldSize) { mutableListOf() })
     }
@@ -50,16 +53,34 @@ class Level(
 
     fun initLevel() {
         gameObjectIds.clear()
-        gameObjectIds.addAll(listOf(SWORD_WOODEN, SWORD_DIAMOND, CUIRASS_RAG, CUIRASS_IRON,
-            CUIRASS_DIAMOND, BOW_WOODEN, "${ARROW}_left", "${ARROW}_right", "${ARROW}_up", "${ARROW}_down"))
+        gameObjectIds.addAll(
+            listOf(
+                SWORD_WOODEN,
+                SWORD_DIAMOND,
+                CUIRASS_RAG,
+                CUIRASS_IRON,
+                CUIRASS_DIAMOND,
+                BOW_WOODEN,
+                "${ARROW}_left", "${ARROW}_right", "${ARROW}_up", "${ARROW}_down",
+                LADDER,
+                "${TREASURE}0", "${TREASURE}1", "${TREASURE}2", "${TREASURE}3"
+            )
+        )
         field = Array(Settings.fieldSize) {
             (Array(Settings.fieldSize) { mutableListOf() })
         }
         weapons = listOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND), Bow(10, BOW_WOODEN))
-        armors = listOf(Cuirass(10, CUIRASS_RAG), Cuirass(25, CUIRASS_IRON), Cuirass(50, CUIRASS_DIAMOND))
+        armors = listOf(
+            Cuirass(10, CUIRASS_RAG),
+            Cuirass(25, CUIRASS_IRON),
+            Cuirass(50, CUIRASS_DIAMOND)
+        )
         placeWalls()
-        placeTreasures()
-        placeLadder()
+        val endBoss = levelCount >= Settings.enemiesPerLevel.size
+        if (!endBoss) {
+            placeTreasures()
+            placeLadder()
+        }
         placeEnemies()
         fillCoinStack()
         fillPotionStack()
@@ -73,7 +94,7 @@ class Level(
     private fun placeWalls() {
         for (row in field.indices) {
             for (column in field[row].indices) {
-                if (row == 0 || column == 0 || row == field.size-1 || column == field[row].size-1){
+                if (row == 0 || column == 0 || row == field.size - 1 || column == field[row].size - 1) {
                     field[row][column].add(Wall())
                 }
             }
@@ -92,17 +113,26 @@ class Level(
 
             val treasureId = "treasure$i"
 
-            field[coordinates.x][coordinates.y].add(Treasure(treasureId))
-            gameObjectIds.add(treasureId)
+            placeTreasure(coordinates, treasureId)
+
         }
     }
 
-    private fun placeLadder() {
-        var coordinates = getRandomCoordinates()
-        while (field[coordinates.x][coordinates.y].isNotEmpty()) {
-            coordinates = getRandomCoordinates()
+    private fun placeTreasure(coordinates: Coordinates, treasureId: String) {
+        field[coordinates.x][coordinates.y].add(Treasure(treasureId))
+        gameObjectIds.add(treasureId)
+    }
+
+    private fun placeLadder(coordinates: Coordinates? = null) {
+        if (coordinates != null) {
+            field[coordinates.x][coordinates.y].add(Ladder())
+            return
         }
-        field[coordinates.x][coordinates.y].add(Ladder())
+        var randomCoordinates = getRandomCoordinates()
+        while (field[randomCoordinates.x][randomCoordinates.y].isNotEmpty()) {
+            randomCoordinates = getRandomCoordinates()
+        }
+        field[randomCoordinates.x][randomCoordinates.y].add(Ladder())
 
     }
 
@@ -115,14 +145,20 @@ class Level(
                 coordinates = getRandomCoordinates()
                 levelObjectsList = field[coordinates.x][coordinates.y]
             }
-            val enemy = when(enemyType) {
+            val enemy = when (enemyType) {
                 EnemyEnum.SLIME -> {
-                    val count = enemyList.count { alreadyAdded ->  alreadyAdded.id.contains("slime") }
+                    val count =
+                        enemyList.count { alreadyAdded -> alreadyAdded.id.contains("slime") }
                     Slime("slime$count")
                 }
+
                 EnemyEnum.WOLF -> {
-                    val count = enemyList.count { alreadyAdded ->  alreadyAdded.id.contains("wolf") }
+                    val count = enemyList.count { alreadyAdded -> alreadyAdded.id.contains("wolf") }
                     Wolf("wolf$count")
+                }
+
+                EnemyEnum.OGRE -> {
+                    Ogre("ogre")
                 }
 
             }
@@ -150,7 +186,7 @@ class Level(
 
     private fun fillCoinStack() {
         val coinIds = listOf("coin0", "coin1", "coin2")
-        coinIds.forEach{
+        coinIds.forEach {
             coinStack.addLast(it)
         }
         gameObjectIds.addAll(coinIds)
@@ -158,7 +194,7 @@ class Level(
 
     private fun fillPotionStack() {
         val potionIds = listOf("potion0", "potion1", "potion2")
-        potionIds.forEach{
+        potionIds.forEach {
             potionStack.addLast(it)
         }
         gameObjectIds.addAll(potionIds)
@@ -176,7 +212,7 @@ class Level(
     }
 
     private fun randomDirection(): Direction {
-        return when (random.nextInt(4)){
+        return when (random.nextInt(4)) {
             0 -> Direction.UP
             1 -> Direction.DOWN
             2 -> Direction.LEFT
@@ -192,7 +228,7 @@ class Level(
             LevelObjectType.COIN
         } else if (randomValue < 0.6) {
             LevelObjectType.POTION
-        } else if (randomValue < 0.85){
+        } else if (randomValue < 0.85) {
             LevelObjectType.ARMOR
         } else {
             LevelObjectType.WEAPON
@@ -224,9 +260,13 @@ class Level(
         return armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
     }
 
-    fun throwArrow(coordinates: Coordinates, direction: Direction, attack: (enemy: BasicEnemy) -> Unit) {
+    fun throwArrow(
+        coordinates: Coordinates,
+        direction: Direction,
+        attack: (enemy: BasicEnemy) -> Unit
+    ) {
 
-        val id = when(direction){
+        val id = when (direction) {
             Direction.UP -> "${ARROW}_up"
             Direction.LEFT -> "${ARROW}_left"
             Direction.DOWN -> "${ARROW}_down"
@@ -247,6 +287,16 @@ class Level(
             }
         }
         arrow.handler.postDelayed(runnableCode, arrow.speed.toLong())
+    }
+
+    fun endBossDefeated() {
+        val xCoord = (field.size/2)
+        val yCoord = (field[xCoord].size/2)
+        val coordinatesLadder = Coordinates(xCoord - 1, yCoord)
+        placeLadder(coordinatesLadder)
+
+        val coordinatesTreasure = Coordinates(xCoord + 1, yCoord)
+        placeTreasure(coordinatesTreasure, "treasure0")
     }
 
 }
