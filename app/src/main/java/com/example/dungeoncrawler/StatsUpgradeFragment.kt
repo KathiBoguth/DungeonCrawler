@@ -11,10 +11,11 @@ import com.example.dungeoncrawler.databinding.FragmentStatsUpgradeBinding
 
 class StatsUpgradeFragment: Fragment() {
 
+    //TODO: negative money?
+
     val statsViewModel: StatsViewModel by activityViewModels()
 
     private var binding: FragmentStatsUpgradeBinding? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

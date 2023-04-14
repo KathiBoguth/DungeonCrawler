@@ -215,7 +215,7 @@ class GameViewModel : ViewModel() {
             when (it.type) {
                 LevelObjectType.COIN -> {
                     getRandomReward()
-                    levelObjectList.remove(it)
+                    levelObjectList.removeIf{levelObject -> it.id == levelObject.id}
                 }
                 LevelObjectType.POTION -> {
                     heal((it as Potion).hpCure)

@@ -2,6 +2,7 @@ package com.example.dungeoncrawler
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
 import kotlin.math.max
 import kotlin.math.pow
@@ -30,6 +31,8 @@ class StatsViewModel: ViewModel() {
     var defenseUpgrade = initialUpgradeCount.defense
     var gold = initialData.gold
     var goldCost = 0
+
+    private lateinit var mediaPlayer: MediaPlayer
 
     fun onHealthPlusButtonClicked() {
         val cost = calcCost(healthUpgrade)
@@ -153,4 +156,19 @@ class StatsViewModel: ViewModel() {
 
 
     private fun calcCost(upgradeCount: Int): Int = ((upgradeCount+1).toDouble().pow(2.0) * COST_PER_UPGRADE).toInt()
+    fun setupMediaPlayer(context: Context) {
+        if (!this::mediaPlayer.isInitialized){
+            mediaPlayer = MediaPlayer.create(context, R.raw.menu)
+            mediaPlayer.isLooping = true
+            mediaPlayer.start()
+        }
+    }
+
+    fun startMediaPlayer() {
+        mediaPlayer.start()
+    }
+
+    fun stopMediaPlayer() {
+        mediaPlayer.pause()
+    }
 }

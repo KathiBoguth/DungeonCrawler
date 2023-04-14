@@ -5,10 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentMainBinding
 
 class MainFragment : Fragment() {
+
+    private val statsViewModel: StatsViewModel by activityViewModels()
 
     private var binding: FragmentMainBinding? = null
 
@@ -29,9 +32,11 @@ class MainFragment : Fragment() {
             lifecycleOwner = viewLifecycleOwner
             mainFragment = this@MainFragment
         }
+        statsViewModel.setupMediaPlayer(requireContext())
     }
 
     fun startGame() {
+        statsViewModel.stopMediaPlayer()
         this.findNavController().navigate(R.id.action_mainFragment_to_gameView)
     }
 

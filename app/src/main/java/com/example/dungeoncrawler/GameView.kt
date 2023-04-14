@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.animation.ValueAnimator.REVERSE
 import android.content.Context
 import android.content.SharedPreferences
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -57,6 +58,8 @@ class GameView : Fragment() {
     private lateinit var updateLevelObserver: Observer<Boolean>
     private lateinit var nextLevelObserver: Observer<Int>
 
+    private lateinit var mediaPlayer: MediaPlayer
+
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
             if (backgroundPos.x == -1) {
@@ -95,6 +98,15 @@ class GameView : Fragment() {
         }
 
         setupObserver(view)
+
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.dungeon)
+        mediaPlayer.isLooping = true
+        mediaPlayer.start()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mediaPlayer.stop()
     }
 
     private fun setupObserver(view: View) {
