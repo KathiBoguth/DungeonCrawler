@@ -2,13 +2,13 @@ package com.example.dungeoncrawler.entity.enemy
 
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.Wall
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
 abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
@@ -21,8 +21,10 @@ abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
     abstract var speed: Int
     abstract var power: Int
 
-    val positionChange: MutableLiveData<LevelObjectPositionChangeDTO> by lazy { MutableLiveData() }
-    val attackDamage: MutableLiveData<EnemyDamageDTO> by lazy { MutableLiveData() }
+    val positionChange: MutableStateFlow<LevelObjectPositionChangeDTO> = MutableStateFlow(
+        LevelObjectPositionChangeDTO(Coordinates(-1,-1), "")
+    )
+    val attackDamage: MutableStateFlow<EnemyDamageDTO> = MutableStateFlow(EnemyDamageDTO(0, Direction.UP, ""))
 
     var handler = Handler(Looper.getMainLooper())
     var random: Random = Random(System.currentTimeMillis())

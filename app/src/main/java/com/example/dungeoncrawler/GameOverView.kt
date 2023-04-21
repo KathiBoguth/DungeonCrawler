@@ -12,7 +12,7 @@ import com.example.dungeoncrawler.databinding.FragmentGameOverBinding
 class GameOverView: Fragment() {
 
     val gameViewModel: GameViewModel by activityViewModels()
-    private val statsViewModel: StatsViewModel by activityViewModels()
+    private val menuViewModel: MenuViewModel by activityViewModels()
 
     private var binding: FragmentGameOverBinding? = null
 
@@ -33,26 +33,26 @@ class GameOverView: Fragment() {
             lifecycleOwner = viewLifecycleOwner
             gameOverFragment = this@GameOverView
         }
-        statsViewModel.startMediaPlayer()
+        menuViewModel.startMediaPlayer()
     }
 
     override fun onPause() {
         super.onPause()
-        statsViewModel.pauseMediaPlayer()
+        menuViewModel.pauseMediaPlayer()
     }
 
     override fun onResume() {
         super.onResume()
-        statsViewModel.startMediaPlayer()
+        menuViewModel.startMediaPlayer()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        statsViewModel.releaseMediaPlayer()
+        menuViewModel.releaseMediaPlayer()
     }
 
     fun startGame() {
-        statsViewModel.pauseMediaPlayer()
+        menuViewModel.pauseMediaPlayer()
         this.findNavController().navigate(R.id.action_gameOverView_to_gameView)
     }
 

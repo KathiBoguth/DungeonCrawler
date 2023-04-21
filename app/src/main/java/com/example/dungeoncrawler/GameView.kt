@@ -55,7 +55,6 @@ class GameView : Fragment() {
     private lateinit var charaWeaponObserver: Observer<Weapon>
     private lateinit var charaArmorObserver: Observer<Armor>
     private lateinit var attackedEntityAnimationObserver: Observer<String>
-    private lateinit var endGameObserver: Observer<Boolean>
     private lateinit var updateLevelObserver: Observer<Boolean>
     private lateinit var nextLevelObserver: Observer<Int>
 
@@ -82,7 +81,7 @@ class GameView : Fragment() {
     ): View {
         val fragmentBinding = FragmentGameViewBinding.inflate(inflater, container, false)
         binding = fragmentBinding
-        val stats: SharedPreferences = requireContext().getSharedPreferences(StatsViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
+        val stats: SharedPreferences = requireContext().getSharedPreferences(MenuViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
         gameViewModel.reset(stats = stats)
 
         return fragmentBinding.root
@@ -163,24 +162,22 @@ class GameView : Fragment() {
             attackedEntityAnimationObserver
         )
 
-        endGameObserver = Observer<Boolean> { victory ->
-            if (victory == null) {
-                setupEnemyObservers()
-                return@Observer
-            }
-            hideAllEnemies()
-            saveGold()
-            if (victory) {
-                this.findNavController().navigate(R.id.action_gameView_to_victoryView)
-            } else {
-                this.findNavController().navigate(R.id.action_gameView_to_gameOverView)
+        scope.launch {
+            gameViewModel.endGame.collect{victory ->
+                if (victory == null) {
+                    setupEnemyObservers()
+                    return@collect
+                }
+                hideAllEnemies()
+                saveGold()
+                if (victory) {
+                    findNavController().navigate(R.id.action_gameView_to_victoryView)
+                } else {
+                    findNavController().navigate(R.id.action_gameView_to_gameOverView)
+                }
             }
         }
 
-        gameViewModel.endGame.observe(
-            viewLifecycleOwner,
-            endGameObserver
-        )
 
         updateLevelObserver = Observer<Boolean> {
             updateLevel()
@@ -222,33 +219,45 @@ class GameView : Fragment() {
 
     private fun removeEnemyObservers() {
         gameViewModel.level.enemies.forEach {
-            it.positionChange.removeObservers(viewLifecycleOwner)
-            it.attackDamage.removeObservers(viewLifecycleOwner)
+            //it.positionChange.removeObservers(viewLifecycleOwner)
+            //it.attackDamage.removeObservers(viewLifecycleOwner)
         }
     }
 
     private fun setupEnemyObservers() {
+
         gameViewModel.level.enemies.forEach {
-            it.positionChange.observe(viewLifecycleOwner, enemyObserver)
-            it.attackDamage.observe(viewLifecycleOwner, enemyDamageObserver)
+            scope.launch {
+                it.attackDamage.collect { dto ->
+                    onEnemyAttack(dto, requireView())
+                }
+            }
+            scope.launch {
+                it.positionChange.collect { dto ->
+                    onEnemyMove(requireView(), dto)
+                }
+            }
         }
+
     }
 
     private fun hideAllEnemies() {
         gameViewModel.level.enemies.forEach{
             if (view != null) {
                 val enemyView = getGameObjectView(view, it.id)
-                enemyView?.visibility = View.GONE
+                requireActivity().runOnUiThread {
+                    enemyView?.visibility = View.GONE
+                }
             }
         }
     }
 
     private fun saveGold() {
-        val stats: SharedPreferences = requireContext().getSharedPreferences(StatsViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
-        val oldGold = stats.getInt(StatsViewModel.GOLD_KEY, 0)
+        val stats: SharedPreferences = requireContext().getSharedPreferences(MenuViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
+        val oldGold = stats.getInt(MenuViewModel.GOLD_KEY, 0)
         val newGold = oldGold + gameViewModel.chara.gold
         with(stats.edit()){
-            putInt(StatsViewModel.GOLD_KEY, newGold)
+            putInt(MenuViewModel.GOLD_KEY, newGold)
             apply()
         }
     }
@@ -353,9 +362,12 @@ class GameView : Fragment() {
     }
 
     private fun fadeView() {
-        view?.animate()?.alpha(0F)?.setDuration(300L)?.withEndAction{
-            view?.animate()?.alpha(1F)?.setDuration(300L)
+        requireActivity().runOnUiThread {
+            view?.animate()?.alpha(0F)?.setDuration(300L)?.withEndAction{
+                view?.animate()?.alpha(1F)?.setDuration(300L)
+            }
         }
+
     }
 
     private fun redraw(duration: Long = Settings.animDuration, charaMoves: Boolean = false) {
@@ -377,7 +389,9 @@ class GameView : Fragment() {
             val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
             chara?.startAnimation(jumpUpAnimation)
         }
-        background.animate().x(xPosBackground).y(yPosBackground).setDuration(duration)
+        requireActivity().runOnUiThread {
+            background.animate().x(xPosBackground).y(yPosBackground).setDuration(duration)
+        }
 
         drawObjects(duration)
     }
@@ -401,7 +415,9 @@ class GameView : Fragment() {
         colorAnim.setDuration(Settings.animDuration)
         colorAnim.repeatMode = REVERSE
         colorAnim.repeatCount = 1
-        colorAnim.start()
+        requireActivity().runOnUiThread {
+            colorAnim.start()
+        }
     }
 
     private fun nudge(gameObjectView: ImageView?, id: String, direction: Direction) {
@@ -423,12 +439,13 @@ class GameView : Fragment() {
         val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
         val newX = xPos + deltaX*nudgeWidth
         val newY = yPos + deltaY*nudgeWidth
-        gameObjectView.animate().x(newX).y(newY)
-            .setDuration(Settings.animDuration).withEndAction {
-                gameObjectView.animate().x(xPos).y(yPos)
-                    .setDuration(Settings.animDuration)
-            }
-
+        requireActivity().runOnUiThread {
+            gameObjectView.animate().x(newX).y(newY)
+                .setDuration(Settings.animDuration).withEndAction {
+                    gameObjectView.animate().x(xPos).y(yPos)
+                        .setDuration(Settings.animDuration)
+                }
+        }
     }
 
     private fun getPositionFromCoordinates(coords: Coordinates, isOgre: Boolean = false): Pair<Float, Float> {
@@ -469,17 +486,23 @@ class GameView : Fragment() {
                 gameObjectView.y = yPos
 
             } else {
-                gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+                requireActivity().runOnUiThread {
+                    gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+                }
             }
         } else {
             val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
 
             if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth){
                 if (levelObject.type == LevelObjectType.ARROW) {
-                    gameObjectView.animate().x(xPos).y(yPos)
-                        .setDuration((levelObject as Arrow).speed.toLong()-10)
+                    requireActivity().runOnUiThread {
+                        gameObjectView.animate().x(xPos).y(yPos)
+                            .setDuration((levelObject as Arrow).speed.toLong()-10)
+                    }
                 } else {
-                    gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+                    requireActivity().runOnUiThread {
+                        gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+                    }
                 }
             }
         }
@@ -491,7 +514,7 @@ class GameView : Fragment() {
             if (levelObject.health <= 0) {
                 gameViewModel.level.field[x][y].remove(levelObject)
                 gameObjectView.visibility = View.GONE
-                levelObject.positionChange.removeObserver(enemyObserver)
+                //levelObject.positionChange.removeObserver(enemyObserver)
                 if (levelObject.id == "ogre"){
                     gameViewModel.level.endBossDefeated()
                 }

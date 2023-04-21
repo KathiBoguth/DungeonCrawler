@@ -13,7 +13,7 @@ class StatsUpgradeFragment: Fragment() {
 
     //TODO: negative money?
 
-    val statsViewModel: StatsViewModel by activityViewModels()
+    val menuViewModel: MenuViewModel by activityViewModels()
 
     private var binding: FragmentStatsUpgradeBinding? = null
 
@@ -38,114 +38,114 @@ class StatsUpgradeFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        statsViewModel.loadStats(requireContext())
+        menuViewModel.loadStats(requireContext())
         updateInitialValues()
         updateButtonsEnabled()
-        statsViewModel.startMediaPlayer()
+        menuViewModel.startMediaPlayer()
     }
 
     override fun onPause() {
         super.onPause()
-        statsViewModel.pauseMediaPlayer()
+        menuViewModel.pauseMediaPlayer()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        statsViewModel.releaseMediaPlayer()
+        menuViewModel.releaseMediaPlayer()
     }
 
     fun onHealthPlusButtonClicked() {
-        statsViewModel.onHealthPlusButtonClicked()
+        menuViewModel.onHealthPlusButtonClicked()
         binding?.healthUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.healthUpgrade*statsViewModel.getHealthUpgradeMultiplier())
+            resources.getString(R.string.upgrade, menuViewModel.healthUpgrade*menuViewModel.getHealthUpgradeMultiplier())
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun onHealthMinusButtonClicked() {
-        statsViewModel.onHealthMinusButtonClicked()
+        menuViewModel.onHealthMinusButtonClicked()
         binding?.healthUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.healthUpgrade*statsViewModel.getHealthUpgradeMultiplier())
+            resources.getString(R.string.upgrade, menuViewModel.healthUpgrade*menuViewModel.getHealthUpgradeMultiplier())
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun onAttackPlusButtonClicked() {
-        statsViewModel.onAttackPlusButtonClicked()
+        menuViewModel.onAttackPlusButtonClicked()
         binding?.attackUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.attackUpgrade)
+            resources.getString(R.string.upgrade, menuViewModel.attackUpgrade)
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun onAttackMinusButtonClicked() {
-        statsViewModel.onAttackMinusButtonClicked()
+        menuViewModel.onAttackMinusButtonClicked()
         binding?.attackUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.attackUpgrade)
+            resources.getString(R.string.upgrade, menuViewModel.attackUpgrade)
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun onDefensePlusButtonClicked() {
-        statsViewModel.onDefensePlusButtonClicked()
+        menuViewModel.onDefensePlusButtonClicked()
         binding?.defenseUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.defenseUpgrade)
+            resources.getString(R.string.upgrade, menuViewModel.defenseUpgrade)
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun onDefenseMinusButtonClicked() {
-        statsViewModel.onDefenseMinusButtonClicked()
+        menuViewModel.onDefenseMinusButtonClicked()
         binding?.defenseUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.defenseUpgrade)
+            resources.getString(R.string.upgrade, menuViewModel.defenseUpgrade)
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun reset() {
-        statsViewModel.reset()
+        menuViewModel.reset()
         binding?.healthUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.getCurrentHealthUpgrade()*statsViewModel.getHealthUpgradeMultiplier())
+            resources.getString(R.string.upgrade, menuViewModel.getCurrentHealthUpgrade()*menuViewModel.getHealthUpgradeMultiplier())
         )
         binding?.attackUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.getCurrentAttackUpgrade())
+            resources.getString(R.string.upgrade, menuViewModel.getCurrentAttackUpgrade())
         )
         binding?.defenseUpgrade?.text = String.format(
-            resources.getString(R.string.upgrade, statsViewModel.getCurrentDefenseUpgrade())
+            resources.getString(R.string.upgrade, menuViewModel.getCurrentDefenseUpgrade())
         )
         updateGoldCost()
         updateButtonsEnabled()
     }
 
     fun returnToMain() {
-        statsViewModel.saveUpgrades(requireContext())
+        menuViewModel.saveUpgrades(requireContext())
         this.findNavController().navigate(R.id.action_statsUpgradeFragment_to_mainFragment)
     }
 
     private fun updateInitialValues() {
         binding?.currentHealth?.text = String.format(
-            resources.getString(R.string.health, statsViewModel.initialData.health)
+            resources.getString(R.string.health, menuViewModel.initialData.health)
         )
         binding?.currentAttack?.text = String.format(
-            resources.getString(R.string.attack, statsViewModel.initialData.attack)
+            resources.getString(R.string.attack, menuViewModel.initialData.attack)
         )
         binding?.currentDefense?.text = String.format(
-            resources.getString(R.string.defense, statsViewModel.initialData.defense)
+            resources.getString(R.string.defense, menuViewModel.initialData.defense)
         )
         binding?.goldAvailable?.text = String.format(
-            resources.getString(R.string.gold, statsViewModel.initialData.gold)
+            resources.getString(R.string.gold, menuViewModel.initialData.gold)
         )
     }
 
     private fun updateGoldCost() {
         binding?.goldUpdate?.text = String.format(
-            resources.getString(R.string.minus, statsViewModel.goldCost)
+            resources.getString(R.string.minus, menuViewModel.goldCost)
         )
     }
 
@@ -154,13 +154,13 @@ class StatsUpgradeFragment: Fragment() {
         binding?.attackPlus?.isEnabled = true
         binding?.defensePlus?.isEnabled = true
 
-        if (!statsViewModel.isHealthUpgradeAffordable()) {
+        if (!menuViewModel.isHealthUpgradeAffordable()) {
             binding?.healthPlus?.isEnabled = false
         }
-        if (!statsViewModel.isAttackUpgradeAffordable()) {
+        if (!menuViewModel.isAttackUpgradeAffordable()) {
             binding?.attackPlus?.isEnabled = false
         }
-        if (!statsViewModel.isDefenseUpgradeAffordable()) {
+        if (!menuViewModel.isDefenseUpgradeAffordable()) {
             binding?.defensePlus?.isEnabled = false
         }
 
@@ -168,16 +168,16 @@ class StatsUpgradeFragment: Fragment() {
         binding?.attackMinus?.isEnabled = false
         binding?.defenseMinus?.isEnabled = false
 
-        if (statsViewModel.isHealthUpgradeSelected()) {
+        if (menuViewModel.isHealthUpgradeSelected()) {
             binding?.healthMinus?.isEnabled = true
         }
-        if (statsViewModel.isAttackUpgradeSelected()) {
+        if (menuViewModel.isAttackUpgradeSelected()) {
             binding?.attackMinus?.isEnabled = true
         }
-        if (statsViewModel.isDefenseUpgradeSelected()) {
+        if (menuViewModel.isDefenseUpgradeSelected()) {
             binding?.defenseMinus?.isEnabled = true
         }
-        if (statsViewModel.isUpgradeSelected()){
+        if (menuViewModel.isUpgradeSelected()){
             binding?.returnToMain?.text = String.format(
                 resources.getString(R.string.applyAndReturn)
             )

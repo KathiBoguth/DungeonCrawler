@@ -3,7 +3,7 @@ package com.example.dungeoncrawler.entity
 import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.StatsViewModel
+import com.example.dungeoncrawler.MenuViewModel
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Weapon
 
@@ -32,10 +32,10 @@ class MainChara: MovableEntity(LevelObjectType.MAIN_CHARA, "character") {
     }
 
     fun setBaseValues(stats: SharedPreferences) {
-        health = stats.getInt(StatsViewModel.HEALTH_KEY, Settings.healthBaseValue)
+        health = stats.getInt(MenuViewModel.HEALTH_KEY, Settings.healthBaseValue)
         maxHealth = health
-        baseAttack = stats.getInt(StatsViewModel.ATTACK_KEY, Settings.attackBaseValue)
-        baseDefense = stats.getInt(StatsViewModel.DEFENSE_KEY, Settings.defenseBaseValue)
+        baseAttack = stats.getInt(MenuViewModel.ATTACK_KEY, Settings.attackBaseValue)
+        baseDefense = stats.getInt(MenuViewModel.DEFENSE_KEY, Settings.defenseBaseValue)
     }
 }
 

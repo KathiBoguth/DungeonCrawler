@@ -15,6 +15,7 @@ import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.max
 import kotlin.math.min
 
@@ -26,7 +27,7 @@ class GameViewModel : ViewModel() {
     lateinit var level: Level
 
     val attackedEntityAnimation: MutableLiveData<String> by lazy { MutableLiveData() }
-    val endGame: MutableLiveData<Boolean> by lazy { MutableLiveData() }
+    val endGame: MutableStateFlow<Boolean?> = MutableStateFlow(null)
     val updateLevel: MutableLiveData<Boolean> by lazy { MutableLiveData() }
 
     fun onEnemyPositionChange(levelObjectPositionChangeDTO: LevelObjectPositionChangeDTO) {

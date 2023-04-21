@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import kotlin.math.max
 import kotlin.math.pow
 
-class StatsViewModel: ViewModel() {
+class MenuViewModel: ViewModel() {
 
     companion object {
         const val HEALTH_UPGRADE_MULTIPLIER = 5

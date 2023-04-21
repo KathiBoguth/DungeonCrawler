@@ -12,7 +12,7 @@ import com.example.dungeoncrawler.databinding.FragmentVictoryBinding
 class VictoryView: Fragment() {
 
     val gameViewModel: GameViewModel by activityViewModels()
-    private val statsViewModel: StatsViewModel by activityViewModels()
+    private val menuViewModel: MenuViewModel by activityViewModels()
 
     private var binding: FragmentVictoryBinding? = null
 
@@ -34,27 +34,27 @@ class VictoryView: Fragment() {
             victoryFragment = this@VictoryView
         }
 
-        statsViewModel.startMediaPlayer()
+        menuViewModel.startMediaPlayer()
     }
 
     override fun onPause() {
         super.onPause()
-        statsViewModel.pauseMediaPlayer()
+        menuViewModel.pauseMediaPlayer()
     }
 
     override fun onResume() {
         super.onResume()
-        statsViewModel.startMediaPlayer()
+        menuViewModel.startMediaPlayer()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        statsViewModel.releaseMediaPlayer()
+        menuViewModel.releaseMediaPlayer()
     }
 
     fun startGame() {
         this.findNavController().navigate(R.id.action_victoryView_to_gameView)
-        statsViewModel.pauseMediaPlayer()
+        menuViewModel.pauseMediaPlayer()
     }
 
     fun upgradeStats() {

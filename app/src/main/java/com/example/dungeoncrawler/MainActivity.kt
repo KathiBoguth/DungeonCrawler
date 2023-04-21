@@ -26,3 +26,17 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
+
+// TODO: use when done with Compose UI
+//class MainActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            val navController = rememberNavController()
+//            NavHost(navController = navController, startDestination = "mainMenu") {
+//                composable("mainMenu") { MainMenuScreen(navController) }
+//                composable("upgradeStats") { UpgradeStats(navController) }
+//            }
+//        }
+//    }
+//}
