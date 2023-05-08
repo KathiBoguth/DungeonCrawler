@@ -6,3 +6,10 @@ abstract class MovableEntity(
     var direction = Direction.DOWN
 
 }
+
+enum class Direction {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+}

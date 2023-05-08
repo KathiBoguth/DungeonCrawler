@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
@@ -33,6 +34,8 @@ import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import com.example.dungeoncrawler.viewmodel.GameViewModel
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,8 +84,7 @@ class GameView : Fragment() {
     ): View {
         val fragmentBinding = FragmentGameViewBinding.inflate(inflater, container, false)
         binding = fragmentBinding
-        val stats: SharedPreferences = requireContext().getSharedPreferences(MenuViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
-        gameViewModel.reset(stats = stats)
+        gameViewModel.reset()
 
         return fragmentBinding.root
     }
@@ -139,7 +141,7 @@ class GameView : Fragment() {
             onEnemyAttack(it, view)
         }
 
-        setupEnemyObservers()
+        setupEnemyObservers(view)
 
         charaWeaponObserver = Observer<Weapon> {
             showWeapon(it.id)
@@ -162,10 +164,10 @@ class GameView : Fragment() {
             attackedEntityAnimationObserver
         )
 
-        scope.launch {
+        lifecycleScope.launch {
             gameViewModel.endGame.collect{victory ->
                 if (victory == null) {
-                    setupEnemyObservers()
+                    setupEnemyObservers(view)
                     return@collect
                 }
                 hideAllEnemies()
@@ -196,7 +198,7 @@ class GameView : Fragment() {
 
             gameViewModel.level.initLevel()
 
-            setupEnemyObservers()
+            setupEnemyObservers(view)
             binding?.level?.text = String.format(
                 resources.getString(
                     (R.string.level),
@@ -224,17 +226,17 @@ class GameView : Fragment() {
         }
     }
 
-    private fun setupEnemyObservers() {
+    private fun setupEnemyObservers(view: View) {
 
         gameViewModel.level.enemies.forEach {
             scope.launch {
                 it.attackDamage.collect { dto ->
-                    onEnemyAttack(dto, requireView())
+                    onEnemyAttack(dto, view)
                 }
             }
             scope.launch {
                 it.positionChange.collect { dto ->
-                    onEnemyMove(requireView(), dto)
+                    onEnemyMove(view, dto)
                 }
             }
         }

@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentMainBinding
 import com.example.dungeoncrawler.mainMenu.MainMenuScreen
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 class MainFragment : Fragment() {
 
@@ -38,7 +39,7 @@ class MainFragment : Fragment() {
             lifecycleOwner = viewLifecycleOwner
             mainFragment = this@MainFragment
         }
-        menuViewModel.setupMediaPlayer(requireContext())
+        //menuViewModel.setupMediaPlayer(requireContext())
     }
 
     override fun onPause() {

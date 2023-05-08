@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentVictoryBinding
+import com.example.dungeoncrawler.viewmodel.GameViewModel
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 class VictoryView: Fragment() {
 

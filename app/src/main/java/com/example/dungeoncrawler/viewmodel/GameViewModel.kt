@@ -1,8 +1,12 @@
-package com.example.dungeoncrawler
+package com.example.dungeoncrawler.viewmodel
 
-import android.content.SharedPreferences
+import android.app.Application
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.entity.CharaStats
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
@@ -16,10 +20,11 @@ import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 
-class GameViewModel : ViewModel() {
+class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     var chara = MainChara()
     var killedBy = ""
@@ -267,13 +272,23 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun reset(newGame: Boolean = true, stats: SharedPreferences) {
-        if (newGame) {
-            chara = MainChara()
-            chara.setBaseValues(stats)
-            level = Level(chara)
+    fun reset(newGame: Boolean = true) {
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.data.collect { preferences ->
+                val health = preferences[intPreferencesKey(MenuViewModel.HEALTH_KEY)] ?: Settings.healthBaseValue
+                val attack = preferences[intPreferencesKey(MenuViewModel.ATTACK_KEY)] ?: Settings.attackBaseValue
+                val defense = preferences[intPreferencesKey(MenuViewModel.DEFENSE_KEY)] ?: Settings.defenseBaseValue
+                val charaStats = CharaStats(health, attack, defense)
+
+                if (newGame) {
+                    chara = MainChara()
+                    chara.setBaseValues(charaStats)
+                    level = Level(chara)
+                }
+                endGame.value = null
+            }
         }
-        endGame.value = null
+
     }
 
     private fun getRandomReward() {

@@ -1,9 +1,7 @@
 package com.example.dungeoncrawler.entity
 
-import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.MenuViewModel
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Weapon
 
@@ -31,17 +29,17 @@ class MainChara: MovableEntity(LevelObjectType.MAIN_CHARA, "character") {
         armorObservable.value = newArmor
     }
 
-    fun setBaseValues(stats: SharedPreferences) {
-        health = stats.getInt(MenuViewModel.HEALTH_KEY, Settings.healthBaseValue)
+    fun setBaseValues(charaStats: CharaStats) {
+        health = charaStats.health
         maxHealth = health
-        baseAttack = stats.getInt(MenuViewModel.ATTACK_KEY, Settings.attackBaseValue)
-        baseDefense = stats.getInt(MenuViewModel.DEFENSE_KEY, Settings.defenseBaseValue)
+        baseAttack = charaStats.attack
+        baseDefense = charaStats.defense
     }
 }
 
-enum class Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
-}
+data class CharaStats(
+    val health: Int,
+    val attack: Int,
+    val defense: Int
+)
+

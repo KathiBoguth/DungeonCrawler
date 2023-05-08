@@ -2,6 +2,7 @@ package com.example.dungeoncrawler.mainMenu
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,19 +19,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
-import com.example.dungeoncrawler.MenuViewModel
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 @Composable
 fun MainMenuScreen(onNavigate: (Int) -> Unit) {
     val menuViewModel: MenuViewModel = viewModel()
 
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = stringResource(R.string.main_menu), color = Color.White, modifier = Modifier.padding(80.dp), fontSize = 32.sp)
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+        MenuTitle(stringResource(R.string.main_menu))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             NavigationButton(stringResource(id = R.string.start_game),
                 onNavigate, R.id.action_mainFragment_to_gameView)
@@ -65,9 +68,14 @@ fun NavigationButton(text: String, onNavigate: (Int) -> Unit, destination: Int){
     MenuButton(text = text, onClick = ::navigate)
 }
 
+@Composable
+fun MenuTitle(text: String) {
+    Text(text = text, color = Color.White, modifier = Modifier.padding(PaddingValues(horizontal = 80.dp)), fontSize = 32.sp, fontFamily = FontFamily(Font(R.font.carrois_gothic_sc)))
+}
+
 
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
-fun MainMenu() {
+fun MainMenuPreview() {
     MainMenuScreen {}
 }

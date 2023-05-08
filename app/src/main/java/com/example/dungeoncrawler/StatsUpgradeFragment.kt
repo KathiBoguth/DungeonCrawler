@@ -5,15 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentStatsUpgradeBinding
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 class StatsUpgradeFragment: Fragment() {
 
     //TODO: negative money?
 
-    val menuViewModel: MenuViewModel by activityViewModels()
+    val menuViewModel: MenuViewModel by viewModels()
 
     private var binding: FragmentStatsUpgradeBinding? = null
 
@@ -38,7 +39,7 @@ class StatsUpgradeFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        menuViewModel.loadStats(requireContext())
+        menuViewModel.loadStats()
         updateInitialValues()
         updateButtonsEnabled()
         menuViewModel.startMediaPlayer()
@@ -124,7 +125,7 @@ class StatsUpgradeFragment: Fragment() {
     }
 
     fun returnToMain() {
-        menuViewModel.saveUpgrades(requireContext())
+        menuViewModel.saveUpgrades()
         this.findNavController().navigate(R.id.action_statsUpgradeFragment_to_mainFragment)
     }
 
