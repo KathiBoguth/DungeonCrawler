@@ -2,8 +2,6 @@ package com.example.dungeoncrawler
 
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.REVERSE
-import android.content.Context
-import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -15,6 +13,8 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.activityViewModels
@@ -36,6 +36,7 @@ import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.viewmodel.GameViewModel
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
+import com.example.dungeoncrawler.viewmodel.dataStore
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -255,12 +256,12 @@ class GameView : Fragment() {
     }
 
     private fun saveGold() {
-        val stats: SharedPreferences = requireContext().getSharedPreferences(MenuViewModel.SAVED_STATS_KEY, Context.MODE_PRIVATE)
-        val oldGold = stats.getInt(MenuViewModel.GOLD_KEY, 0)
-        val newGold = oldGold + gameViewModel.chara.gold
-        with(stats.edit()){
-            putInt(MenuViewModel.GOLD_KEY, newGold)
-            apply()
+        scope.launch {
+            requireContext().dataStore.edit { preferences ->
+                val oldGold = preferences[intPreferencesKey(MenuViewModel.GOLD_KEY)]
+                val newGold = oldGold?.plus(gameViewModel.chara.gold) ?: gameViewModel.chara.gold
+                preferences[intPreferencesKey(MenuViewModel.GOLD_KEY)] = newGold
+            }
         }
     }
 
@@ -514,7 +515,7 @@ class GameView : Fragment() {
 
         if (levelObject is BasicEnemy) {
             if (levelObject.health <= 0) {
-                gameViewModel.level.field[x][y].remove(levelObject)
+                gameViewModel.level.field[x][y].removeIf{it.id == levelObject.id}
                 gameObjectView.visibility = View.GONE
                 //levelObject.positionChange.removeObserver(enemyObserver)
                 if (levelObject.id == "ogre"){

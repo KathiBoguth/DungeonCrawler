@@ -23,26 +23,26 @@ class Arrow(id: String, val direction: Direction, private var coordinates: Coord
         }
         val currentPositionLevelObjectList = field[coordinates.x][coordinates.y]
         if (coordinates.x < 0 || coordinates.x >= field.size || coordinates.y < 0 || coordinates.y > field[coordinates.x].size){
-            currentPositionLevelObjectList.remove(this)
+            currentPositionLevelObjectList.removeIf { this.id == it.id }
             isActive = false
             return null
         }
         val enemy = currentPositionLevelObjectList.find { it.type == LevelObjectType.ENEMY}
         if (enemy != null) {
-            currentPositionLevelObjectList.remove(this)
+            currentPositionLevelObjectList.removeIf { this.id == it.id }
             isActive = false
             return (enemy as BasicEnemy)
 
         }
         val isNotSteppable = currentPositionLevelObjectList.find { !it.type.isSteppableObject()} != null
         if (isNotSteppable) {
-            currentPositionLevelObjectList.remove(this)
+            currentPositionLevelObjectList.removeIf { this.id == it.id }
             isActive = false
             return null
         }
 
         field[nextCoordinates.x][nextCoordinates.y].add(this)
-        field[coordinates.x][coordinates.y].remove(this)
+        field[coordinates.x][coordinates.y].removeIf { this.id == it.id }
         coordinates = nextCoordinates
         return null
     }

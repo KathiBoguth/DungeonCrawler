@@ -4,17 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentStatsUpgradeBinding
+import com.example.dungeoncrawler.mainMenu.UpgradeStatsScreen
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 class StatsUpgradeFragment: Fragment() {
 
     //TODO: negative money?
 
-    val menuViewModel: MenuViewModel by viewModels()
+    val menuViewModel: MenuViewModel by activityViewModels()
 
     private var binding: FragmentStatsUpgradeBinding? = null
 
@@ -23,10 +25,16 @@ class StatsUpgradeFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val fragmentBinding = FragmentStatsUpgradeBinding.inflate(inflater, container, false)
-        binding = fragmentBinding
+//        val fragmentBinding = FragmentStatsUpgradeBinding.inflate(inflater, container, false)
+//        binding = fragmentBinding
+//
+//        return fragmentBinding.root
 
-        return fragmentBinding.root
+        return ComposeView(requireContext()).apply {
+            setContent {
+                UpgradeStatsScreen(onNavigate = { dest -> findNavController().navigate(dest) }, menuViewModel = menuViewModel)
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -39,21 +47,21 @@ class StatsUpgradeFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        menuViewModel.loadStats()
+        menuViewModel.loadStats(requireContext())
         updateInitialValues()
         updateButtonsEnabled()
-        menuViewModel.startMediaPlayer()
+        //menuViewModel.startMediaPlayer()
     }
 
-    override fun onPause() {
-        super.onPause()
-        menuViewModel.pauseMediaPlayer()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        menuViewModel.releaseMediaPlayer()
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        menuViewModel.pauseMediaPlayer()
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        menuViewModel.releaseMediaPlayer()
+//    }
 
     fun onHealthPlusButtonClicked() {
         menuViewModel.onHealthPlusButtonClicked()
@@ -125,7 +133,7 @@ class StatsUpgradeFragment: Fragment() {
     }
 
     fun returnToMain() {
-        menuViewModel.saveUpgrades()
+        menuViewModel.saveUpgrades(requireContext())
         this.findNavController().navigate(R.id.action_statsUpgradeFragment_to_mainFragment)
     }
 

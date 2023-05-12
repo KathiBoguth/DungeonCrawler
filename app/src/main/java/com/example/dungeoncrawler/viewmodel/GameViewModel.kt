@@ -29,6 +29,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     var chara = MainChara()
     var killedBy = ""
 
+    // TODO: UninitializedPropertyAccessException
     lateinit var level: Level
 
     val attackedEntityAnimation: MutableLiveData<String> by lazy { MutableLiveData() }
@@ -41,10 +42,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         val oldCoordinates = findCoordinate(levelObjectPositionChangeDTO.id)
-        if(oldCoordinates.x == -1 && oldCoordinates.y == -1) {
+        if(oldCoordinates.x == -1 || oldCoordinates.y == -1 || level.field.isEmpty()) {
             return
         }
-        level.field[oldCoordinates.x][oldCoordinates.y].removeAll { it.id == levelObjectPositionChangeDTO.id }
+        // TODO: ConcurrentModificationException: maybe do something completely different (not a list on field?)
+        level.field[oldCoordinates.x][oldCoordinates.y].removeIf { it.id == levelObjectPositionChangeDTO.id }
         val enemy = level.enemies.find { it.id == levelObjectPositionChangeDTO.id }
         if (enemy != null) {
             level.field[levelObjectPositionChangeDTO.newPosition.x][levelObjectPositionChangeDTO.newPosition.y].add(enemy)
@@ -89,7 +91,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val levelObject = levelObjectList.first()
         when (levelObject.type) {
             LevelObjectType.TREASURE -> {
-                levelObjectList.remove(levelObject)
+                levelObjectList.removeIf{it.id == levelObject.id}
                 when (level.drop()) {
                     LevelObjectType.COIN -> placeCoin(coordinates)
                     LevelObjectType.POTION -> placePotion(coordinates)
@@ -103,11 +105,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
             LevelObjectType.COIN -> {
                 getRandomReward()
-                levelObjectList.remove(levelObject)
+                levelObjectList.removeIf{it.id == levelObject.id}
             }
             LevelObjectType.POTION -> {
                 heal((levelObject as Potion).hpCure)
-                levelObjectList.remove(levelObject)
+                levelObjectList.removeIf{it.id == levelObject.id}
             }
             LevelObjectType.WEAPON -> {
                 takeWeapon(coordinates)
@@ -150,7 +152,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (oldWeapon != null) {
             level.field[coordinates.x][coordinates.y].add(0, oldWeapon)
         } else {
-            level.field[coordinates.x][coordinates.y].remove(weapon)
+            level.field[coordinates.x][coordinates.y].removeIf { it.id == weapon.id }
         }
     }
 
@@ -164,7 +166,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (oldArmor != null) {
             level.field[coordinates.x][coordinates.y].add(0, oldArmor)
         } else {
-            level.field[coordinates.x][coordinates.y].remove(armor)
+            level.field[coordinates.x][coordinates.y].removeIf { armor.id == it.id }
         }
     }
 
@@ -214,7 +216,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        level.field[coordinates.x][coordinates.y].remove(chara)
+        level.field[coordinates.x][coordinates.y].removeIf { it.id == chara.id }
         val levelObjectList = level.field[newCoordinates.x][newCoordinates.y]
         //TODO: ConcurrentModificationException
         levelObjectList.forEach {
@@ -239,8 +241,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun findCoordinate(id: String): Coordinates {
-        for (row in 0 until level.field.size) {
-            val index = level.field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == id  } != -1}
+        // TODO: ConcurrentModificationException
+        val field = level.field.toList()
+        for (row in field.indices) {
+            val index = field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == id  } != -1}
             if ( index != -1) {
                 return Coordinates(row, index)
             }
@@ -273,19 +277,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun reset(newGame: Boolean = true) {
+        endGame.value = null
+        if (newGame) {
+            chara = MainChara()
+            level = Level(chara)
+        }
+
         viewModelScope.launch {
             getApplication<Application>().dataStore.data.collect { preferences ->
                 val health = preferences[intPreferencesKey(MenuViewModel.HEALTH_KEY)] ?: Settings.healthBaseValue
                 val attack = preferences[intPreferencesKey(MenuViewModel.ATTACK_KEY)] ?: Settings.attackBaseValue
                 val defense = preferences[intPreferencesKey(MenuViewModel.DEFENSE_KEY)] ?: Settings.defenseBaseValue
                 val charaStats = CharaStats(health, attack, defense)
-
-                if (newGame) {
-                    chara = MainChara()
-                    chara.setBaseValues(charaStats)
-                    level = Level(chara)
-                }
-                endGame.value = null
+                chara.setBaseValues(charaStats)
             }
         }
 

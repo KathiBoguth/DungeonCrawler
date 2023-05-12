@@ -1,12 +1,11 @@
 package com.example.dungeoncrawler.viewmodel
 
-import android.app.Application
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dungeoncrawler.CharaStats
 import com.example.dungeoncrawler.R
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.time.Duration.Companion.seconds
@@ -26,8 +24,7 @@ import kotlinx.coroutines.launch
 val Context.dataStore by preferencesDataStore(
     name = MenuViewModel.SAVED_STATS_KEY
 )
-class MenuViewModel @Inject constructor( app: Application
-): AndroidViewModel(app) {
+class MenuViewModel : ViewModel() {
 
     companion object {
         const val HEALTH_UPGRADE_MULTIPLIER = 5
@@ -69,11 +66,6 @@ class MenuViewModel @Inject constructor( app: Application
         )
 
     private lateinit var mediaPlayer: MediaPlayer
-
-    init {
-        // TODO: music starts wrongly/multiple times etc
-        setupMediaPlayer(getApplication<Application>().applicationContext)
-    }
 
     fun onHealthPlusButtonClicked() {
         val cost = calcCost(statsUpgradeUiState.healthUpgrade)
@@ -156,10 +148,10 @@ class MenuViewModel @Inject constructor( app: Application
 
     }
 
-    fun loadStats() {
+    fun loadStats(context: Context) {
 
         viewModelScope.launch {
-            getApplication<Application>().dataStore.data.collect{preferences ->
+            context.dataStore.data.collect{preferences ->
                 val health = preferences[intPreferencesKey(HEALTH_KEY)] ?: Settings.healthBaseValue
                 val healthUpgradeCount = preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] ?: 0
                 val attack = preferences[intPreferencesKey(ATTACK_KEY)] ?: Settings.attackBaseValue
@@ -184,9 +176,9 @@ class MenuViewModel @Inject constructor( app: Application
         }
 
     }
-    fun saveUpgrades() {
+    fun saveUpgrades(context: Context) {
         viewModelScope.launch {
-            getApplication<Application>().dataStore.edit { preferences ->
+            context.dataStore.edit { preferences ->
                 preferences[intPreferencesKey(HEALTH_KEY)] = Settings.healthBaseValue + (statsUpgradeUiState.healthUpgrade * HEALTH_UPGRADE_MULTIPLIER)
                 preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] = statsUpgradeUiState.healthUpgrade
                 preferences[intPreferencesKey(ATTACK_KEY)] = Settings.attackBaseValue + statsUpgradeUiState.attackUpgrade
@@ -232,8 +224,8 @@ class MenuViewModel @Inject constructor( app: Application
         mediaPlayer.release()
     }
 
-    fun returnToMain(onNavigate: (Int) -> Unit, destination: Int) {
-        saveUpgrades()
+    fun returnToMain(onNavigate: (Int) -> Unit, destination: Int, context: Context) {
+        saveUpgrades(context)
         onNavigate(destination)
     }
 

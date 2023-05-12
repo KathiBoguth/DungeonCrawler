@@ -28,7 +28,7 @@ class MainFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
-                MainMenuScreen(onNavigate = { dest -> findNavController().navigate(dest) })
+                MainMenuScreen(onNavigate = { dest -> findNavController().navigate(dest) }, menuViewModel = menuViewModel )
             }
         }
     }
@@ -42,20 +42,20 @@ class MainFragment : Fragment() {
         //menuViewModel.setupMediaPlayer(requireContext())
     }
 
-    override fun onPause() {
-        super.onPause()
-        menuViewModel.pauseMediaPlayer()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        menuViewModel.startMediaPlayer()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        menuViewModel.releaseMediaPlayer()
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        menuViewModel.pauseMediaPlayer()
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        menuViewModel.startMediaPlayer()
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        menuViewModel.releaseMediaPlayer()
+//    }
 
     fun startGame() {
         menuViewModel.pauseMediaPlayer()

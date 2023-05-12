@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.mainMenu
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,12 +42,13 @@ fun UpgradeStatsScreen(
     menuViewModel: MenuViewModel = viewModel()
 ) {
     val state by menuViewModel.uiState.collectAsState()
-    fun saveAndReturnToMain() {
-        menuViewModel.returnToMain(onNavigate, R.id.action_statsUpgradeFragment_to_mainFragment)
+
+    fun saveAndReturnToMain(context: Context) {
+        menuViewModel.returnToMain(onNavigate, R.id.action_statsUpgradeFragment_to_mainFragment, context)
     }
     UpgradeStatsScreen(
         statsUpgradeUiState = state,
-        saveAndReturnToMain =  ::saveAndReturnToMain,
+        saveAndReturnToMain = ::saveAndReturnToMain,
         onHealthPlusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
         onHealthMinusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
         onAttackPlusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
@@ -60,7 +63,7 @@ fun UpgradeStatsScreen(
 @Composable
 fun  UpgradeStatsScreen(
     statsUpgradeUiState: StatsUpgradeUiState,
-    saveAndReturnToMain: () -> Unit,
+    saveAndReturnToMain: (Context) -> Unit,
     onHealthPlusButtonClicked: () -> Unit,
     onHealthMinusButtonClicked: () -> Unit,
     onAttackPlusButtonClicked: () -> Unit,
@@ -112,14 +115,11 @@ fun  UpgradeStatsScreen(
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            val context = LocalContext.current
             MenuButton(stringResource(id = R.string.reset)) {reset()}
-            MenuButton(text = stringResource(id = R.string.returnToMain), saveAndReturnToMain)
+            MenuButton(text = stringResource(id = R.string.returnToMain)) { saveAndReturnToMain(context) }
         }
-
-        
     }
-
-
 }
 
 @Composable
@@ -136,7 +136,7 @@ fun UpgradeStatRow(
         Text(text = upgradeValueText, color = colorResource(id = R.color.secondary), fontSize = 20.sp, modifier = Modifier.padding(
             PaddingValues(horizontal = 30.dp)
         ))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        Row(Modifier.width(120.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             RoundButton(content = { Icon(Icons.Default.Add, contentDescription = "plus") }, plusButtonEnabled) {
                 onClickPlus()
             }
@@ -151,7 +151,9 @@ fun UpgradeStatRow(
 fun RoundButton(content: @Composable () -> Unit, enabled: Boolean = true, onClick: () -> Unit) {
     Button(onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.primary)
+            containerColor = colorResource(id = R.color.primary),
+            disabledContainerColor = colorResource(id = R.color.disabled_button),
+            disabledContentColor = colorResource(id = R.color.white_semitransparant)
         ),
         shape = CircleShape,
         modifier = Modifier

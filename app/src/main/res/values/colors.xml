@@ -15,5 +15,7 @@
     <color name="secondary">#DA8BC34A</color>
     <color name="secondary_variant">#DA618833</color>
     <color name="transparent">#00FFFFFF</color>
+    <color name="disabled_button">#AB777777</color>
+    <color name="white_semitransparant">#ABFFFFFF</color>
 
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -28,19 +29,28 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
-@Composable
-fun MainMenuScreen(onNavigate: (Int) -> Unit) {
-    val menuViewModel: MenuViewModel = viewModel()
 
+@Composable
+fun MainMenuScreen(onNavigate: (Int) -> Unit, pauseMusicPlayer: () -> Unit) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
         MenuTitle(stringResource(R.string.main_menu))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             NavigationButton(stringResource(id = R.string.start_game),
-                onNavigate, R.id.action_mainFragment_to_gameView)
+                onNavigate, R.id.action_mainFragment_to_gameView, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer)
             NavigationButton(text = stringResource(id = R.string.upgrade_stats), onNavigate, R.id.action_mainFragment_to_statsUpgradeFragment)
         }
 
     }
+}
+@Composable
+fun MainMenuScreen(
+    onNavigate: (Int) -> Unit,
+    menuViewModel: MenuViewModel = viewModel()) {
+
+    menuViewModel.setupMediaPlayer(LocalContext.current)
+    menuViewModel.startMediaPlayer()
+
+    MainMenuScreen(onNavigate = onNavigate, pauseMusicPlayer = menuViewModel::pauseMediaPlayer)
 }
 
 @Composable
@@ -59,9 +69,11 @@ fun MenuButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun NavigationButton(text: String, onNavigate: (Int) -> Unit, destination: Int){
+fun NavigationButton(text: String, onNavigate: (Int) -> Unit, destination: Int, pauseMusic: Boolean = false, pauseMusicPlayer: () -> Unit = {}){
     fun navigate() {
-        //navController.navigate(destination)
+        if(pauseMusic){
+            pauseMusicPlayer()
+        }
         onNavigate(destination)
     }
 
@@ -77,5 +89,5 @@ fun MenuTitle(text: String) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun MainMenuPreview() {
-    MainMenuScreen {}
+    MainMenuScreen(onNavigate = {}, pauseMusicPlayer = {})
 }
