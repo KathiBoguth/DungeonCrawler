@@ -14,7 +14,7 @@ import kotlin.random.Random
 abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
     LevelObjectType.ENEMY, idEnemy) {
 
-    var position = Coordinates(0,0)
+
 
     var health = 100
 
@@ -85,6 +85,7 @@ abstract class BasicEnemy(idEnemy: String, val skin: String): MovableEntity(
     }
 
     fun canWalk(field: Array<Array<MutableList<LevelObject>>>): Boolean {
+        // TODO: needs movableEntities list for correct calculation
         val objectInFront = getObjectInFrontOfMe(field)
         return !objectInFront.any { !it.type.isSteppableObject() }
     }

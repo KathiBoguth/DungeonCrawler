@@ -46,10 +46,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         // TODO: ConcurrentModificationException: maybe do something completely different (not a list on field?)
-        level.field[oldCoordinates.x][oldCoordinates.y].removeIf { it.id == levelObjectPositionChangeDTO.id }
-        val enemy = level.enemies.find { it.id == levelObjectPositionChangeDTO.id }
+        val enemy = level.movableEntitiesList.find { it.id == levelObjectPositionChangeDTO.id }
         if (enemy != null) {
-            level.field[levelObjectPositionChangeDTO.newPosition.x][levelObjectPositionChangeDTO.newPosition.y].add(enemy)
             enemy.position = levelObjectPositionChangeDTO.newPosition
         }
 
@@ -75,7 +73,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         val levelObjectList = level.field[coordinates.x][coordinates.y]
-        if(levelObjectList.isEmpty()) {
+        if(levelObjectList.isEmpty() && level.movableEntitiesList.none{ it.position == coordinates }) {
             if (chara.weapon is Bow){
                 if (!isArrowOnField()) {
                     throwArrow(coordinates, chara.direction)
@@ -83,13 +81,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
-        val enemy = levelObjectList.find { it.type == LevelObjectType.ENEMY }
+        val enemy = level.movableEntitiesList.find { it.type == LevelObjectType.ENEMY && it.position == coordinates}
         if (enemy != null) {
             attack(enemy as BasicEnemy)
             return
         }
-        val levelObject = levelObjectList.first()
-        when (levelObject.type) {
+        val levelObject = levelObjectList.firstOrNull()
+        when (levelObject?.type) {
             LevelObjectType.TREASURE -> {
                 levelObjectList.removeIf{it.id == levelObject.id}
                 when (level.drop()) {
@@ -241,6 +239,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun findCoordinate(id: String): Coordinates {
+        val movableEntity = level.movableEntitiesList.firstOrNull { it.id == id }
+        if (movableEntity != null) {
+            return movableEntity.position
+        }
+
+        // TODO: check if part below is still needed
         // TODO: ConcurrentModificationException
         val field = level.field.toList()
         for (row in field.indices) {
@@ -326,6 +330,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun movePossible(coordinates: Coordinates) : Boolean {
+        if (level.movableEntitiesList.any { it.position == coordinates }) {
+            return false
+        }
         if (coordinates.x >= level.field.size || coordinates.x < 0) {
             return false
         }
@@ -334,6 +341,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
         val levelObjectList = level.field[coordinates.x][coordinates.y]
         if ( levelObjectList.isNotEmpty() && levelObjectList.any { !it.type.isSteppableObject()} ) {
+            return false
+        }
+        if (level.movableEntitiesList.any { it.position == coordinates }) {
             return false
         }
         return true

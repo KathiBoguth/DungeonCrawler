@@ -6,44 +6,51 @@ import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
+import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 
-class Arrow(id: String, val direction: Direction, private var coordinates: Coordinates): LevelObject(LevelObjectType.ARROW, id) {
+class Arrow(id: String, arrowDirection: Direction, coordinates: Coordinates): MovableEntity(LevelObjectType.ARROW, id) {
 
     var handler = Handler(Looper.getMainLooper())
     var speed = 200
     var isActive = true
 
-    fun move(field: Array<Array<MutableList<LevelObject>>>) : BasicEnemy? {
-        val nextCoordinates = when(direction) {
-            Direction.UP -> Coordinates(coordinates.x, coordinates.y-1)
-            Direction.LEFT -> Coordinates(coordinates.x-1, coordinates.y)
-            Direction.DOWN -> Coordinates(coordinates.x, coordinates.y+1)
-            Direction.RIGHT -> Coordinates(coordinates.x+1, coordinates.y)
-        }
-        val currentPositionLevelObjectList = field[coordinates.x][coordinates.y]
-        if (coordinates.x < 0 || coordinates.x >= field.size || coordinates.y < 0 || coordinates.y > field[coordinates.x].size){
-            currentPositionLevelObjectList.removeIf { this.id == it.id }
-            isActive = false
+    init {
+        direction = arrowDirection
+        position = coordinates
+    }
+
+    fun move(field: Array<Array<MutableList<LevelObject>>>, movableEntitiesList: List<MovableEntity>) : BasicEnemy? {
+
+        val currentPositionLevelObjectList = field[position.x][position.y]
+        if (position.x < 0 || position.x >= field.size || position.y < 0 || position.y > field[position.x].size){
+            deactivateArrow()
             return null
         }
-        val enemy = currentPositionLevelObjectList.find { it.type == LevelObjectType.ENEMY}
+        val enemy = movableEntitiesList.firstOrNull { it.position.x == position.x && it.position.y == position.y }
         if (enemy != null) {
-            currentPositionLevelObjectList.removeIf { this.id == it.id }
-            isActive = false
+            deactivateArrow()
             return (enemy as BasicEnemy)
 
         }
         val isNotSteppable = currentPositionLevelObjectList.find { !it.type.isSteppableObject()} != null
         if (isNotSteppable) {
-            currentPositionLevelObjectList.removeIf { this.id == it.id }
-            isActive = false
+            deactivateArrow()
             return null
         }
 
-        field[nextCoordinates.x][nextCoordinates.y].add(this)
-        field[coordinates.x][coordinates.y].removeIf { this.id == it.id }
-        coordinates = nextCoordinates
+        val nextCoordinates = when(direction) {
+            Direction.UP -> Coordinates(position.x, position.y-1)
+            Direction.LEFT -> Coordinates(position.x-1, position.y)
+            Direction.DOWN -> Coordinates(position.x, position.y+1)
+            Direction.RIGHT -> Coordinates(position.x+1, position.y)
+        }
+        position = nextCoordinates
         return null
+    }
+
+    private fun deactivateArrow() {
+        position = Coordinates(-1, -1)
+        isActive = false
     }
 }

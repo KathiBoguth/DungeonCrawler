@@ -221,7 +221,7 @@ class GameView : Fragment() {
     }
 
     private fun removeEnemyObservers() {
-        gameViewModel.level.enemies.forEach {
+        gameViewModel.level.movableEntitiesList.forEach {
             //it.positionChange.removeObservers(viewLifecycleOwner)
             //it.attackDamage.removeObservers(viewLifecycleOwner)
         }
@@ -229,7 +229,7 @@ class GameView : Fragment() {
 
     private fun setupEnemyObservers(view: View) {
 
-        gameViewModel.level.enemies.forEach {
+        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
             scope.launch {
                 it.attackDamage.collect { dto ->
                     onEnemyAttack(dto, view)
@@ -245,7 +245,7 @@ class GameView : Fragment() {
     }
 
     private fun hideAllEnemies() {
-        gameViewModel.level.enemies.forEach{
+        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach{
             if (view != null) {
                 val enemyView = getGameObjectView(view, it.id)
                 requireActivity().runOnUiThread {
@@ -474,6 +474,11 @@ class GameView : Fragment() {
                 }
             }
         }
+        gameViewModel.level.movableEntitiesList.filter { it.position != Coordinates(-1, -1) }.forEach {
+            if ( it.id != gameViewModel.chara.id){
+                moveObject(it, it.position.x, it.position.y, duration)
+            }
+        }
     }
 
     private fun moveObject(levelObject: LevelObject, x: Int, y: Int, duration: Long) {
@@ -515,7 +520,7 @@ class GameView : Fragment() {
 
         if (levelObject is BasicEnemy) {
             if (levelObject.health <= 0) {
-                gameViewModel.level.field[x][y].removeIf{it.id == levelObject.id}
+                gameViewModel.level.movableEntitiesList.firstOrNull{ levelObject.id == it.id}?.position = Coordinates(-1, -1)
                 gameObjectView.visibility = View.GONE
                 //levelObject.positionChange.removeObserver(enemyObserver)
                 if (levelObject.id == "ogre"){
@@ -555,13 +560,22 @@ class GameView : Fragment() {
     }
 
     private fun hideGameObjectIfRemoved(id: String) {
-        if (!gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}) {
+        val notOnField = !gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}
+        val noPosition = gameViewModel.level.movableEntitiesList.firstOrNull{it.id == id}?.position == Coordinates(-1, -1)
+        if (notOnField && noPosition) {
             val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
             gameObjectView?.visibility = View.GONE
-            if (id.contains(Level.ARROW)) {
-                val charaView = getGameObjectView(view, gameViewModel.chara.id)
-                gameObjectView?.x = charaView?.x ?: 0F
-                gameObjectView?.y = charaView?.y ?: 0F
+
+        }
+        gameViewModel.level.movableEntitiesList.forEach{
+            if(it.position.x == -1 || it.position.y == -1) {
+                val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
+                gameObjectView?.visibility = View.GONE
+                if (id.contains(Level.ARROW)) {
+                    val charaView = getGameObjectView(view, gameViewModel.chara.id)
+                    gameObjectView?.x = charaView?.x ?: 0F
+                    gameObjectView?.y = charaView?.y ?: 0F
+                }
             }
         }
     }

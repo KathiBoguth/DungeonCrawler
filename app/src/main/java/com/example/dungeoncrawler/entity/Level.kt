@@ -35,12 +35,12 @@ class Level(
         (Array(Settings.fieldSize) { mutableListOf() })
     }
 
-    lateinit var enemies: MutableList<BasicEnemy>
     val coinStack = ArrayDeque<String>()
     val potionStack = ArrayDeque<String>()
     lateinit var weapons: List<Weapon>
     lateinit var armors: List<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
+    val movableEntitiesList: MutableList<MovableEntity> = mutableListOf()
 
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 
@@ -84,11 +84,8 @@ class Level(
         placeEnemies()
         fillCoinStack()
         fillPotionStack()
-        var randomStartCoordinates = getRandomCoordinates()
-        while (field[randomStartCoordinates.x][randomStartCoordinates.y].isNotEmpty()) {
-            randomStartCoordinates = getRandomCoordinates()
-        }
-        field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara)
+        val randomStartCoordinates = randomFreeCoordinates()
+        field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara) // TODO: should chara be on field or in movableEntities list?
     }
 
     private fun placeWalls() {
@@ -106,13 +103,8 @@ class Level(
 
         for (i in 0..treasureCount) {
 
-            var coordinates = getRandomCoordinates()
-            while (field[coordinates.x][coordinates.y].isNotEmpty()) {
-                coordinates = getRandomCoordinates()
-            }
-
+            val coordinates = randomFreeCoordinates()
             val treasureId = "treasure$i"
-
             placeTreasure(coordinates, treasureId)
 
         }
@@ -128,10 +120,7 @@ class Level(
             field[coordinates.x][coordinates.y].add(Ladder())
             return
         }
-        var randomCoordinates = getRandomCoordinates()
-        while (field[randomCoordinates.x][randomCoordinates.y].isNotEmpty()) {
-            randomCoordinates = getRandomCoordinates()
-        }
+        val randomCoordinates = randomFreeCoordinates()
         field[randomCoordinates.x][randomCoordinates.y].add(Ladder())
 
     }
@@ -139,12 +128,7 @@ class Level(
     private fun placeEnemies() {
         val enemyList = ArrayList<BasicEnemy>()
         Settings.enemiesPerLevel[levelCount]?.forEach { enemyType ->
-            var coordinates = getRandomCoordinates()
-            var levelObjectsList = field[coordinates.x][coordinates.y]
-            while (levelObjectsList.isNotEmpty() || levelObjectsList.any { !it.type.isSteppableObject() }) {
-                coordinates = getRandomCoordinates()
-                levelObjectsList = field[coordinates.x][coordinates.y]
-            }
+            val coordinates = randomFreeCoordinates() // TODO: should enemies be placed on non-steppable stuff as well?
             val enemy = when (enemyType) {
                 EnemyEnum.SLIME -> {
                     val count =
@@ -164,13 +148,13 @@ class Level(
             }
             setMoveRunnable(enemy)
 
-            field[coordinates.x][coordinates.y].add(enemy)
+            // field[coordinates.x][coordinates.y].add(enemy)
             enemy.position = coordinates
             enemy.direction = randomDirection()
             enemyList.add(enemy)
             gameObjectIds.add(enemy.id)
+            movableEntitiesList.add(enemy)
         }
-        enemies = enemyList.toMutableList()
 
     }
 
@@ -260,6 +244,16 @@ class Level(
         return armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
     }
 
+    private fun randomFreeCoordinates(): Coordinates {
+        var randomCoordinates = getRandomCoordinates()
+        while (field[randomCoordinates.x][randomCoordinates.y].isNotEmpty()
+            || movableEntitiesList.any { it.position == randomCoordinates }
+        ) {
+            randomCoordinates = getRandomCoordinates()
+        }
+        return randomCoordinates
+    }
+
     fun throwArrow(
         coordinates: Coordinates,
         direction: Direction,
@@ -273,11 +267,10 @@ class Level(
             Direction.RIGHT -> "${ARROW}_right"
         }
         val arrow = Arrow(id, direction, coordinates)
-        field[coordinates.x][coordinates.y].add(arrow)
 
         val runnableCode: Runnable = object : Runnable {
             override fun run() {
-                val enemy = arrow.move(field)
+                val enemy = arrow.move(field, movableEntitiesList)
                 if (enemy != null) {
                     attack(enemy)
                 }
