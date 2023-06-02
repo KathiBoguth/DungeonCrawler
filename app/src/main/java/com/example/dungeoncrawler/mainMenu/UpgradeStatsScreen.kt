@@ -50,11 +50,11 @@ fun UpgradeStatsScreen(
         statsUpgradeUiState = state,
         saveAndReturnToMain = ::saveAndReturnToMain,
         onHealthPlusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
-        onHealthMinusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
-        onAttackPlusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
-        onAttackMinusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
-        onDefensePlusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
-        onDefenseMinusButtonClicked = menuViewModel::onHealthPlusButtonClicked,
+        onHealthMinusButtonClicked = menuViewModel::onHealthMinusButtonClicked,
+        onAttackPlusButtonClicked = menuViewModel::onAttackPlusButtonClicked,
+        onAttackMinusButtonClicked = menuViewModel::onAttackMinusButtonClicked,
+        onDefensePlusButtonClicked = menuViewModel::onDefensePlusButtonClicked,
+        onDefenseMinusButtonClicked = menuViewModel::onDefenseMinusButtonClicked,
         reset = menuViewModel::reset
     )
 
@@ -86,27 +86,27 @@ fun  UpgradeStatsScreen(
             {
                 UpgradeStatRow(
                     statText = stringResource(R.string.health, statsUpgradeUiState.initialData.health),
-                    upgradeValueText = stringResource(R.string.upgrade, statsUpgradeUiState.healthUpgrade),
+                    upgradeValueText = stringResource(R.string.upgrade, statsUpgradeUiState.healthUpgrade* MenuViewModel.HEALTH_UPGRADE_MULTIPLIER),
                     onClickPlus = onHealthPlusButtonClicked,
                     onClickMinus = onHealthMinusButtonClicked,
-                    plusButtonEnabled = statsUpgradeUiState.healthUpgradeAffordable,
-                    minusButtonEnabled = statsUpgradeUiState.healthUpgradeButtonEnabled
+                    plusButtonEnabled = statsUpgradeUiState.healthUpgradePlusButtonEnabled,
+                    minusButtonEnabled = statsUpgradeUiState.healthUpgradeMinusButtonEnabled
                 )
                 UpgradeStatRow(
                     statText = stringResource(R.string.attack, statsUpgradeUiState.initialData.attack),
                     upgradeValueText = stringResource(R.string.upgrade, statsUpgradeUiState.attackUpgrade),
                     onClickPlus = onAttackPlusButtonClicked,
                     onClickMinus = onAttackMinusButtonClicked,
-                    plusButtonEnabled = statsUpgradeUiState.attackUpgradeAffordable,
-                    minusButtonEnabled = statsUpgradeUiState.attackUpgradeButtonEnabled
+                    plusButtonEnabled = statsUpgradeUiState.attackUpgradePlusButtonEnabled,
+                    minusButtonEnabled = statsUpgradeUiState.attackUpgradeMinusButtonEnabled
                 )
                 UpgradeStatRow(
                     statText = stringResource(R.string.defense, statsUpgradeUiState.initialData.defense),
                     upgradeValueText = stringResource(R.string.upgrade, statsUpgradeUiState.defenseUpgrade),
                     onClickPlus = onDefensePlusButtonClicked,
                     onClickMinus = onDefenseMinusButtonClicked,
-                    plusButtonEnabled = statsUpgradeUiState.defenseUpgradeAffordable,
-                    minusButtonEnabled = statsUpgradeUiState.defenseUpgradeButtonEnabled
+                    plusButtonEnabled = statsUpgradeUiState.defenseUpgradePlusButtonEnabled,
+                    minusButtonEnabled = statsUpgradeUiState.defenseUpgradeMinusButtonEnabled
                 )
             }
             Row(Modifier.width(140.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -116,8 +116,13 @@ fun  UpgradeStatsScreen(
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             val context = LocalContext.current
-            MenuButton(stringResource(id = R.string.reset)) {reset()}
-            MenuButton(text = stringResource(id = R.string.returnToMain)) { saveAndReturnToMain(context) }
+            val returnButtonText = if (statsUpgradeUiState.isAnyUpgradeSelected){
+                stringResource(id = R.string.applyAndReturn)
+            } else {
+                stringResource(id = R.string.returnToMain)
+            }
+            MenuButton(stringResource(id = R.string.reset), enabled = statsUpgradeUiState.isAnyUpgradeSelected) {reset()}
+            MenuButton(text = returnButtonText) { saveAndReturnToMain(context) }
         }
     }
 }

@@ -1,19 +1,21 @@
 package com.example.dungeoncrawler
 
 data class StatsUpgradeUiState (
-    var initialData: CharaStats = CharaStats(0, 0, 0, 0),
+    val initialData: CharaStats = CharaStats(0, 0, 0, 0),
 
-    var healthUpgrade: Int = initialData.health,
-    var attackUpgrade: Int = initialData.attack,
-    var defenseUpgrade: Int = initialData.defense,
-    var gold: Int = initialData.gold,
-    var goldCost: Int = 0,
+    val healthUpgrade: Int = initialData.health,
+    val attackUpgrade: Int = initialData.attack,
+    val defenseUpgrade: Int = initialData.defense,
+    val gold: Int = initialData.gold,
+    val goldCost: Int = 0,
 
-    var healthUpgradeButtonEnabled:Boolean = false,
-    var attackUpgradeButtonEnabled:Boolean = false,
-    var defenseUpgradeButtonEnabled:Boolean = false,
+    val healthUpgradePlusButtonEnabled:Boolean = false,
+    val attackUpgradePlusButtonEnabled:Boolean = false,
+    val defenseUpgradePlusButtonEnabled:Boolean = false,
 
-    var healthUpgradeAffordable:Boolean = false,
-    var attackUpgradeAffordable:Boolean = false,
-    var defenseUpgradeAffordable:Boolean = false
+    val healthUpgradeMinusButtonEnabled:Boolean = false,
+    val attackUpgradeMinusButtonEnabled:Boolean = false,
+    val defenseUpgradeMinusButtonEnabled:Boolean = false,
+
+    val isAnyUpgradeSelected:Boolean = false
 )

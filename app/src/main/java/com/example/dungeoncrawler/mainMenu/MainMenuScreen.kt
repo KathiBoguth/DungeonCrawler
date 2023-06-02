@@ -54,14 +54,17 @@ fun MainMenuScreen(
 }
 
 @Composable
-fun MenuButton(text: String, onClick: () -> Unit) {
+fun MenuButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
     Button(onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.primary)
+            containerColor = colorResource(id = R.color.primary),
+            disabledContainerColor = colorResource(id = R.color.disabled_button),
+            disabledContentColor = colorResource(id = R.color.white_semitransparant)
         ),
         shape = RoundedCornerShape(5.dp),
+        enabled = enabled,
         modifier = Modifier
-            .width(160.dp)
+            .width(240.dp)
             .wrapContentHeight()
         ) {
         Text(text = text)

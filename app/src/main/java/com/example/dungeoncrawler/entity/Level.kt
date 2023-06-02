@@ -127,6 +127,7 @@ class Level(
 
     private fun placeEnemies() {
         val enemyList = ArrayList<BasicEnemy>()
+        movableEntitiesList.clear()
         Settings.enemiesPerLevel[levelCount]?.forEach { enemyType ->
             val coordinates = randomFreeCoordinates() // TODO: should enemies be placed on non-steppable stuff as well?
             val enemy = when (enemyType) {

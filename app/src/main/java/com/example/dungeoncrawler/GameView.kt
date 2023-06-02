@@ -40,7 +40,9 @@ import com.example.dungeoncrawler.viewmodel.dataStore
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 
@@ -54,8 +56,8 @@ class GameView : Fragment() {
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private var handler = Handler(Looper.getMainLooper())
-    private lateinit var enemyObserver: Observer<LevelObjectPositionChangeDTO>
-    private lateinit var enemyDamageObserver: Observer<EnemyDamageDTO>
+    private val enemyAttackFlowCollectionJobList = mutableListOf<Job>()
+    private val enemyPositionChangeFlowCollectionJobList = mutableListOf<Job>()
     private lateinit var charaWeaponObserver: Observer<Weapon>
     private lateinit var charaArmorObserver: Observer<Armor>
     private lateinit var attackedEntityAnimationObserver: Observer<String>
@@ -134,14 +136,6 @@ class GameView : Fragment() {
     }
 
     private fun setupObserver(view: View) {
-        enemyObserver = Observer<LevelObjectPositionChangeDTO> {
-            onEnemyMove(view, it)
-        }
-
-        enemyDamageObserver = Observer<EnemyDamageDTO> {
-            onEnemyAttack(it, view)
-        }
-
         setupEnemyObservers(view)
 
         charaWeaponObserver = Observer<Weapon> {
@@ -168,19 +162,22 @@ class GameView : Fragment() {
         lifecycleScope.launch {
             gameViewModel.endGame.collect{victory ->
                 if (victory == null) {
-                    setupEnemyObservers(view)
                     return@collect
                 }
+                removeEnemyObservers()
                 hideAllEnemies()
                 saveGold()
-                if (victory) {
-                    findNavController().navigate(R.id.action_gameView_to_victoryView)
-                } else {
-                    findNavController().navigate(R.id.action_gameView_to_gameOverView)
+                if(findNavController().currentDestination?.id == R.id.gameView){
+                    if (victory) {
+                        findNavController().navigate(R.id.action_gameView_to_victoryView)
+                    } else {
+                        findNavController().navigate(R.id.action_gameView_to_gameOverView)
+                    }
+                    this.cancel()
                 }
+
             }
         }
-
 
         updateLevelObserver = Observer<Boolean> {
             updateLevel()
@@ -221,27 +218,34 @@ class GameView : Fragment() {
     }
 
     private fun removeEnemyObservers() {
-        gameViewModel.level.movableEntitiesList.forEach {
-            //it.positionChange.removeObservers(viewLifecycleOwner)
-            //it.attackDamage.removeObservers(viewLifecycleOwner)
+
+        enemyAttackFlowCollectionJobList.forEach{
+            it.cancel()
         }
+        enemyPositionChangeFlowCollectionJobList.forEach {
+            it.cancel()
+        }
+        enemyAttackFlowCollectionJobList.clear()
+        enemyPositionChangeFlowCollectionJobList.clear()
     }
 
     private fun setupEnemyObservers(view: View) {
-
         gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
-            scope.launch {
-                it.attackDamage.collect { dto ->
-                    onEnemyAttack(dto, view)
+            enemyPositionChangeFlowCollectionJobList.add(
+                scope.launch {
+                    it.positionChange.collect { dto ->
+                        onEnemyMove(view, dto)
+                    }
                 }
-            }
-            scope.launch {
-                it.positionChange.collect { dto ->
-                    onEnemyMove(view, dto)
+            )
+            enemyAttackFlowCollectionJobList.add(
+                scope.launch {
+                    it.attackDamage.collect { dto ->
+                        onEnemyAttack(dto, view)
+                    }
                 }
-            }
+            )
         }
-
     }
 
     private fun hideAllEnemies() {
@@ -561,14 +565,9 @@ class GameView : Fragment() {
 
     private fun hideGameObjectIfRemoved(id: String) {
         val notOnField = !gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}
-        val noPosition = gameViewModel.level.movableEntitiesList.firstOrNull{it.id == id}?.position == Coordinates(-1, -1)
-        if (notOnField && noPosition) {
-            val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
-            gameObjectView?.visibility = View.GONE
-
-        }
-        gameViewModel.level.movableEntitiesList.forEach{
-            if(it.position.x == -1 || it.position.y == -1) {
+        val movableEntity = gameViewModel.level.movableEntitiesList.firstOrNull{it.id == id}
+        if (movableEntity != null){
+            if(movableEntity.position.x == -1 || movableEntity.position.y == -1) {
                 val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
                 gameObjectView?.visibility = View.GONE
                 if (id.contains(Level.ARROW)) {
@@ -577,7 +576,13 @@ class GameView : Fragment() {
                     gameObjectView?.y = charaView?.y ?: 0F
                 }
             }
+        } else {
+            if (notOnField) {
+                val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
+                gameObjectView?.visibility = View.GONE
+            }
         }
+
     }
 
     private fun updateStats() {
