@@ -526,10 +526,6 @@ class GameView : Fragment() {
             if (levelObject.health <= 0) {
                 gameViewModel.level.movableEntitiesList.firstOrNull{ levelObject.id == it.id}?.position = Coordinates(-1, -1)
                 gameObjectView.visibility = View.GONE
-                //levelObject.positionChange.removeObserver(enemyObserver)
-                if (levelObject.id == "ogre"){
-                    gameViewModel.level.endBossDefeated()
-                }
                 return
             }
             val drawableName = if(levelObject is Ogre && levelObject.attackCharged) {

@@ -59,7 +59,7 @@ class MenuViewModel : ViewModel() {
     private lateinit var mediaPlayer: MediaPlayer
 
     fun onHealthPlusButtonClicked() {
-        val cost = calcCost(_statsUpgradeUiState.value.healthUpgrade)
+        val cost = calcCost(_statsUpgradeUiState.value.healthUpgrade + initialUpgradeCount.health)
         if (cost < _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost) {
             _statsUpgradeUiState.update {
                 val newGoldCost = it.goldCost+cost
@@ -67,9 +67,9 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     healthUpgrade = newHealthUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(newHealthUpgrade, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, newGoldCost),
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(newHealthUpgrade, initialUpgradeCount.health, newGoldCost),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
                     healthUpgradeMinusButtonEnabled = isUpgradeSelected(newHealthUpgrade, initialUpgradeCount.health),
                     isAnyUpgradeSelected = isAnyUpgradeSelected(newHealthUpgrade, it.attackUpgrade, it.defenseUpgrade)
                 )
@@ -79,16 +79,16 @@ class MenuViewModel : ViewModel() {
 
     fun onHealthMinusButtonClicked() {
         if (_statsUpgradeUiState.value.healthUpgrade > 0) {
-            val cost = calcCost(max(0,_statsUpgradeUiState.value.healthUpgrade-1))
+            val cost = calcCost(max(0,_statsUpgradeUiState.value.healthUpgrade-1+ initialUpgradeCount.health))
             _statsUpgradeUiState.update {
                 val newGoldCost = it.goldCost-cost
                 val newHealthUpgrade = it.healthUpgrade-1
                 it.copy(
                     goldCost = newGoldCost,
                     healthUpgrade = newHealthUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(newHealthUpgrade, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, newGoldCost),
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(newHealthUpgrade, initialUpgradeCount.health, newGoldCost),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
                     healthUpgradeMinusButtonEnabled = isUpgradeSelected(newHealthUpgrade, initialUpgradeCount.health),
                     isAnyUpgradeSelected = isAnyUpgradeSelected(newHealthUpgrade, it.attackUpgrade, it.defenseUpgrade)
                 )
@@ -97,17 +97,17 @@ class MenuViewModel : ViewModel() {
     }
 
     fun onAttackPlusButtonClicked() {
-        val cost = calcCost(_statsUpgradeUiState.value.attackUpgrade)
+        val cost = calcCost(_statsUpgradeUiState.value.attackUpgrade+initialUpgradeCount.attack)
         if (cost <= _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost) {
             _statsUpgradeUiState.update {
                 val newGoldCost = it.goldCost+cost
                 val newAttackUpgrade = it.attackUpgrade+1
                 it.copy(
                     goldCost = newGoldCost,
-                    attackUpgrade = it.attackUpgrade+1,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(newAttackUpgrade, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, newGoldCost),
+                    attackUpgrade = newAttackUpgrade,
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(newAttackUpgrade, initialUpgradeCount.attack, newGoldCost),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
                     attackUpgradeMinusButtonEnabled = isUpgradeSelected(newAttackUpgrade, initialUpgradeCount.attack),
                     isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, newAttackUpgrade, it.defenseUpgrade)
                 )
@@ -117,16 +117,16 @@ class MenuViewModel : ViewModel() {
 
     fun onAttackMinusButtonClicked() {
         if (_statsUpgradeUiState.value.attackUpgrade > 0) {
-            val cost = calcCost(max(0, _statsUpgradeUiState.value.attackUpgrade-1))
+            val cost = calcCost(max(0, _statsUpgradeUiState.value.attackUpgrade + initialUpgradeCount.attack-1))
             _statsUpgradeUiState.update {
                 val newGoldCost = it.goldCost-cost
                 val newAttackUpgrade = it.attackUpgrade-1
                 it.copy(
                     goldCost = newGoldCost,
                     attackUpgrade = newAttackUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(newAttackUpgrade, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, newGoldCost),
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(newAttackUpgrade, initialUpgradeCount.attack, newGoldCost),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
                     attackUpgradeMinusButtonEnabled = isUpgradeSelected(newAttackUpgrade, initialUpgradeCount.attack),
                     isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, newAttackUpgrade, it.defenseUpgrade)
                 )
@@ -135,7 +135,7 @@ class MenuViewModel : ViewModel() {
     }
 
     fun onDefensePlusButtonClicked() {
-        val cost = calcCost(_statsUpgradeUiState.value.defenseUpgrade)
+        val cost = calcCost(_statsUpgradeUiState.value.defenseUpgrade + initialUpgradeCount.defense)
         if (cost <= _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost) {
             _statsUpgradeUiState.update {
                 val newGoldCost = it.goldCost+cost
@@ -143,9 +143,9 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     defenseUpgrade = newDefenseUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(newDefenseUpgrade, newGoldCost),
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(newDefenseUpgrade, initialUpgradeCount.defense, newGoldCost),
                     defenseUpgradeMinusButtonEnabled = isUpgradeSelected(newDefenseUpgrade, initialUpgradeCount.defense),
                     isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, it.attackUpgrade, newDefenseUpgrade)
                 )
@@ -155,16 +155,16 @@ class MenuViewModel : ViewModel() {
 
     fun onDefenseMinusButtonClicked() {
         if (_statsUpgradeUiState.value.defenseUpgrade > 0) {
-            val cost = calcCost(max(0, _statsUpgradeUiState.value.defenseUpgrade-1))
+            val cost = calcCost(max(0, _statsUpgradeUiState.value.defenseUpgrade-1+initialUpgradeCount.defense))
             _statsUpgradeUiState.update {
                 val newGoldCost = it.goldCost-cost
                 val newDefenseUpgrade = it.defenseUpgrade-1
                 it.copy(
                     goldCost = newGoldCost,
                     defenseUpgrade = newDefenseUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(newDefenseUpgrade, newGoldCost),
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(newDefenseUpgrade, initialUpgradeCount.defense, newGoldCost),
                     defenseUpgradeMinusButtonEnabled = isUpgradeSelected(newDefenseUpgrade, initialUpgradeCount.defense),
                     isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, it.attackUpgrade, newDefenseUpgrade)
                 )
@@ -172,8 +172,8 @@ class MenuViewModel : ViewModel() {
         }
     }
 
-    private fun isUpgradeAffordable(upgradeCount: Int, goldCost: Int): Boolean {
-        val cost = calcCost(upgradeCount)
+    private fun isUpgradeAffordable(upgradeCount: Int, initialUpgrade: Int, goldCost: Int): Boolean {
+        val cost = calcCost(upgradeCount+initialUpgrade)
         return cost <= gold-goldCost
     }
 
@@ -186,11 +186,11 @@ class MenuViewModel : ViewModel() {
                 healthUpgrade = initialUpgradeCount.health,
                 attackUpgrade = initialUpgradeCount.attack,
                 defenseUpgrade = initialUpgradeCount.defense,
-                healthUpgradePlusButtonEnabled = isUpgradeAffordable(initialUpgradeCount.health, 0),
+                healthUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.health, 0),
                 healthUpgradeMinusButtonEnabled = false,
-                attackUpgradePlusButtonEnabled = isUpgradeAffordable(initialUpgradeCount.attack, 0),
+                attackUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.attack, 0),
                 attackUpgradeMinusButtonEnabled = false,
-                defenseUpgradePlusButtonEnabled = isUpgradeAffordable(initialUpgradeCount.defense, 0),
+                defenseUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.defense, 0),
                 defenseUpgradeMinusButtonEnabled = false,
                 isAnyUpgradeSelected = false,
                 goldCost = 0
@@ -216,14 +216,14 @@ class MenuViewModel : ViewModel() {
                 _statsUpgradeUiState.update {
                     StatsUpgradeUiState(
                         initialData = initialData,
-                        healthUpgrade = initialUpgradeCount.health,
-                        attackUpgrade = initialUpgradeCount.attack,
-                        defenseUpgrade = initialUpgradeCount.defense,
-                        healthUpgradePlusButtonEnabled = isUpgradeAffordable(initialUpgradeCount.health, 0),
+                        healthUpgrade = 0,
+                        attackUpgrade = 0,
+                        defenseUpgrade = 0,
+                        healthUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.health, 0),
                         healthUpgradeMinusButtonEnabled = false,
-                        attackUpgradePlusButtonEnabled = isUpgradeAffordable(initialUpgradeCount.attack, 0),
+                        attackUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.attack, 0),
                         attackUpgradeMinusButtonEnabled = false,
-                        defenseUpgradePlusButtonEnabled = isUpgradeAffordable(initialUpgradeCount.defense, 0),
+                        defenseUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.defense, 0),
                         defenseUpgradeMinusButtonEnabled = false,
                         isAnyUpgradeSelected = isAnyUpgradeSelected(initialUpgradeCount.health, initialUpgradeCount.attack, initialUpgradeCount.defense),
                         gold = gold,
@@ -235,15 +235,15 @@ class MenuViewModel : ViewModel() {
         }
 
     }
-    fun saveUpgrades(context: Context) {
+    private fun saveUpgrades(context: Context) {
         viewModelScope.launch {
             context.dataStore.edit { preferences ->
-                preferences[intPreferencesKey(HEALTH_KEY)] = Settings.healthBaseValue + (_statsUpgradeUiState.value.healthUpgrade * HEALTH_UPGRADE_MULTIPLIER)
-                preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.healthUpgrade
-                preferences[intPreferencesKey(ATTACK_KEY)] = Settings.attackBaseValue + _statsUpgradeUiState.value.attackUpgrade
-                preferences[intPreferencesKey(ATTACK_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.attackUpgrade
-                preferences[intPreferencesKey(DEFENSE_KEY)] = Settings.defenseBaseValue + _statsUpgradeUiState.value.defenseUpgrade
-                preferences[intPreferencesKey(DEFENSE_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.defenseUpgrade
+                preferences[intPreferencesKey(HEALTH_KEY)] = initialData.health + (_statsUpgradeUiState.value.healthUpgrade * HEALTH_UPGRADE_MULTIPLIER)
+                preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.healthUpgrade + initialUpgradeCount.health
+                preferences[intPreferencesKey(ATTACK_KEY)] = initialData.attack + _statsUpgradeUiState.value.attackUpgrade
+                preferences[intPreferencesKey(ATTACK_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.attackUpgrade + initialUpgradeCount.attack
+                preferences[intPreferencesKey(DEFENSE_KEY)] = initialData.defense + _statsUpgradeUiState.value.defenseUpgrade
+                preferences[intPreferencesKey(DEFENSE_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.defenseUpgrade + initialUpgradeCount.defense
                 preferences[intPreferencesKey(GOLD_KEY)] = _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost
             }
         }

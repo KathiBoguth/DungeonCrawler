@@ -17,6 +17,7 @@ import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
+import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -269,15 +270,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val weaponBonus = chara.weapon?.attack ?: 0
         attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
         attackedEntityAnimation.value = attackedEnemy.id
-        placeCoinIfEnemyDefeated(attackedEnemy)
+        if (attackedEnemy.health <= 0) {
+            onEnemyDefeated(attackedEnemy)
+        }
 
     }
 
-    private fun placeCoinIfEnemyDefeated(attackedEnemy: BasicEnemy) {
-        if (attackedEnemy.health <= 0) {
-            placeCoin(attackedEnemy.position)
-            attackedEnemy.position = Coordinates(-1, -1)
+    private fun onEnemyDefeated(attackedEnemy: BasicEnemy) {
+        if (attackedEnemy is Ogre){
+            level.endBossDefeated()
+            return
         }
+        placeCoin(attackedEnemy.position)
+        attackedEnemy.position = Coordinates(-1, -1)
     }
 
     fun reset(newGame: Boolean = true) {
