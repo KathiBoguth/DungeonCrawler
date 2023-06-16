@@ -12,45 +12,48 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.res.ResourcesCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
-import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
-import com.example.dungeoncrawler.entity.Level
-import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
-import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.armor.Armor
+import com.example.dungeoncrawler.entity.enemy.BasicEnemy
+import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
+import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 import com.example.dungeoncrawler.viewmodel.GameViewModel
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 import com.example.dungeoncrawler.viewmodel.dataStore
-import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 
 class GameView : Fragment() {
 
-    private var backgroundPos = Coordinates(-1,-1)
-    private var backgroundOrigPos = Coordinates(-1,-1)
+    private var backgroundPos = Coordinates(-1, -1)
+    private var backgroundOrigPos = Coordinates(-1, -1)
     val gameViewModel: GameViewModel by activityViewModels()
+    val composableGameViewModel: ComposableGameViewModel by viewModels()
 
     private var binding: FragmentGameViewBinding? = null
 
@@ -71,7 +74,8 @@ class GameView : Fragment() {
         override fun run() {
             if (backgroundPos.x == -1) {
                 val character = view?.findViewById<ImageView>(R.id.character)
-                backgroundPos = Coordinates(character?.x?.toInt() ?: -1, character?.y?.toInt() ?: -1)
+                backgroundPos =
+                    Coordinates(character?.x?.toInt() ?: -1, character?.y?.toInt() ?: -1)
                 backgroundOrigPos = backgroundPos
                 redraw(0)
             } else {
@@ -85,11 +89,18 @@ class GameView : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val fragmentBinding = FragmentGameViewBinding.inflate(inflater, container, false)
-        binding = fragmentBinding
-        gameViewModel.reset()
+//        val fragmentBinding = FragmentGameViewBinding.inflate(inflater, container, false)
+//        binding = fragmentBinding
+        //gameViewModel.reset()
 
-        return fragmentBinding.root
+        return ComposeView(requireContext()).apply {
+
+            setContent {
+                GameScreen(
+                    gameViewModel = composableGameViewModel
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -120,11 +131,11 @@ class GameView : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
-            mediaPlayerBoss.start()
-        } else {
-            mediaPlayerDungeon.start()
-        }
+//        if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
+//            mediaPlayerBoss.start()
+//        } else {
+//            mediaPlayerDungeon.start()
+//        }
     }
 
     override fun onDestroy() {
@@ -160,14 +171,14 @@ class GameView : Fragment() {
         )
 
         lifecycleScope.launch {
-            gameViewModel.endGame.collect{victory ->
+            gameViewModel.endGame.collect { victory ->
                 if (victory == null) {
                     return@collect
                 }
                 removeEnemyObservers()
                 hideAllEnemies()
                 saveGold()
-                if(findNavController().currentDestination?.id == R.id.gameView){
+                if (findNavController().currentDestination?.id == R.id.gameView) {
                     if (victory) {
                         findNavController().navigate(R.id.action_gameView_to_victoryView)
                     } else {
@@ -188,38 +199,38 @@ class GameView : Fragment() {
             updateLevelObserver
         )
 
-        nextLevelObserver = Observer<Int> {
-            removeEnemyObservers()
-            hideAllEnemies()
-            fadeView()
-            backgroundPos = Coordinates(-1,-1)
-
-            gameViewModel.level.initLevel()
-
-            setupEnemyObservers(view)
-            binding?.level?.text = String.format(
-                resources.getString(
-                    (R.string.level),
-                    gameViewModel.level.levelCount.toString()
-                )
-            )
-            redraw(0, true)
-
-            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
-                mediaPlayerDungeon.pause()
-                mediaPlayerBoss.start()
-            }
-        }
-
-        gameViewModel.level.nextLevel.observe(
-            viewLifecycleOwner,
-            nextLevelObserver
-        )
+//        nextLevelObserver = Observer<Int> {
+//            removeEnemyObservers()
+//            hideAllEnemies()
+//            fadeView()
+//            backgroundPos = Coordinates(-1,-1)
+//
+//            gameViewModel.level.initLevel()
+//
+//            setupEnemyObservers(view)
+//            binding?.level?.text = String.format(
+//                resources.getString(
+//                    (R.string.level),
+//                    gameViewModel.level.levelCount.toString()
+//                )
+//            )
+//            redraw(0, true)
+//
+//            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
+//                mediaPlayerDungeon.pause()
+//                mediaPlayerBoss.start()
+//            }
+//        }
+//
+//        gameViewModel.level.nextLevel.observe(
+//            viewLifecycleOwner,
+//            nextLevelObserver
+//        )
     }
 
     private fun removeEnemyObservers() {
 
-        enemyAttackFlowCollectionJobList.forEach{
+        enemyAttackFlowCollectionJobList.forEach {
             it.cancel()
         }
         enemyPositionChangeFlowCollectionJobList.forEach {
@@ -230,33 +241,33 @@ class GameView : Fragment() {
     }
 
     private fun setupEnemyObservers(view: View) {
-        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
-            enemyPositionChangeFlowCollectionJobList.add(
-                scope.launch {
-                    it.positionChange.collect { dto ->
-                        onEnemyMove(view, dto)
-                    }
-                }
-            )
-            enemyAttackFlowCollectionJobList.add(
-                scope.launch {
-                    it.attackDamage.collect { dto ->
-                        onEnemyAttack(dto, view)
-                    }
-                }
-            )
-        }
+//        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
+//            enemyPositionChangeFlowCollectionJobList.add(
+//                scope.launch {
+//                    it.positionChange.collect { dto ->
+//                        onEnemyMove(view, dto)
+//                    }
+//                }
+//            )
+//            enemyAttackFlowCollectionJobList.add(
+//                scope.launch {
+//                    it.attackDamage.collect { dto ->
+//                        onEnemyAttack(dto, view)
+//                    }
+//                }
+//            )
+//        }
     }
 
     private fun hideAllEnemies() {
-        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach{
-            if (view != null) {
-                val enemyView = getGameObjectView(view, it.id)
-                requireActivity().runOnUiThread {
-                    enemyView?.visibility = View.GONE
-                }
-            }
-        }
+//        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach{
+//            if (view != null) {
+//                val enemyView = getGameObjectView(view, it.id)
+//                requireActivity().runOnUiThread {
+//                    enemyView?.visibility = View.GONE
+//                }
+//            }
+//        }
     }
 
     private fun saveGold() {
@@ -289,7 +300,7 @@ class GameView : Fragment() {
             )
         )
         val enemyView = getGameObjectView(view, it.id)
-        nudge(enemyView, it.id, it.direction)
+        //nudge(enemyView, it.id, it.direction)
     }
 
     private fun onEnemyMove(
@@ -303,74 +314,10 @@ class GameView : Fragment() {
         gameViewModel.onEnemyPositionChange(it)
     }
 
-    fun interact() {
-        gameViewModel.interact()
-
-        val charaView = getGameObjectView(view, gameViewModel.chara.id)
-        nudge(charaView, gameViewModel.chara.id, gameViewModel.chara.direction)
-
-        updateLevel()
-    }
-
-    fun moveUp() {
-
-        val turn = gameViewModel.turn(Direction.UP)
-
-        if (turn) {
-            val chara = view?.findViewById<ImageView>(R.id.character)
-            chara?.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.chara_back, requireContext().theme))
-            return
-        }
-        gameViewModel.moveUp()
-
-        redraw(charaMoves = true)
-    }
-
-    fun moveDown() {
-        val turn = gameViewModel.turn(Direction.DOWN)
-
-        if (turn) {
-            val chara = view?.findViewById<ImageView>(R.id.character)
-            chara?.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.chara_front, requireContext().theme))
-            return
-        }
-
-        gameViewModel.moveDown()
-
-        redraw(charaMoves = true)
-    }
-
-    fun moveLeft() {
-        val turn = gameViewModel.turn(Direction.LEFT)
-
-        if (turn) {
-            val chara = view?.findViewById<ImageView>(R.id.character)
-            chara?.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.chara_left, requireContext().theme))
-            return
-        }
-
-        gameViewModel.moveLeft()
-
-        redraw(charaMoves = true)
-    }
-
-    fun moveRight() {
-        val turn = gameViewModel.turn(Direction.RIGHT)
-
-        if (turn) {
-            val chara = view?.findViewById<ImageView>(R.id.character)
-            chara?.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.chara_right, requireContext().theme))
-            return
-        }
-
-        gameViewModel.moveRight()
-
-        redraw(charaMoves = true)
-    }
 
     private fun fadeView() {
         requireActivity().runOnUiThread {
-            view?.animate()?.alpha(0F)?.setDuration(300L)?.withEndAction{
+            view?.animate()?.alpha(0F)?.setDuration(300L)?.withEndAction {
                 view?.animate()?.alpha(1F)?.setDuration(300L)
             }
         }
@@ -385,20 +332,20 @@ class GameView : Fragment() {
         if (background == null) {
             return
         }
-        val charaPosition = gameViewModel.findCoordinate(gameViewModel.chara.id)
+        // val charaPosition = gameViewModel.findCoordinate(gameViewModel.chara.id)
         val moveLength = convertDpToPixel(Settings.moveLength)
-        val xPosBackground = backgroundOrigPos.x.minus(charaPosition.x*moveLength)
-        val yPosBackground = backgroundOrigPos.y.minus(charaPosition.y*moveLength)
+        // val xPosBackground = backgroundOrigPos.x.minus(charaPosition.x*moveLength)
+        // val yPosBackground = backgroundOrigPos.y.minus(charaPosition.y*moveLength)
 
-        backgroundPos = Coordinates(xPosBackground.toInt(), yPosBackground.toInt())
+        // backgroundPos = Coordinates(xPosBackground.toInt(), yPosBackground.toInt())
 
-        if (charaMoves){
+        if (charaMoves) {
             val jumpUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
             chara?.startAnimation(jumpUpAnimation)
         }
-        requireActivity().runOnUiThread {
-            background.animate().x(xPosBackground).y(yPosBackground).setDuration(duration)
-        }
+        // requireActivity().runOnUiThread {
+        //    background.animate().x(xPosBackground).y(yPosBackground).setDuration(duration)
+        // }
 
         drawObjects(duration)
     }
@@ -441,21 +388,24 @@ class GameView : Fragment() {
             Direction.RIGHT -> deltaX = 1
         }
 
-        val coords = gameViewModel.findCoordinate(id)
-        val (xPos, yPos) = getPositionFromCoordinates(coords)
-        val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
-        val newX = xPos + deltaX*nudgeWidth
-        val newY = yPos + deltaY*nudgeWidth
-        requireActivity().runOnUiThread {
-            gameObjectView.animate().x(newX).y(newY)
-                .setDuration(Settings.animDuration).withEndAction {
-                    gameObjectView.animate().x(xPos).y(yPos)
-                        .setDuration(Settings.animDuration)
-                }
-        }
+//        val coords = gameViewModel.findCoordinate(id)
+//        val (xPos, yPos) = getPositionFromCoordinates(coords)
+//        val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
+//        val newX = xPos + deltaX*nudgeWidth
+//        val newY = yPos + deltaY*nudgeWidth
+//        requireActivity().runOnUiThread {
+//            gameObjectView.animate().x(newX).y(newY)
+//                .setDuration(Settings.animDuration).withEndAction {
+//                    gameObjectView.animate().x(xPos).y(yPos)
+//                        .setDuration(Settings.animDuration)
+//                }
+//        }
     }
 
-    private fun getPositionFromCoordinates(coords: Coordinates, isOgre: Boolean = false): Pair<Float, Float> {
+    private fun getPositionFromCoordinates(
+        coords: Coordinates,
+        isOgre: Boolean = false
+    ): Pair<Float, Float> {
         val moveLength = convertDpToPixel(Settings.moveLength)
         var xPos = coords.x * moveLength + backgroundPos.x + Settings.margin
         var yPos = coords.y * moveLength + backgroundPos.y + Settings.margin
@@ -467,33 +417,33 @@ class GameView : Fragment() {
     }
 
     private fun drawObjects(duration: Long) {
-        val fieldCopy = gameViewModel.level.field.clone()
-        fieldCopy.forEachIndexed { x, row ->
-            row.forEachIndexed { y, levelObjects ->
-                val levelObjectList = levelObjects.toMutableList()
-                levelObjectList.forEach {
-                        if ( it.id != gameViewModel.chara.id){
-                            moveObject(it, x, y, duration)
-                    }
-                }
-            }
-        }
-        gameViewModel.level.movableEntitiesList.filter { it.position != Coordinates(-1, -1) }.forEach {
-            if ( it.id != gameViewModel.chara.id){
-                moveObject(it, it.position.x, it.position.y, duration)
-            }
-        }
+//        val fieldCopy = gameViewModel.level.field.clone()
+//        fieldCopy.forEachIndexed { x, row ->
+//            row.forEachIndexed { y, levelObjects ->
+//                val levelObjectList = levelObjects.toMutableList()
+//                levelObjectList.forEach {
+//                        if ( it.id != gameViewModel.chara.id){
+//                            moveObject(it, x, y, duration)
+//                    }
+//                }
+//            }
+//        }
+//        gameViewModel.level.movableEntitiesList.filter { it.position != Coordinates(-1, -1) }.forEach {
+//            if ( it.id != gameViewModel.chara.id){
+//                moveObject(it, it.position.x, it.position.y, duration)
+//            }
+//        }
     }
 
     private fun moveObject(levelObject: LevelObject, x: Int, y: Int, duration: Long) {
         val gameObjectView = getGameObjectView(view, levelObject.id)
-                ?: return
+            ?: return
 
         val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y), (levelObject is Ogre))
 
-        if(levelObject.type == LevelObjectType.COIN || levelObject.type == LevelObjectType.WEAPON) {
+        if (levelObject.type == LevelObjectType.COIN || levelObject.type == LevelObjectType.WEAPON) {
             val moveLength = convertDpToPixel(Settings.moveLength)
-            if(gameObjectView.x.toInt() <= moveLength && gameObjectView.y.toInt() <= moveLength ){
+            if (gameObjectView.x.toInt() <= moveLength && gameObjectView.y.toInt() <= moveLength) {
                 gameObjectView.x = xPos
                 gameObjectView.y = yPos
 
@@ -505,11 +455,11 @@ class GameView : Fragment() {
         } else {
             val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
 
-            if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth){
+            if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth) {
                 if (levelObject.type == LevelObjectType.ARROW) {
                     requireActivity().runOnUiThread {
                         gameObjectView.animate().x(xPos).y(yPos)
-                            .setDuration((levelObject as Arrow).speed.toLong()-10)
+                            .setDuration((levelObject as Arrow).speed.toLong() - 10)
                     }
                 } else {
                     requireActivity().runOnUiThread {
@@ -524,14 +474,13 @@ class GameView : Fragment() {
 
         if (levelObject is BasicEnemy) {
             if (levelObject.health <= 0) {
-                gameViewModel.level.movableEntitiesList.firstOrNull{ levelObject.id == it.id}?.position = Coordinates(-1, -1)
                 gameObjectView.visibility = View.GONE
                 return
             }
-            val drawableName = if(levelObject is Ogre && levelObject.attackCharged) {
+            val drawableName = if (levelObject is Ogre && levelObject.attackCharged) {
                 "${levelObject.skin}_attack"
             } else {
-                when(levelObject.direction) {
+                when (levelObject.direction) {
                     Direction.DOWN -> "${levelObject.skin}_front"
                     Direction.UP -> "${levelObject.skin}_back"
                     Direction.LEFT -> "${levelObject.skin}_left"
@@ -548,63 +497,73 @@ class GameView : Fragment() {
             removeGameObjects()
 
             // TODO: catch exceptions
-            gameObjectView.setImageDrawable(ResourcesCompat.getDrawable(resources, drawableId, requireContext().theme))
+            gameObjectView.setImageDrawable(
+                ResourcesCompat.getDrawable(
+                    resources,
+                    drawableId,
+                    requireContext().theme
+                )
+            )
 
         }
     }
 
     private fun removeGameObjects() {
-        gameViewModel.level.gameObjectIds.forEach{
-            hideGameObjectIfRemoved(it)
-        }
+//        gameViewModel.level.gameObjectIds.forEach{
+//            hideGameObjectIfRemoved(it)
+//        }
     }
 
     private fun hideGameObjectIfRemoved(id: String) {
-        val notOnField = !gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}
-        val movableEntity = gameViewModel.level.movableEntitiesList.firstOrNull{it.id == id}
-        if (movableEntity != null){
-            if(movableEntity.position.x == -1 || movableEntity.position.y == -1) {
-                val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
-                gameObjectView?.visibility = View.GONE
-                if (id.contains(Level.ARROW)) {
-                    val charaView = getGameObjectView(view, gameViewModel.chara.id)
-                    gameObjectView?.x = charaView?.x ?: 0F
-                    gameObjectView?.y = charaView?.y ?: 0F
-                }
-            }
-        } else {
-            if (notOnField) {
-                val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
-                gameObjectView?.visibility = View.GONE
-            }
-        }
+//        val notOnField = !gameViewModel.level.field.any { arrayOfLevelObjects -> arrayOfLevelObjects.any { it.any{itemInList -> itemInList.id == id }}}
+//        val movableEntity = gameViewModel.level.movableEntitiesList.firstOrNull{it.id == id}
+//        if (movableEntity != null){
+//            if(movableEntity.position.x == -1 || movableEntity.position.y == -1) {
+//                val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
+//                gameObjectView?.visibility = View.GONE
+//                if (id.contains(Level.ARROW)) {
+//                    val charaView = getGameObjectView(view, gameViewModel.chara.id)
+//                    gameObjectView?.x = charaView?.x ?: 0F
+//                    gameObjectView?.y = charaView?.y ?: 0F
+//                }
+//            }
+//        } else {
+//            if (notOnField) {
+//                val gameObjectView = view?.findViewById<ImageView>(resources.getIdentifier(id, "id", requireContext().packageName))
+//                gameObjectView?.visibility = View.GONE
+//            }
+//        }
 
     }
 
     private fun updateStats() {
         binding?.goldCounter?.text = String.format(
-            resources.getString((R.string.gold),
-            gameViewModel.chara.gold)
+            resources.getString(
+                (R.string.gold),
+                gameViewModel.chara.gold
+            )
         )
         binding?.health?.text = String.format(
-            resources.getString((R.string.health),
-                gameViewModel.chara.health)
+            resources.getString(
+                (R.string.health),
+                gameViewModel.chara.health
+            )
         )
     }
 
     private fun showWeapon(id: String) {
-        for (sword in gameViewModel.level.weapons) {
-            val i = sword.id
-            val weaponId = "gui_$i"
-            val weaponView = view?.findViewById<View>(
-                resources.getIdentifier(
-                    weaponId,
-                    "id",
-                    requireContext().packageName
-                )
-            )
-            weaponView?.visibility = View.GONE
-        }
+//        for (sword in gameViewModel.level.weapons) {
+//            val i = sword.id
+//            val weaponId = "gui_$i"
+//            val weaponView = view?.findViewById<View>(
+//                resources.getIdentifier(
+//                    weaponId,
+//                    "id",
+//                    requireContext().packageName
+//                )
+//            )
+//            weaponView?.visibility = View.GONE
+//        }
 
         val weaponId = "gui_$id"
         val weaponView = view?.findViewById<View>(
@@ -618,18 +577,18 @@ class GameView : Fragment() {
     }
 
     private fun showArmor(id: String) {
-        for (armor in gameViewModel.level.armors) {
-            val i = armor.id
-            val armorId = "gui_$i"
-            val armorView = view?.findViewById<View>(
-                resources.getIdentifier(
-                    armorId,
-                    "id",
-                    requireContext().packageName
-                )
-            )
-            armorView?.visibility = View.GONE
-        }
+//        for (armor in gameViewModel.level.armors) {
+//            val i = armor.id
+//            val armorId = "gui_$i"
+//            val armorView = view?.findViewById<View>(
+//                resources.getIdentifier(
+//                    armorId,
+//                    "id",
+//                    requireContext().packageName
+//                )
+//            )
+//            armorView?.visibility = View.GONE
+//        }
 
         val armorId = "gui_$id"
         val armorView = view?.findViewById<View>(
