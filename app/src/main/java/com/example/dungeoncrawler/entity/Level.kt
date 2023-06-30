@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.entity
 
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.armor.Armor
@@ -298,4 +299,8 @@ class Level(
 data class Coordinates(
     val x: Int,
     val y: Int
+)
+data class CoordinatesDp(
+    val x: Dp,
+    val y: Dp
 )

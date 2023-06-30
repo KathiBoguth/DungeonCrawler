@@ -1,7 +1,5 @@
 package com.example.dungeoncrawler.ground
 
-import android.os.Bundle
-import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,20 +11,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.GroundType
 import kotlin.random.Random
 
+val backgroundLayout = computeBackgroundLayout()
 @Composable
-fun BackgroundComposable() {
-    val backgroundLayout = getBackgroundLayout()
+fun BackgroundComposable(backgroundPosition: CoordinatesDp) {
 
-    Row(modifier = Modifier.wrapContentSize(unbounded = true)) {
+    Row(modifier = Modifier
+        .offset(backgroundPosition.x, backgroundPosition.y)
+        .wrapContentSize(unbounded = true)) {
         for (row in backgroundLayout) {
             Column(modifier = Modifier.wrapContentSize(unbounded = true)) {
                 for (item in row) {
@@ -42,7 +41,6 @@ fun BackgroundComposable() {
             }
         }
     }
-
 }
 fun randomGroundType(random: Random) : GroundType {
 
@@ -55,7 +53,7 @@ fun randomGroundType(random: Random) : GroundType {
     }
 }
 
-fun getBackgroundLayout(): List<List<GroundType>> {
+fun computeBackgroundLayout(): List<List<GroundType>> {
     val random = Random(System.currentTimeMillis())
     val layout = MutableList(Settings.fieldSize - 2) {
         MutableList(2) { GroundType.STONE }
@@ -75,4 +73,10 @@ fun GroundType.getDrawableId()  = when (this) {
         GroundType.PEBBLES -> R.drawable.pebbles
         GroundType.WATER -> R.drawable.water
         GroundType.STONE -> R.drawable.stone_wall
+}
+
+@Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
+@Composable
+fun BackgroundPreview() {
+    BackgroundComposable(CoordinatesDp(405.dp, 440.dp))
 }

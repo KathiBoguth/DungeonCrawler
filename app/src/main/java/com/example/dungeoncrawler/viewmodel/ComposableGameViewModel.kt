@@ -34,7 +34,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     var chara = MainChara()
 
     private val _charaStateFlow =
-        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false))
+        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, position = chara.position))
     val charaStateFlow = _charaStateFlow.asStateFlow()
 
     private var backgroundPos = Coordinates(-1, -1)
@@ -57,7 +57,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val newCoordinates = Coordinates(coordinates.x, coordinates.y - 1)
 
         moveIfPossible(newCoordinates, coordinates)
-        //redraw(charaMoves = true)
     }
 
     fun moveDown() {
@@ -154,6 +153,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         //updateLevel.value = true
 
         levelObjectList.add(chara)
+        _charaStateFlow.update {
+            it.copy(position = newCoordinates)
+        }
     }
 
     private fun turn(direction: Direction): Boolean {
@@ -405,6 +407,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         if (newGame) {
             chara = MainChara()
             level = Level(chara)
+            chara.position = findCoordinate(chara.id)
+            _charaStateFlow.update {
+                it.copy(position = chara.position)
+            }
         }
 
         viewModelScope.launch {

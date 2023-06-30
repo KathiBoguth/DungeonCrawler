@@ -16,8 +16,11 @@ import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
@@ -26,19 +29,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.entity.Coordinates
+import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.ground.BackgroundComposable
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
+
 
 val triangleShape = GenericShape { size, _ ->
     moveTo(size.width / 2f, 0f)
@@ -49,7 +53,9 @@ val triangleShape = GenericShape { size, _ ->
 @Composable
 fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel()) {
     val charaState by gameViewModel.charaStateFlow.collectAsState()
-    gameViewModel.reset()
+    LaunchedEffect(Unit) {
+        gameViewModel.reset()
+    }
 
     GameScreen(
         charaState,
@@ -83,10 +89,26 @@ fun GameScreen(
         Direction.LEFT -> R.drawable.chara_left
     }
 
-    BackgroundComposable()
+    //var backgroundOrigPosition by remember { mutableStateOf(CoordinatesDp(0.dp, 0.dp))  }
+    val backgroundOrigPosition = CoordinatesDp(
+        (LocalConfiguration.current.screenWidthDp/2).dp,
+        (LocalConfiguration.current.screenHeightDp).dp
+    )
+    val backgroundPosition by remember(key1 = charaState.position, key2 = backgroundOrigPosition) {
+        val moveLength = Settings.moveLength
+        val xPosBackground = backgroundOrigPosition.x.minus((charaState.position.x*moveLength).dp)
+        val yPosBackground = backgroundOrigPosition.y.minus((charaState.position.y*moveLength).dp)
+        return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
+    }
+
+    BackgroundComposable(backgroundPosition)
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize(),
+//                .onGloballyPositioned { coordinates ->
+//                    val offset = coordinates.positionInParent()
+//                    backgroundOrigPosition = CoordinatesDp(offset.x.dp, offset.y.dp)
+//                },
             contentAlignment = Center
         ) {
             Image(
@@ -163,7 +185,9 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun GamePreview() {
-    GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false),
+    GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false,
+        position = Coordinates(0,0)
+    ),
         {}, {}, {}, {}, {}
     )
 }
