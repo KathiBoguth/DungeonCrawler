@@ -2,8 +2,10 @@ package com.example.dungeoncrawler.entity.enemy
 
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
-class Wolf(wolfId: String) : BasicEnemy(wolfId, "wolf") {
+class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(wolfId, "wolf", enemyPositionFlow) {
 
     override var speed = 400
     override var power = 30
@@ -27,7 +29,7 @@ class Wolf(wolfId: String) : BasicEnemy(wolfId, "wolf") {
             }
         } else {
             val newPosition = moveOneStep()
-            positionChange.value = LevelObjectPositionChangeDTO(newPosition, id)
+            enemyPositionFlow.update { LevelObjectPositionChangeDTO(newPosition, id) }
         }
     }
 }

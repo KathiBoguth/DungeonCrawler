@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dungeoncrawler.CharaState
+import com.example.dungeoncrawler.EnemyState
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.CharaStats
 import com.example.dungeoncrawler.entity.Coin
@@ -16,7 +17,10 @@ import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
+import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.entity.enemy.Ogre
+import com.example.dungeoncrawler.entity.enemy.Slime
+import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlinx.coroutines.delay
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import kotlin.math.min
 
 class ComposableGameViewModel(application: Application) : AndroidViewModel(application) {
@@ -36,6 +41,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private val _charaStateFlow =
         MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position))
     val charaStateFlow = _charaStateFlow.asStateFlow()
+
+    private val _enemiesStateFlow = MutableStateFlow(listOf<EnemyState>())
+    val enemiesStateFlow = _enemiesStateFlow.asStateFlow()
 
     private val _endGame: MutableStateFlow<Boolean?> = MutableStateFlow(null)
     private val endGame = _endGame.asStateFlow()
@@ -425,6 +433,33 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             _charaStateFlow.update {
                 it.copy(position = chara.position)
             }
+            _enemiesStateFlow.update {
+                val list = mutableListOf<EnemyState>()
+                level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach{
+                    val enemyType = when(it as BasicEnemy){
+                        is Slime -> EnemyEnum.SLIME
+                        is Wolf -> EnemyEnum.WOLF
+                        is Ogre -> EnemyEnum.OGRE
+                        else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
+                    }
+                    list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType ))
+                }
+                return@update list
+            }
+            // TODO: get working: enemies that move
+//            viewModelScope.launch {
+//                level.enemyPositionFlow.collect{ changeDto ->
+//                    _enemiesStateFlow.update {
+//                        val newList = mutableListOf<EnemyState>()
+//                        it.forEach{enemyState ->
+//                            if (enemyState.id == changeDto.id){
+//                                newList.add(enemyState.copy(position = changeDto.newPosition))
+//                            }
+//                        }
+//                        return@update newList
+//                    }
+//                }
+//            }
         }
 
         viewModelScope.launch {
@@ -441,5 +476,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
     }
+
+}
+
+class MissingEnemyTypeException(message: String): Exception(message){
 
 }

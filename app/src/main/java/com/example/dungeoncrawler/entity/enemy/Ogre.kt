@@ -3,9 +3,11 @@ package com.example.dungeoncrawler.entity.enemy
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlin.math.abs
 
-class Ogre(ogreId: String) : BasicEnemy(ogreId, "ogre") {
+class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(ogreId, "ogre", enemyPositionFlow) {
 
     override var speed = 800
     override var power = 80
@@ -32,7 +34,7 @@ class Ogre(ogreId: String) : BasicEnemy(ogreId, "ogre") {
             direction = nextDirection
         } else {
             val newPosition = moveOneStep()
-            positionChange.value = LevelObjectPositionChangeDTO(newPosition, id)
+            enemyPositionFlow.update { LevelObjectPositionChangeDTO(newPosition, id) }
         }
     }
 

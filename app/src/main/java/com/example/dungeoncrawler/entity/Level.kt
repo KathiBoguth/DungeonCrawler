@@ -7,6 +7,7 @@ import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
+import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
@@ -14,6 +15,7 @@ import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
 class Level(
@@ -42,6 +44,7 @@ class Level(
     lateinit var armors: List<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
     val movableEntitiesList: MutableList<MovableEntity> = mutableListOf()
+    val enemyPositionFlow = MutableStateFlow(LevelObjectPositionChangeDTO(Coordinates(-1,-1), ""))
 
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 
@@ -135,16 +138,16 @@ class Level(
                 EnemyEnum.SLIME -> {
                     val count =
                         enemyList.count { alreadyAdded -> alreadyAdded.id.contains("slime") }
-                    Slime("slime$count")
+                    Slime("slime$count", enemyPositionFlow)
                 }
 
                 EnemyEnum.WOLF -> {
                     val count = enemyList.count { alreadyAdded -> alreadyAdded.id.contains("wolf") }
-                    Wolf("wolf$count")
+                    Wolf("wolf$count", enemyPositionFlow)
                 }
 
                 EnemyEnum.OGRE -> {
-                    Ogre("ogre")
+                    Ogre("ogre", enemyPositionFlow)
                 }
 
             }

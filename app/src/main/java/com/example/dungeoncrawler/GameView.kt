@@ -26,14 +26,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
-import com.example.dungeoncrawler.entity.LevelObject
-import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.armor.Armor
-import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
-import com.example.dungeoncrawler.entity.enemy.Ogre
-import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 import com.example.dungeoncrawler.viewmodel.GameViewModel
@@ -45,7 +40,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 
 class GameView : Fragment() {
@@ -402,20 +396,6 @@ class GameView : Fragment() {
 //        }
     }
 
-    private fun getPositionFromCoordinates(
-        coords: Coordinates,
-        isOgre: Boolean = false
-    ): Pair<Float, Float> {
-        val moveLength = convertDpToPixel(Settings.moveLength)
-        var xPos = coords.x * moveLength + backgroundPos.x + Settings.margin
-        var yPos = coords.y * moveLength + backgroundPos.y + Settings.margin
-        if (isOgre) {
-            xPos -= convertDpToPixel(70f)
-            yPos -= convertDpToPixel(70f)
-        }
-        return Pair(xPos, yPos)
-    }
-
     private fun drawObjects(duration: Long) {
 //        val fieldCopy = gameViewModel.level.field.clone()
 //        fieldCopy.forEachIndexed { x, row ->
@@ -435,78 +415,78 @@ class GameView : Fragment() {
 //        }
     }
 
-    private fun moveObject(levelObject: LevelObject, x: Int, y: Int, duration: Long) {
-        val gameObjectView = getGameObjectView(view, levelObject.id)
-            ?: return
-
-        val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y), (levelObject is Ogre))
-
-        if (levelObject.type == LevelObjectType.COIN || levelObject.type == LevelObjectType.WEAPON) {
-            val moveLength = convertDpToPixel(Settings.moveLength)
-            if (gameObjectView.x.toInt() <= moveLength && gameObjectView.y.toInt() <= moveLength) {
-                gameObjectView.x = xPos
-                gameObjectView.y = yPos
-
-            } else {
-                requireActivity().runOnUiThread {
-                    gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
-                }
-            }
-        } else {
-            val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
-
-            if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth) {
-                if (levelObject.type == LevelObjectType.ARROW) {
-                    requireActivity().runOnUiThread {
-                        gameObjectView.animate().x(xPos).y(yPos)
-                            .setDuration((levelObject as Arrow).speed.toLong() - 10)
-                    }
-                } else {
-                    requireActivity().runOnUiThread {
-                        gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
-                    }
-                }
-            }
-        }
-
-        gameObjectView.visibility = View.VISIBLE
-        gameObjectView.bringToFront()
-
-        if (levelObject is BasicEnemy) {
-            if (levelObject.health <= 0) {
-                gameObjectView.visibility = View.GONE
-                return
-            }
-            val drawableName = if (levelObject is Ogre && levelObject.attackCharged) {
-                "${levelObject.skin}_attack"
-            } else {
-                when (levelObject.direction) {
-                    Direction.DOWN -> "${levelObject.skin}_front"
-                    Direction.UP -> "${levelObject.skin}_back"
-                    Direction.LEFT -> "${levelObject.skin}_left"
-                    Direction.RIGHT -> "${levelObject.skin}_right"
-
-                }
-            }
-            val drawableId = resources.getIdentifier(
-                drawableName,
-                "drawable",
-                requireContext().packageName
-            )
-
-            removeGameObjects()
-
-            // TODO: catch exceptions
-            gameObjectView.setImageDrawable(
-                ResourcesCompat.getDrawable(
-                    resources,
-                    drawableId,
-                    requireContext().theme
-                )
-            )
-
-        }
-    }
+//    private fun moveObject(levelObject: LevelObject, x: Int, y: Int, duration: Long) {
+//        val gameObjectView = getGameObjectView(view, levelObject.id)
+//            ?: return
+//
+//        val (xPos, yPos) = getPositionFromCoordinates(Coordinates(x, y), (levelObject is Ogre))
+//
+//        if (levelObject.type == LevelObjectType.COIN || levelObject.type == LevelObjectType.WEAPON) {
+//            val moveLength = convertDpToPixel(Settings.moveLength)
+//            if (gameObjectView.x.toInt() <= moveLength && gameObjectView.y.toInt() <= moveLength) {
+//                gameObjectView.x = xPos
+//                gameObjectView.y = yPos
+//
+//            } else {
+//                requireActivity().runOnUiThread {
+//                    gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+//                }
+//            }
+//        } else {
+//            val nudgeWidth = convertDpToPixel(Settings.nudgeWidth)
+//
+//            if (abs(yPos - gameObjectView.y) > nudgeWidth || abs(xPos - gameObjectView.x) > nudgeWidth) {
+//                if (levelObject.type == LevelObjectType.ARROW) {
+//                    requireActivity().runOnUiThread {
+//                        gameObjectView.animate().x(xPos).y(yPos)
+//                            .setDuration((levelObject as Arrow).speed.toLong() - 10)
+//                    }
+//                } else {
+//                    requireActivity().runOnUiThread {
+//                        gameObjectView.animate().x(xPos).y(yPos).setDuration(duration)
+//                    }
+//                }
+//            }
+//        }
+//
+//        gameObjectView.visibility = View.VISIBLE
+//        gameObjectView.bringToFront()
+//
+//        if (levelObject is BasicEnemy) {
+//            if (levelObject.health <= 0) {
+//                gameObjectView.visibility = View.GONE
+//                return
+//            }
+//            val drawableName = if (levelObject is Ogre && levelObject.attackCharged) {
+//                "${levelObject.skin}_attack"
+//            } else {
+//                when (levelObject.direction) {
+//                    Direction.DOWN -> "${levelObject.skin}_front"
+//                    Direction.UP -> "${levelObject.skin}_back"
+//                    Direction.LEFT -> "${levelObject.skin}_left"
+//                    Direction.RIGHT -> "${levelObject.skin}_right"
+//
+//                }
+//            }
+//            val drawableId = resources.getIdentifier(
+//                drawableName,
+//                "drawable",
+//                requireContext().packageName
+//            )
+//
+//            removeGameObjects()
+//
+//            // TODO: catch exceptions
+//            gameObjectView.setImageDrawable(
+//                ResourcesCompat.getDrawable(
+//                    resources,
+//                    drawableId,
+//                    requireContext().theme
+//                )
+//            )
+//
+//        }
+//    }
 
     private fun removeGameObjects() {
 //        gameViewModel.level.gameObjectIds.forEach{

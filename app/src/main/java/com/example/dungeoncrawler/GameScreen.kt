@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.ground.BackgroundComposable
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 
@@ -53,12 +54,14 @@ val triangleShape = GenericShape { size, _ ->
 @Composable
 fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel()) {
     val charaState by gameViewModel.charaStateFlow.collectAsState()
+    val enemiesState by gameViewModel.enemiesStateFlow.collectAsState()
     LaunchedEffect(Unit) {
         gameViewModel.reset()
     }
 
     GameScreen(
         charaState,
+        enemiesState,
         gameViewModel::interact,
         gameViewModel::moveUp,
         gameViewModel::moveDown,
@@ -70,20 +73,13 @@ fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel()) {
 @Composable
 fun GameScreen(
     charaState: CharaState,
+    enemiesState: List<EnemyState>,
     interact: () -> Unit,
     moveUp: () -> Unit,
     moveDown: () -> Unit,
     moveLeft: () -> Unit,
     moveRight: () -> Unit,
 ) {
-    val charaOffset: Offset by animateOffsetAsState(
-        getOffset(
-            nudge = charaState.nudge,
-            jump = charaState.jump,
-            direction = charaState.direction
-        )
-    )
-
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
     val adjustWidth = ((density.density - 2.55) * 200) //TODO: no idea how to calculate, not connected to density?
@@ -94,12 +90,70 @@ fun GameScreen(
     )
 
     val backgroundPosition by remember(key1 = charaState.position, key2 = backgroundOrigPosition) {
-        val moveLength = Settings.moveLength//* density.density
+        val moveLength = Settings.moveLength
         val xPosBackground = backgroundOrigPosition.x.minus((charaState.position.x*moveLength).dp)
         val yPosBackground = backgroundOrigPosition.y.minus((charaState.position.y*moveLength).dp)
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
-    val backgroundOffset: Offset by animateOffsetAsState(targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value))
+
+    BackgroundComposable(backgroundPosition)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Character(charaState)
+
+        Controls(interact, moveUp, moveDown, moveLeft, moveRight)
+
+        //enemies
+        enemiesState.forEach { enemy ->
+
+            Enemy(enemy, backgroundPosition)
+        }
+    }
+
+}
+
+@Composable
+private fun Controls(
+    interact: () -> Unit,
+    moveUp: () -> Unit,
+    moveDown: () -> Unit,
+    moveLeft: () -> Unit,
+    moveRight: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(76.dp, 112.dp),
+        contentAlignment = BottomEnd
+    ) {
+        FloatingActionButton(shape = RoundedCornerShape(50.dp),
+            containerColor = colorResource(id = R.color.secondary),
+            onClick = { interact() }) {
+
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(76.dp, 56.dp),
+        contentAlignment = BottomStart
+    ) {
+        ControlPad(moveUp, moveDown, moveLeft, moveRight)
+    }
+}
+
+@Composable
+private fun Character(charaState: CharaState) {
+
+    val charaOffset: Offset by animateOffsetAsState(
+        getOffset(
+            nudge = charaState.nudge,
+            jump = charaState.jump,
+            direction = charaState.direction
+        )
+    )
+
     val charaSkin = when (charaState.direction) {
         Direction.UP -> R.drawable.chara_back
         Direction.DOWN -> R.drawable.chara_front
@@ -107,47 +161,62 @@ fun GameScreen(
         Direction.LEFT -> R.drawable.chara_left
     }
 
-    BackgroundComposable(backgroundOffset)
-    Box(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-//                .onGloballyPositioned { coordinates ->
-//                    val offset = coordinates.positionInParent()
-//                    backgroundOrigPosition = CoordinatesDp(offset.x.dp, offset.y.dp)
-//                },
-            contentAlignment = Center
-        ) {
-            Image(
-                painter = painterResource(id = charaSkin),
-                contentDescription = stringResource(id = R.string.main_character),
-                modifier = Modifier
-                    .width(62.dp)
-                    .height(73.dp)
-                    .offset(charaOffset.x.dp, charaOffset.y.dp)
-            )
-        }
-
-        Box(
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Center
+    ) {
+        Image(
+            painter = painterResource(id = charaSkin),
+            contentDescription = stringResource(id = R.string.main_character),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(76.dp, 112.dp),
-            contentAlignment = BottomEnd
-        ) {
-            FloatingActionButton(shape = RoundedCornerShape(50.dp),
-                containerColor = colorResource(id = R.color.secondary),
-                onClick = { interact() }) {
+                .width(62.dp)
+                .height(73.dp)
+                .offset(charaOffset.x.dp, charaOffset.y.dp)
+        )
+    }
+}
 
-            }
+@Composable
+private fun Enemy(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
+    val enemyOffset: Offset by animateOffsetAsState(
+        getOffset(
+            nudge = enemyState.nudge,
+            jump = enemyState.jump,
+            direction = enemyState.direction
+        )
+    )
+
+    val skin = when (enemyState.type) {
+        EnemyEnum.SLIME -> when (enemyState.direction) {
+            Direction.UP -> R.drawable.slime_back
+            Direction.DOWN -> R.drawable.slime_front
+            Direction.LEFT -> R.drawable.slime_left
+            Direction.RIGHT -> R.drawable.slime_right
         }
+        EnemyEnum.WOLF -> when (enemyState.direction) {
+            Direction.UP -> R.drawable.wolf_back
+            Direction.DOWN -> R.drawable.wolf_front
+            Direction.LEFT -> R.drawable.wolf_left
+            Direction.RIGHT -> R.drawable.wolf_right
+        }
+        EnemyEnum.OGRE -> when (enemyState.direction) {
+            Direction.UP -> R.drawable.ogre_back
+            Direction.DOWN -> R.drawable.ogre_back
+            Direction.LEFT -> R.drawable.ogre_left
+            Direction.RIGHT -> R.drawable.ogre_right
+        }
+    }
+    val position = getPositionFromCoordinates(backgroundPos, enemyState.position, enemyState.type == EnemyEnum.OGRE)
 
-        Box(
+    Box(modifier = Modifier.fillMaxSize().offset(position.x, position.y)){
+        Image(
+            painter = painterResource(id = skin),
+            contentDescription = stringResource(id = R.string.enemy),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(76.dp, 56.dp),
-            contentAlignment = BottomStart
-        ) {
-            ControlPad(moveUp, moveDown, moveLeft, moveRight)
-        }
+                .width(62.dp)
+                .height(73.dp)
+                .offset(enemyOffset.x.dp, enemyOffset.y.dp)
+        )
     }
 
 }
@@ -194,6 +263,7 @@ fun GamePreview() {
     GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false, jump = false,
         position = Coordinates(0,0)
     ),
+        enemiesState = listOf(),
         {}, {}, {}, {}, {}
     )
 }
@@ -207,7 +277,6 @@ fun getOffset(jump: Boolean, nudge: Boolean, direction: Direction): Offset {
         return Offset(0f, -Settings.nudgeWidth)
     }
 
-
     var deltaX = 0
     var deltaY = 0
     when (direction) {
@@ -218,4 +287,19 @@ fun getOffset(jump: Boolean, nudge: Boolean, direction: Direction): Offset {
     }
 
     return Offset(Settings.nudgeWidth * deltaX, Settings.nudgeWidth * deltaY)
+}
+
+fun getPositionFromCoordinates(
+    backgroundPos: CoordinatesDp,
+    coords: Coordinates,
+    isOgre: Boolean = false
+): CoordinatesDp {
+    val moveLength = Settings.moveLength
+    var xPos = backgroundPos.x + (coords.x * moveLength).dp + Settings.margin.dp
+    var yPos = backgroundPos.y + (coords.y * moveLength).dp + Settings.margin.dp
+    if (isOgre) {
+        xPos -= 70.dp
+        yPos -= 70.dp
+    }
+    return CoordinatesDp(xPos, yPos)
 }
