@@ -34,11 +34,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     var chara = MainChara()
 
     private val _charaStateFlow =
-        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, position = chara.position))
+        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position))
     val charaStateFlow = _charaStateFlow.asStateFlow()
-
-    private var backgroundPos = Coordinates(-1, -1)
-    private var backgroundOrigPos = Coordinates(-1, -1)
 
     private val _endGame: MutableStateFlow<Boolean?> = MutableStateFlow(null)
     private val endGame = _endGame.asStateFlow()
@@ -46,11 +43,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     fun moveUp() {
 
         if (turn(Direction.UP)) {
+            _charaStateFlow.update {
+                it.copy(direction = Direction.UP)
+            }
             return
         }
 
         //gameViewModel.moveUp()
-        val coordinates = chara.position
+        val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
@@ -70,7 +70,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
         //gameViewModel.moveDown()
-        val coordinates = chara.position
+        val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
@@ -128,6 +128,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
+        jumpAnimation()
+
         level.field[coordinates.x][coordinates.y].removeIf { it.id == chara.id }
         val levelObjectList = level.field[newCoordinates.x][newCoordinates.y]
         //TODO: ConcurrentModificationException
@@ -155,6 +157,18 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         levelObjectList.add(chara)
         _charaStateFlow.update {
             it.copy(position = newCoordinates)
+        }
+    }
+
+    private fun jumpAnimation() {
+        _charaStateFlow.update {
+            it.copy(jump = true)
+        }
+        viewModelScope.launch {
+            delay(Settings.animDuration)
+            _charaStateFlow.update {
+                it.copy(jump = false)
+            }
         }
     }
 

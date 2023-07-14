@@ -9,22 +9,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.GroundType
 import kotlin.random.Random
 
 val backgroundLayout = computeBackgroundLayout()
 @Composable
-fun BackgroundComposable(backgroundPosition: CoordinatesDp) {
+fun BackgroundComposable(backgroundPosition: Offset) {
+
+    val tileSize = Settings.moveLength
 
     Row(modifier = Modifier
-        .offset(backgroundPosition.x, backgroundPosition.y)
+        .offset(backgroundPosition.x.dp, backgroundPosition.y.dp)
         .wrapContentSize(unbounded = true)) {
         for (row in backgroundLayout) {
             Column(modifier = Modifier.wrapContentSize(unbounded = true)) {
@@ -34,8 +36,8 @@ fun BackgroundComposable(backgroundPosition: CoordinatesDp) {
                         contentDescription = stringResource(id = R.string.ground),
                         modifier = Modifier
                             .wrapContentSize(unbounded = true)
-                            .width(80.dp)
-                            .height(80.dp)
+                            .width(tileSize.dp)
+                            .height(tileSize.dp)
                     )
                 }
             }
@@ -78,5 +80,5 @@ fun GroundType.getDrawableId()  = when (this) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun BackgroundPreview() {
-    BackgroundComposable(CoordinatesDp(405.dp, 440.dp))
+    BackgroundComposable(Offset(405f, 440f))
 }

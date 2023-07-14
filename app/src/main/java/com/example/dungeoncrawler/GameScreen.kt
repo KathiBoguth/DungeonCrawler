@@ -78,10 +78,28 @@ fun GameScreen(
 ) {
     val charaOffset: Offset by animateOffsetAsState(
         getOffset(
-            charaState.nudge,
-            charaState.direction
+            nudge = charaState.nudge,
+            jump = charaState.jump,
+            direction = charaState.direction
         )
     )
+
+    val density = LocalDensity.current
+    val configuration = LocalConfiguration.current
+    val adjustWidth = ((density.density - 2.55) * 200) //TODO: no idea how to calculate, not connected to density?
+    val adjustHeight = ((density.density - 2.45) * 200) //TODO: no idea how to calculate, not connected to density?
+    val backgroundOrigPosition = CoordinatesDp(
+        (configuration.screenWidthDp/2).dp + adjustWidth.dp,
+        (configuration.screenWidthDp/2).dp + adjustHeight.dp
+    )
+
+    val backgroundPosition by remember(key1 = charaState.position, key2 = backgroundOrigPosition) {
+        val moveLength = Settings.moveLength//* density.density
+        val xPosBackground = backgroundOrigPosition.x.minus((charaState.position.x*moveLength).dp)
+        val yPosBackground = backgroundOrigPosition.y.minus((charaState.position.y*moveLength).dp)
+        return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
+    }
+    val backgroundOffset: Offset by animateOffsetAsState(targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value))
     val charaSkin = when (charaState.direction) {
         Direction.UP -> R.drawable.chara_back
         Direction.DOWN -> R.drawable.chara_front
@@ -89,19 +107,7 @@ fun GameScreen(
         Direction.LEFT -> R.drawable.chara_left
     }
 
-    //var backgroundOrigPosition by remember { mutableStateOf(CoordinatesDp(0.dp, 0.dp))  }
-    val backgroundOrigPosition = CoordinatesDp(
-        (LocalConfiguration.current.screenWidthDp/2).dp,
-        (LocalConfiguration.current.screenHeightDp).dp
-    )
-    val backgroundPosition by remember(key1 = charaState.position, key2 = backgroundOrigPosition) {
-        val moveLength = Settings.moveLength
-        val xPosBackground = backgroundOrigPosition.x.minus((charaState.position.x*moveLength).dp)
-        val yPosBackground = backgroundOrigPosition.y.minus((charaState.position.y*moveLength).dp)
-        return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
-    }
-
-    BackgroundComposable(backgroundPosition)
+    BackgroundComposable(backgroundOffset)
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -185,47 +191,31 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun GamePreview() {
-    GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false,
+    GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false, jump = false,
         position = Coordinates(0,0)
     ),
         {}, {}, {}, {}, {}
     )
 }
 
-@Composable
-fun Coordinates.getPositionInPixels(
-    isOgre: Boolean = false,
-    backgroundPos: Coordinates
-): Pair<Float, Float> {
-    var xPos: Float
-    var yPos: Float
-    with(LocalDensity.current) {
-        val moveLength = Settings.moveLength.dp.toPx()
-        xPos = x * moveLength + backgroundPos.x + Settings.margin
-        yPos = y * moveLength + backgroundPos.y + Settings.margin
-        if (isOgre) {
-            xPos -= 70f.dp.toPx()
-            yPos -= 70f.dp.toPx()
-        }
+fun getOffset(jump: Boolean, nudge: Boolean, direction: Direction): Offset {
+
+    if (!jump && !nudge){
+        return Offset(0f, 0f)
+    }
+    if (jump){
+        return Offset(0f, -Settings.nudgeWidth)
     }
 
-    return Pair(xPos, yPos)
-}
 
-fun getOffset(nudge: Boolean, direction: Direction): Offset {
-
-    return if (!nudge) {
-        Offset(0f, 0f)
-    } else {
-        var deltaX = 0
-        var deltaY = 0
-        when (direction) {
-            Direction.UP -> deltaY = -1
-            Direction.DOWN -> deltaY = 1
-            Direction.LEFT -> deltaX = -1
-            Direction.RIGHT -> deltaX = 1
-        }
-
-        Offset(Settings.nudgeWidth * deltaX, Settings.nudgeWidth * deltaY)
+    var deltaX = 0
+    var deltaY = 0
+    when (direction) {
+        Direction.UP -> deltaY = -1
+        Direction.DOWN -> deltaY = 1
+        Direction.LEFT -> deltaX = -1
+        Direction.RIGHT -> deltaX = 1
     }
+
+    return Offset(Settings.nudgeWidth * deltaX, Settings.nudgeWidth * deltaY)
 }
