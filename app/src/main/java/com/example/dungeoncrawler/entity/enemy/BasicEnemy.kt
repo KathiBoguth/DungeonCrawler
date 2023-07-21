@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
 abstract class BasicEnemy(idEnemy: String,
-                          val skin: String,
                           val enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>):
     MovableEntity(LevelObjectType.ENEMY, idEnemy) {
 
@@ -21,9 +20,6 @@ abstract class BasicEnemy(idEnemy: String,
     abstract var speed: Int
     abstract var power: Int
 
-    //val positionChange: MutableStateFlow<LevelObjectPositionChangeDTO> = MutableStateFlow(
-    //    LevelObjectPositionChangeDTO(Coordinates(-1,-1), "")
-    //)
     val attackDamage: MutableStateFlow<EnemyDamageDTO> = MutableStateFlow(EnemyDamageDTO(0, Direction.UP, ""))
 
     var handler = Handler(Looper.getMainLooper())

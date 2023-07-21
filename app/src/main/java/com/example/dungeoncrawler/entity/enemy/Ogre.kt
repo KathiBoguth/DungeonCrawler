@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.abs
 
-class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(ogreId, "ogre", enemyPositionFlow) {
+class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(ogreId, enemyPositionFlow) {
 
     override var speed = 800
     override var power = 80
@@ -33,9 +33,10 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         if (nextDirection != direction ) {
             direction = nextDirection
         } else {
-            val newPosition = moveOneStep()
-            enemyPositionFlow.update { LevelObjectPositionChangeDTO(newPosition, id) }
+            position = moveOneStep()
+
         }
+        enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, id) }
     }
 
     private fun findChara(field: Array<Array<MutableList<LevelObject>>>): Coordinates {

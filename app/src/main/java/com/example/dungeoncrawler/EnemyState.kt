@@ -10,5 +10,6 @@ data class EnemyState(
     val jump: Boolean,
     val direction: Direction,
     val position: Coordinates,
-    val type: EnemyEnum
+    val type: EnemyEnum,
+    val flashRed: Boolean
 )

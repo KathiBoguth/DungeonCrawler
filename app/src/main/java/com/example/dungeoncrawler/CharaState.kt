@@ -7,5 +7,6 @@ data class CharaState(
     val nudge: Boolean,
     val jump: Boolean,
     val direction: Direction,
-    val position: Coordinates
+    val position: Coordinates,
+    val flashRed: Boolean
 )

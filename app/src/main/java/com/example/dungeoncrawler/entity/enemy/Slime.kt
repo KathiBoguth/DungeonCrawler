@@ -5,7 +5,7 @@ import com.example.dungeoncrawler.entity.LevelObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
-class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(slimeId, "slime", enemyPositionFlow) {
+class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(slimeId, enemyPositionFlow) {
 
     override var speed = 800
     override var power = 20
@@ -28,11 +28,14 @@ class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
                 2 -> Direction.LEFT
                 else -> Direction.UP
             }
+
         } else {
-            val newPosition = moveOneStep()
-            enemyPositionFlow.update {
-                LevelObjectPositionChangeDTO(newPosition, id)
+            if(canWalk(field)){
+                position = moveOneStep()
             }
+        }
+        enemyPositionFlow.update {
+            LevelObjectPositionChangeDTO(position, direction, id)
         }
     }
 }

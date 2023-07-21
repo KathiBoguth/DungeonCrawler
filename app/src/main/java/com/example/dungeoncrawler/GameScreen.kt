@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -96,7 +100,7 @@ fun GameScreen(
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
-    BackgroundComposable(backgroundPosition)
+    BackgroundComposable(backgroundPosition, enemiesState)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Character(charaState)
@@ -104,10 +108,7 @@ fun GameScreen(
         Controls(interact, moveUp, moveDown, moveLeft, moveRight)
 
         //enemies
-        enemiesState.forEach { enemy ->
 
-            Enemy(enemy, backgroundPosition)
-        }
     }
 
 }
@@ -154,6 +155,13 @@ private fun Character(charaState: CharaState) {
         )
     )
 
+    val flashColor = if (charaState.flashRed) {
+        colorResource(id = R.color.red_semitransparent)
+    } else {
+        colorResource(id = R.color.transparent)
+    }
+    val animatedFlashColor: Color by animateColorAsState(targetValue = flashColor)
+
     val charaSkin = when (charaState.direction) {
         Direction.UP -> R.drawable.chara_back
         Direction.DOWN -> R.drawable.chara_front
@@ -171,56 +179,11 @@ private fun Character(charaState: CharaState) {
             modifier = Modifier
                 .width(62.dp)
                 .height(73.dp)
-                .offset(charaOffset.x.dp, charaOffset.y.dp)
+                .offset(charaOffset.x.dp, charaOffset.y.dp),
+            colorFilter = ColorFilter.tint(animatedFlashColor, BlendMode.SrcAtop)
         )
     }
 }
-
-@Composable
-private fun Enemy(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
-    val enemyOffset: Offset by animateOffsetAsState(
-        getOffset(
-            nudge = enemyState.nudge,
-            jump = enemyState.jump,
-            direction = enemyState.direction
-        )
-    )
-
-    val skin = when (enemyState.type) {
-        EnemyEnum.SLIME -> when (enemyState.direction) {
-            Direction.UP -> R.drawable.slime_back
-            Direction.DOWN -> R.drawable.slime_front
-            Direction.LEFT -> R.drawable.slime_left
-            Direction.RIGHT -> R.drawable.slime_right
-        }
-        EnemyEnum.WOLF -> when (enemyState.direction) {
-            Direction.UP -> R.drawable.wolf_back
-            Direction.DOWN -> R.drawable.wolf_front
-            Direction.LEFT -> R.drawable.wolf_left
-            Direction.RIGHT -> R.drawable.wolf_right
-        }
-        EnemyEnum.OGRE -> when (enemyState.direction) {
-            Direction.UP -> R.drawable.ogre_back
-            Direction.DOWN -> R.drawable.ogre_back
-            Direction.LEFT -> R.drawable.ogre_left
-            Direction.RIGHT -> R.drawable.ogre_right
-        }
-    }
-    val position = getPositionFromCoordinates(backgroundPos, enemyState.position, enemyState.type == EnemyEnum.OGRE)
-
-    Box(modifier = Modifier.fillMaxSize().offset(position.x, position.y)){
-        Image(
-            painter = painterResource(id = skin),
-            contentDescription = stringResource(id = R.string.enemy),
-            modifier = Modifier
-                .width(62.dp)
-                .height(73.dp)
-                .offset(enemyOffset.x.dp, enemyOffset.y.dp)
-        )
-    }
-
-}
-
 
 @Preview
 @Composable
@@ -261,9 +224,9 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
 @Composable
 fun GamePreview() {
     GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false, jump = false,
-        position = Coordinates(0,0)
+        position = Coordinates(0,0), flashRed = false
     ),
-        enemiesState = listOf(),
+        enemiesState = listOf(EnemyState("", false, false, Direction.DOWN, Coordinates(-2,-5), EnemyEnum.SLIME, flashRed = false)),
         {}, {}, {}, {}, {}
     )
 }
@@ -287,19 +250,4 @@ fun getOffset(jump: Boolean, nudge: Boolean, direction: Direction): Offset {
     }
 
     return Offset(Settings.nudgeWidth * deltaX, Settings.nudgeWidth * deltaY)
-}
-
-fun getPositionFromCoordinates(
-    backgroundPos: CoordinatesDp,
-    coords: Coordinates,
-    isOgre: Boolean = false
-): CoordinatesDp {
-    val moveLength = Settings.moveLength
-    var xPos = backgroundPos.x + (coords.x * moveLength).dp + Settings.margin.dp
-    var yPos = backgroundPos.y + (coords.y * moveLength).dp + Settings.margin.dp
-    if (isOgre) {
-        xPos -= 70.dp
-        yPos -= 70.dp
-    }
-    return CoordinatesDp(xPos, yPos)
 }

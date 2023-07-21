@@ -44,7 +44,7 @@ class Level(
     lateinit var armors: List<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
     val movableEntitiesList: MutableList<MovableEntity> = mutableListOf()
-    val enemyPositionFlow = MutableStateFlow(LevelObjectPositionChangeDTO(Coordinates(-1,-1), ""))
+    val enemyPositionFlow = MutableStateFlow(LevelObjectPositionChangeDTO(Coordinates(-1,-1), Direction.DOWN,""))
 
     val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 

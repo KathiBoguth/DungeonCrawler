@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlin.math.max
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -35,14 +34,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun onEnemyAttack(damage: Int, enemyId: String) {
-        val protection = chara.armor?.protection ?: 0
-        chara.health -= max(0, (damage - (chara.baseDefense + protection)))
-        if (chara.health <= 0) {
-            killedBy = enemyId
-            endGame.value = false
-        }
-    }
+
 
 
 }

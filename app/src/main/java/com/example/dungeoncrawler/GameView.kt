@@ -27,7 +27,6 @@ import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.armor.Armor
-import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
@@ -141,7 +140,7 @@ class GameView : Fragment() {
     }
 
     private fun setupObserver(view: View) {
-        setupEnemyObservers(view)
+        //setupEnemyObservers(view)
 
         charaWeaponObserver = Observer<Weapon> {
             showWeapon(it.id)
@@ -234,24 +233,7 @@ class GameView : Fragment() {
         enemyPositionChangeFlowCollectionJobList.clear()
     }
 
-    private fun setupEnemyObservers(view: View) {
-//        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
-//            enemyPositionChangeFlowCollectionJobList.add(
-//                scope.launch {
-//                    it.positionChange.collect { dto ->
-//                        onEnemyMove(view, dto)
-//                    }
-//                }
-//            )
-//            enemyAttackFlowCollectionJobList.add(
-//                scope.launch {
-//                    it.attackDamage.collect { dto ->
-//                        onEnemyAttack(dto, view)
-//                    }
-//                }
-//            )
-//        }
-    }
+
 
     private fun hideAllEnemies() {
 //        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach{
@@ -279,23 +261,7 @@ class GameView : Fragment() {
         updateStats()
     }
 
-    private fun onEnemyAttack(
-        it: EnemyDamageDTO,
-        view: View
-    ) {
-        gameViewModel.onEnemyAttack(it.damage, it.id)
-        val charaView = getGameObjectView(view, gameViewModel.chara.id)
-        flashRed(charaView)
 
-        binding?.health?.text = String.format(
-            resources.getString(
-                R.string.health,
-                gameViewModel.chara.health
-            )
-        )
-        val enemyView = getGameObjectView(view, it.id)
-        //nudge(enemyView, it.id, it.direction)
-    }
 
     private fun onEnemyMove(
         view: View,

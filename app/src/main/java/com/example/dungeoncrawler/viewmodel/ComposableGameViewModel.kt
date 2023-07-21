@@ -1,6 +1,8 @@
 package com.example.dungeoncrawler.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.toMutableStateList
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +19,7 @@ import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
+import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.enemy.Slime
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import kotlin.math.max
 import kotlin.math.min
 
 class ComposableGameViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,7 +43,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     var chara = MainChara()
 
     private val _charaStateFlow =
-        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position))
+        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position, flashRed = false))
     val charaStateFlow = _charaStateFlow.asStateFlow()
 
     private val _enemiesStateFlow = MutableStateFlow(listOf<EnemyState>())
@@ -434,7 +438,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 it.copy(position = chara.position)
             }
             _enemiesStateFlow.update {
-                val list = mutableListOf<EnemyState>()
+                val list = mutableStateListOf<EnemyState>()
                 level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach{
                     val enemyType = when(it as BasicEnemy){
                         is Slime -> EnemyEnum.SLIME
@@ -442,24 +446,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                         is Ogre -> EnemyEnum.OGRE
                         else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
                     }
-                    list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType ))
+                    list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType, flashRed = false ))
                 }
                 return@update list
             }
-            // TODO: get working: enemies that move
-//            viewModelScope.launch {
-//                level.enemyPositionFlow.collect{ changeDto ->
-//                    _enemiesStateFlow.update {
-//                        val newList = mutableListOf<EnemyState>()
-//                        it.forEach{enemyState ->
-//                            if (enemyState.id == changeDto.id){
-//                                newList.add(enemyState.copy(position = changeDto.newPosition))
-//                            }
-//                        }
-//                        return@update newList
-//                    }
-//                }
-//            }
+            setupEnemyPositionChangeCollector()
         }
 
         viewModelScope.launch {
@@ -477,7 +468,106 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     }
 
+    private fun setupEnemyPositionChangeCollector() {
+        viewModelScope.launch {
+            level.enemyPositionFlow.collect { changeDto ->
+                _enemiesStateFlow.update {
+                    val newList = mutableStateListOf<EnemyState>()
+                    it.forEach { enemyState ->
+                        if (enemyState.id == changeDto.id) {
+                            newList.add(enemyState.copy(position = changeDto.newPosition, direction = changeDto.newDirection))
+                        } else {
+                            newList.add(enemyState)
+                        }
+                    }
+                    return@update newList
+                }
+            }
+        }
+    }
+
+    private fun setupEnemyObservers() {
+        level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
+            viewModelScope.launch {
+                it.attackDamage.collect { dto ->
+                    onEnemyAttack(dto)
+                }
+            }
+        }
+//        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
+//            enemyPositionChangeFlowCollectionJobList.add(
+//                scope.launch {
+//                    it.positionChange.collect { dto ->
+//                        onEnemyMove(view, dto)
+//                    }
+//                }
+//            )
+//            enemyAttackFlowCollectionJobList.add(
+//                scope.launch {
+//                    it.attackDamage.collect { dto ->
+//                        onEnemyAttack(dto, view)
+//                    }
+//                }
+//            )
+//        }
+    }
+
+    private fun onEnemyAttack(
+        damageDTO: EnemyDamageDTO
+    ) {
+        val protection = chara.armor?.protection ?: 0
+        chara.health -= max(0, (damageDTO.damage - (chara.baseDefense + protection)))
+        if (chara.health <= 0) {
+            //TODO
+            //killedBy = enemyId
+            //endGame.value = false
+        }
+
+        flashCharaRed()
+
+//        binding?.health?.text = String.format(
+//            resources.getString(
+//                R.string.health,
+//                gameViewModel.chara.health
+//            )
+//        )
+//        val enemyView = getGameObjectView(view, it.id)
+//        //nudge(enemyView, it.id, it.direction)
+    }
+
+    private fun flashEnemiesRed(id: String) {
+        _enemiesStateFlow.update {enemiesState ->
+            val newList = enemiesState.toMutableStateList()
+            val enemyState = enemiesState.first { it.id == id }
+            newList[enemiesState.indexOfFirst { it.id == id }] = enemyState.copy(flashRed = true)
+
+            return@update newList
+        }
+        viewModelScope.launch {
+            delay(Settings.animDuration)
+            _enemiesStateFlow.update {enemiesState ->
+                val newList = enemiesState.toMutableStateList()
+                val enemyState = enemiesState.first { it.id == id }
+                newList[enemiesState.indexOfFirst { it.id == id }] = enemyState.copy(flashRed = false)
+
+                return@update newList
+            }
+        }
+    }
+
+    private fun flashCharaRed() {
+        _charaStateFlow.update {
+            it.copy(flashRed = true)
+        }
+        viewModelScope.launch {
+            delay(Settings.animDuration)
+            _charaStateFlow.update {
+                it.copy(flashRed = false)
+            }
+        }
+    }
 }
+
 
 class MissingEnemyTypeException(message: String): Exception(message){
 
