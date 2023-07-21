@@ -2,7 +2,9 @@ package com.example.dungeoncrawler
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,16 +18,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -38,6 +43,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,7 +77,8 @@ fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel()) {
         gameViewModel::moveUp,
         gameViewModel::moveDown,
         gameViewModel::moveLeft,
-        gameViewModel::moveRight
+        gameViewModel::moveRight,
+        0 // TODO
     )
 }
 
@@ -83,6 +91,7 @@ fun GameScreen(
     moveDown: () -> Unit,
     moveLeft: () -> Unit,
     moveRight: () -> Unit,
+    levelCount: Int
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -105,9 +114,7 @@ fun GameScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Character(charaState)
 
-        Controls(interact, moveUp, moveDown, moveLeft, moveRight)
-
-        //enemies
+        Controls(interact, moveUp, moveDown, moveLeft, moveRight, charaState.gold, charaState.health, levelCount)
 
     }
 
@@ -119,7 +126,10 @@ private fun Controls(
     moveUp: () -> Unit,
     moveDown: () -> Unit,
     moveLeft: () -> Unit,
-    moveRight: () -> Unit
+    moveRight: () -> Unit,
+    gold: Int,
+    health: Int,
+    levelCount: Int
 ) {
     Box(
         modifier = Modifier
@@ -142,6 +152,15 @@ private fun Controls(
     ) {
         ControlPad(moveUp, moveDown, moveLeft, moveRight)
     }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(76.dp, 56.dp),
+        contentAlignment = TopStart
+    ) {
+        Stats(gold, health, levelCount)
+    }
 }
 
 @Composable
@@ -160,7 +179,7 @@ private fun Character(charaState: CharaState) {
     } else {
         colorResource(id = R.color.transparent)
     }
-    val animatedFlashColor: Color by animateColorAsState(targetValue = flashColor)
+    val animatedFlashColor: Color by animateColorAsState(targetValue = flashColor, animationSpec = tween(durationMillis = Settings.animDuration.toInt()) )
 
     val charaSkin = when (charaState.direction) {
         Direction.UP -> R.drawable.chara_back
@@ -220,14 +239,46 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun Stats(gold: Int, health: Int, levelCount: Int) {
+    Column{
+        Box(modifier = Modifier.background(colorResource(id = R.color.blue_transparent) ),
+            contentAlignment = Center
+        ){
+            StatsText(text = stringResource(id = R.string.gold, gold))
+        }
+        Box(modifier = Modifier.background(colorResource(id = R.color.blue_transparent))
+        ){
+            StatsText(stringResource(id = R.string.health, health))
+
+        }
+        Box(modifier = Modifier.background(colorResource(id = R.color.blue_transparent))
+        ) {
+            StatsText(text = stringResource(id = R.string.level, levelCount))
+        }
+    }
+
+}
+
+@Composable
+fun StatsText(text: String) {
+    Text(modifier = Modifier
+        .padding(4.dp)
+        .width(65.dp)
+        .height(22.dp),
+        text = text,
+        fontFamily = FontFamily(Font(R.font.carrois_gothic_sc)),
+        color = Color.White)
+}
+
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun GamePreview() {
     GameScreen(charaState = CharaState(direction = Direction.DOWN, nudge = false, jump = false,
-        position = Coordinates(0,0), flashRed = false
+        position = Coordinates(0,0), flashRed = false, gold = 0, health = 0
     ),
         enemiesState = listOf(EnemyState("", false, false, Direction.DOWN, Coordinates(-2,-5), EnemyEnum.SLIME, flashRed = false)),
-        {}, {}, {}, {}, {}
+        {}, {}, {}, {}, {}, levelCount = 0
     )
 }
 

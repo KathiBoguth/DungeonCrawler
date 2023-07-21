@@ -8,5 +8,7 @@ data class CharaState(
     val jump: Boolean,
     val direction: Direction,
     val position: Coordinates,
-    val flashRed: Boolean
+    val flashRed: Boolean,
+    val health: Int,
+    val gold: Int
 )

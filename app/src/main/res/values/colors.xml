@@ -17,5 +17,6 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="disabled_button">#AB777777</color>
     <color name="white_semitransparant">#ABFFFFFF</color>
+    <color name="blue_transparent">#B4212C68</color>
 
 </resources>

@@ -43,7 +43,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     var chara = MainChara()
 
     private val _charaStateFlow =
-        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position, flashRed = false))
+        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position, flashRed = false, health = Settings.healthBaseValue, gold = 0))
     val charaStateFlow = _charaStateFlow.asStateFlow()
 
     private val _enemiesStateFlow = MutableStateFlow(listOf<EnemyState>())
@@ -435,7 +435,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             level = Level(chara)
             chara.position = findCoordinate(chara.id)
             _charaStateFlow.update {
-                it.copy(position = chara.position)
+                it.copy(position = chara.position, health = chara.health, gold = chara.gold)
             }
             _enemiesStateFlow.update {
                 val list = mutableStateListOf<EnemyState>()
@@ -451,6 +451,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 return@update list
             }
             setupEnemyPositionChangeCollector()
+            setupEnemyCollector()
         }
 
         viewModelScope.launch {
@@ -486,7 +487,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    private fun setupEnemyObservers() {
+    private fun setupEnemyCollector() {
         level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
             viewModelScope.launch {
                 it.attackDamage.collect { dto ->
@@ -517,6 +518,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     ) {
         val protection = chara.armor?.protection ?: 0
         chara.health -= max(0, (damageDTO.damage - (chara.baseDefense + protection)))
+        _charaStateFlow.update {
+            it.copy(health = chara.health)
+        }
+
         if (chara.health <= 0) {
             //TODO
             //killedBy = enemyId
