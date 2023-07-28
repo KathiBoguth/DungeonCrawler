@@ -395,6 +395,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
         // TODO: animate on screen
         //attackedEntityAnimation.value = attackedEnemy.id
+        flashEnemiesRed(attackedEnemy.id)
         if (attackedEnemy.health <= 0) {
             onEnemyDefeated(attackedEnemy)
         }
@@ -582,6 +583,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    // TODO: enemy flash red not working
     private fun flashEnemiesRed(id: String) {
         _enemiesStateFlow.update {enemiesState ->
             val newList = enemiesState.toMutableStateList()

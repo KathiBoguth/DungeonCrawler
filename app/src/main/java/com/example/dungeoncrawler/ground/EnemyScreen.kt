@@ -1,6 +1,8 @@
 package com.example.dungeoncrawler.ground
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,7 +39,7 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             nudge = enemyState.nudge,
             jump = enemyState.jump,
             direction = enemyState.direction
-        )
+        ), label = ""
     )
     val position by remember(key1 = enemyState.position, key2 = backgroundPos) {
         val position = getPositionFromCoordinates(enemyState.position, enemyState.type == EnemyEnum.OGRE)
@@ -41,7 +47,16 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
     }
 
     val positionAsOffset: Offset by
-    animateOffsetAsState(Offset(position.x.value, position.y.value))
+    animateOffsetAsState(Offset(position.x.value, position.y.value), label = "enemy offset")
+
+    val flashColor = if (enemyState.flashRed) {
+        colorResource(id = R.color.red_semitransparent)
+    } else {
+        colorResource(id = R.color.transparent)
+    }
+    val animatedFlashColor: Color by animateColorAsState(targetValue = flashColor, animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
+        label = "enemy flash red"
+    )
 
 
     val skin = when (enemyState.type) {
@@ -75,7 +90,8 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             modifier = Modifier
                 .width(62.dp)
                 .height(73.dp)
-                .offset(enemyOffset.x.dp, enemyOffset.y.dp)
+                .offset(enemyOffset.x.dp, enemyOffset.y.dp),
+            colorFilter = ColorFilter.tint(animatedFlashColor, BlendMode.SrcAtop)
         )
     }
 }
