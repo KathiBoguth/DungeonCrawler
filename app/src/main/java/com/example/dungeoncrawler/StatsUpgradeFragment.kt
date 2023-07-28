@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.dungeoncrawler.mainMenu.UpgradeStatsScreen
+import com.example.dungeoncrawler.screen.mainMenu.UpgradeStatsScreen
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 class StatsUpgradeFragment: Fragment() {
@@ -31,7 +31,7 @@ class StatsUpgradeFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        menuViewModel.loadStats(requireContext())
+        menuViewModel.loadStats()
     }
 
 }

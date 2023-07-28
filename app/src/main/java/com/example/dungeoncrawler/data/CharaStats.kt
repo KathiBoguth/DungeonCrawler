@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler
+package com.example.dungeoncrawler.data
 
 data class CharaStats(
     val health: Int,

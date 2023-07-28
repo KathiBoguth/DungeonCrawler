@@ -14,14 +14,11 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.res.ResourcesCompat
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.dungeoncrawler.databinding.FragmentGameViewBinding
 import com.example.dungeoncrawler.entity.Coordinates
@@ -29,15 +26,13 @@ import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import com.example.dungeoncrawler.screen.gamescreen.GameScreen
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 import com.example.dungeoncrawler.viewmodel.GameViewModel
-import com.example.dungeoncrawler.viewmodel.MenuViewModel
-import com.example.dungeoncrawler.viewmodel.dataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 
@@ -90,7 +85,8 @@ class GameView : Fragment() {
 
             setContent {
                 GameScreen(
-                    gameViewModel = composableGameViewModel
+                    gameViewModel = composableGameViewModel,
+                    onNavigate = { dest -> findNavController().navigate(dest) },
                 )
             }
         }
@@ -163,25 +159,7 @@ class GameView : Fragment() {
             attackedEntityAnimationObserver
         )
 
-        lifecycleScope.launch {
-            gameViewModel.endGame.collect { victory ->
-                if (victory == null) {
-                    return@collect
-                }
-                removeEnemyObservers()
-                hideAllEnemies()
-                saveGold()
-                if (findNavController().currentDestination?.id == R.id.gameView) {
-                    if (victory) {
-                        findNavController().navigate(R.id.action_gameView_to_victoryView)
-                    } else {
-                        findNavController().navigate(R.id.action_gameView_to_gameOverView)
-                    }
-                    this.cancel()
-                }
 
-            }
-        }
 
         updateLevelObserver = Observer<Boolean> {
             updateLevel()
@@ -246,15 +224,7 @@ class GameView : Fragment() {
 //        }
     }
 
-    private fun saveGold() {
-        scope.launch {
-            requireContext().dataStore.edit { preferences ->
-                val oldGold = preferences[intPreferencesKey(MenuViewModel.GOLD_KEY)]
-                val newGold = oldGold?.plus(gameViewModel.chara.gold) ?: gameViewModel.chara.gold
-                preferences[intPreferencesKey(MenuViewModel.GOLD_KEY)] = newGold
-            }
-        }
-    }
+
 
     private fun updateLevel() {
         removeGameObjects()

@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler
+package com.example.dungeoncrawler.data
 
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction

@@ -3,13 +3,12 @@ package com.example.dungeoncrawler.viewmodel
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.toMutableStateList
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dungeoncrawler.CharaState
-import com.example.dungeoncrawler.EnemyState
+import com.example.dungeoncrawler.data.CharaState
+import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.entity.CharaStats
+import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
@@ -26,6 +25,7 @@ import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import com.example.dungeoncrawler.service.DataStoreManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,7 +50,13 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     val enemiesStateFlow = _enemiesStateFlow.asStateFlow()
 
     private val _endGame: MutableStateFlow<Boolean?> = MutableStateFlow(null)
-    private val endGame = _endGame.asStateFlow()
+    val endGame = _endGame.asStateFlow()
+
+    private var dataStoreManager: DataStoreManager? = null
+
+    fun initDataStoreManager(newManager: DataStoreManager){
+        dataStoreManager = newManager
+    }
 
     fun moveUp() {
 
@@ -455,14 +461,13 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
         viewModelScope.launch {
-            getApplication<Application>().dataStore.data.collect { preferences ->
-                val health = preferences[intPreferencesKey(MenuViewModel.HEALTH_KEY)]
-                    ?: Settings.healthBaseValue
-                val attack = preferences[intPreferencesKey(MenuViewModel.ATTACK_KEY)]
-                    ?: Settings.attackBaseValue
-                val defense = preferences[intPreferencesKey(MenuViewModel.DEFENSE_KEY)]
-                    ?: Settings.defenseBaseValue
-                val charaStats = CharaStats(health, attack, defense)
+            dataStoreManager?.getDataFromDataStore()?.collect{
+                val charaStats = CharaStats(
+                    health = it.health,
+                    attack = it.attack,
+                    defense = it.defense,
+                    gold = it.gold
+                )
                 chara.setBaseValues(charaStats)
             }
         }
@@ -516,6 +521,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun onEnemyAttack(
         damageDTO: EnemyDamageDTO
     ) {
+        nudgeEnemy(damageDTO)
+
         val protection = chara.armor?.protection ?: 0
         chara.health -= max(0, (damageDTO.damage - (chara.baseDefense + protection)))
         _charaStateFlow.update {
@@ -525,7 +532,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         if (chara.health <= 0) {
             //TODO
             //killedBy = enemyId
-            //endGame.value = false
+            //hideAllEnemies()
+            saveGold()
+            viewModelScope.launch {
+                _endGame.emit(false)
+            }
         }
 
         flashCharaRed()
@@ -538,6 +549,37 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 //        )
 //        val enemyView = getGameObjectView(view, it.id)
 //        //nudge(enemyView, it.id, it.direction)
+    }
+
+    private fun saveGold() {
+        viewModelScope.launch {
+            dataStoreManager?.saveGatheredGoldToDataStore(chara.gold)
+        }
+    }
+
+    private fun nudgeEnemy(damageDTO: EnemyDamageDTO) {
+        _enemiesStateFlow.update { enemiesState ->
+            val newList = enemiesState.toMutableStateList()
+            val enemyState = enemiesState.firstOrNull { it.id == damageDTO.id }
+            if(enemyState != null){
+                newList[enemiesState.indexOfFirst { it.id == damageDTO.id }] =
+                    enemyState.copy(nudge = true)
+            }
+            return@update newList
+        }
+        viewModelScope.launch {
+            delay(Settings.animDuration)
+            _enemiesStateFlow.update { enemiesState ->
+                val newList = enemiesState.toMutableStateList()
+                val enemyState = enemiesState.firstOrNull { it.id == damageDTO.id }
+                if(enemyState != null) {
+                    newList[enemiesState.indexOfFirst { it.id == damageDTO.id }] =
+                        enemyState.copy(nudge = false)
+                }
+
+                return@update newList
+            }
+        }
     }
 
     private fun flashEnemiesRed(id: String) {

@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
-import com.example.dungeoncrawler.mainMenu.MenuTitle
-import com.example.dungeoncrawler.mainMenu.NavigationButton
+import com.example.dungeoncrawler.screen.mainMenu.MenuTitle
+import com.example.dungeoncrawler.screen.mainMenu.NavigationButton
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 @Composable

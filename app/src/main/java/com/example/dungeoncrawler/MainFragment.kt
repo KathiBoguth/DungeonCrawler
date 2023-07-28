@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.dungeoncrawler.mainMenu.MainMenuScreen
+import com.example.dungeoncrawler.screen.mainMenu.MainMenuScreen
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 class MainFragment : Fragment() {

@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler
+package com.example.dungeoncrawler.data
 
 data class StatsUpgradeUiState (
     val initialData: CharaStats = CharaStats(0, 0, 0, 0),

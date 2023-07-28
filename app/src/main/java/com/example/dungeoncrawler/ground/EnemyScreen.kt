@@ -17,14 +17,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.dungeoncrawler.EnemyState
+import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
-import com.example.dungeoncrawler.getOffset
+import com.example.dungeoncrawler.screen.gamescreen.getOffset
 
 @Composable
 fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {

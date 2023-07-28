@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler.mainMenu
+package com.example.dungeoncrawler.screen.mainMenu
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
+import com.example.dungeoncrawler.service.DataStoreManager
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 
@@ -49,6 +50,7 @@ fun MainMenuScreen(
 
     menuViewModel.setupMediaPlayer(LocalContext.current)
     menuViewModel.startMediaPlayer()
+    menuViewModel.initDataStoreManager(DataStoreManager(LocalContext.current))
 
     MainMenuScreen(onNavigate = onNavigate, pauseMusicPlayer = menuViewModel::pauseMediaPlayer)
 }

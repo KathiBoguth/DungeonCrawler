@@ -1,6 +1,5 @@
-package com.example.dungeoncrawler.mainMenu
+package com.example.dungeoncrawler.screen.mainMenu
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 import com.example.dungeoncrawler.R
-import com.example.dungeoncrawler.StatsUpgradeUiState
+import com.example.dungeoncrawler.data.StatsUpgradeUiState
 
 @Composable
 fun UpgradeStatsScreen(
@@ -43,8 +42,8 @@ fun UpgradeStatsScreen(
 ) {
     val state by menuViewModel.uiState.collectAsState()
 
-    fun saveAndReturnToMain(context: Context) {
-        menuViewModel.returnToMain(onNavigate, R.id.action_statsUpgradeFragment_to_mainFragment, context)
+    fun saveAndReturnToMain() {
+        menuViewModel.returnToMain(onNavigate, R.id.action_statsUpgradeFragment_to_mainFragment)
     }
     UpgradeStatsScreen(
         statsUpgradeUiState = state,
@@ -63,7 +62,7 @@ fun UpgradeStatsScreen(
 @Composable
 fun  UpgradeStatsScreen(
     statsUpgradeUiState: StatsUpgradeUiState,
-    saveAndReturnToMain: (Context) -> Unit,
+    saveAndReturnToMain: () -> Unit,
     onHealthPlusButtonClicked: () -> Unit,
     onHealthMinusButtonClicked: () -> Unit,
     onAttackPlusButtonClicked: () -> Unit,
@@ -115,14 +114,13 @@ fun  UpgradeStatsScreen(
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            val context = LocalContext.current
             val returnButtonText = if (statsUpgradeUiState.isAnyUpgradeSelected){
                 stringResource(id = R.string.applyAndReturn)
             } else {
                 stringResource(id = R.string.returnToMain)
             }
             MenuButton(stringResource(id = R.string.reset), enabled = statsUpgradeUiState.isAnyUpgradeSelected) {reset()}
-            MenuButton(text = returnButtonText) { saveAndReturnToMain(context) }
+            MenuButton(text = returnButtonText) { saveAndReturnToMain() }
         }
     }
 }

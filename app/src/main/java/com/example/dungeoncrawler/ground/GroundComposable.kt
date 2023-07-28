@@ -16,7 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.dungeoncrawler.EnemyState
+import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.CoordinatesDp

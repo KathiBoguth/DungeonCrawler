@@ -2,6 +2,7 @@ package com.example.dungeoncrawler.entity
 
 import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.weapon.Weapon
 
@@ -36,10 +37,4 @@ class MainChara: MovableEntity(LevelObjectType.MAIN_CHARA, "character") {
         baseDefense = charaStats.defense
     }
 }
-
-data class CharaStats(
-    val health: Int,
-    val attack: Int,
-    val defense: Int
-)
 

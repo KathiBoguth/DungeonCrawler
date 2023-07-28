@@ -2,15 +2,14 @@ package com.example.dungeoncrawler.viewmodel
 
 import android.content.Context
 import android.media.MediaPlayer
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dungeoncrawler.CharaStats
+import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.R
-import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.StatsUpgradeUiState
+import com.example.dungeoncrawler.data.DataStoreData
+import com.example.dungeoncrawler.data.StatsUpgradeUiState
+import com.example.dungeoncrawler.service.DataStoreManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
@@ -31,14 +30,12 @@ class MenuViewModel : ViewModel() {
         const val HEALTH_UPGRADE_MULTIPLIER = 5
         const val COST_PER_UPGRADE = 50
         const val SAVED_STATS_KEY = "savedStats"
+    }
 
-        const val HEALTH_KEY = "healthValue"
-        const val ATTACK_KEY = "attackValue"
-        const val DEFENSE_KEY = "defenseValue"
-        const val GOLD_KEY = "goldValue"
-        const val HEALTH_UPGRADE_COUNT_KEY = "healthUpgradeCount"
-        const val ATTACK_UPGRADE_COUNT_KEY = "attackUpgradeCount"
-        const val DEFENSE_UPGRADE_COUNT_KEY = "defenseUpgradeCount"
+    private var dataStoreManager: DataStoreManager? = null
+
+    fun initDataStoreManager(newManager: DataStoreManager){
+        dataStoreManager = newManager
     }
 
     var initialData = CharaStats(0, 0, 0, 0)
@@ -198,20 +195,13 @@ class MenuViewModel : ViewModel() {
         }
     }
 
-    fun loadStats(context: Context) {
+    fun loadStats() {
 
         viewModelScope.launch {
-            context.dataStore.data.collect{preferences ->
-                val health = preferences[intPreferencesKey(HEALTH_KEY)] ?: Settings.healthBaseValue
-                val healthUpgradeCount = preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] ?: 0
-                val attack = preferences[intPreferencesKey(ATTACK_KEY)] ?: Settings.attackBaseValue
-                val attackUpgradeCount = preferences[intPreferencesKey(ATTACK_UPGRADE_COUNT_KEY)] ?: 0
-                val defense = preferences[intPreferencesKey(DEFENSE_KEY)] ?: Settings.defenseBaseValue
-                val defenseUpgradeCount = preferences[intPreferencesKey(DEFENSE_UPGRADE_COUNT_KEY)] ?: 0
-                gold = preferences[intPreferencesKey(GOLD_KEY)] ?: 0
-
-                initialData = CharaStats(health, attack, defense, gold)
-                initialUpgradeCount = CharaStats(healthUpgradeCount, attackUpgradeCount, defenseUpgradeCount, 0)
+            dataStoreManager?.getDataFromDataStore()?.collect{
+                initialData = CharaStats(it.health, it.attack, it.defense, it.gold)
+                gold = it.gold
+                initialUpgradeCount = CharaStats(it.healthUpgradeCount, it.attackUpgradeCount, it.defenseUpgradeCount, 0)
                 // TODO: get this and fix this
                 _statsUpgradeUiState.update {
                     StatsUpgradeUiState(
@@ -232,20 +222,24 @@ class MenuViewModel : ViewModel() {
                 }
             }
 
+
+
+
         }
 
     }
-    private fun saveUpgrades(context: Context) {
+    private fun saveUpgrades() {
         viewModelScope.launch {
-            context.dataStore.edit { preferences ->
-                preferences[intPreferencesKey(HEALTH_KEY)] = initialData.health + (_statsUpgradeUiState.value.healthUpgrade * HEALTH_UPGRADE_MULTIPLIER)
-                preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.healthUpgrade + initialUpgradeCount.health
-                preferences[intPreferencesKey(ATTACK_KEY)] = initialData.attack + _statsUpgradeUiState.value.attackUpgrade
-                preferences[intPreferencesKey(ATTACK_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.attackUpgrade + initialUpgradeCount.attack
-                preferences[intPreferencesKey(DEFENSE_KEY)] = initialData.defense + _statsUpgradeUiState.value.defenseUpgrade
-                preferences[intPreferencesKey(DEFENSE_UPGRADE_COUNT_KEY)] = _statsUpgradeUiState.value.defenseUpgrade + initialUpgradeCount.defense
-                preferences[intPreferencesKey(GOLD_KEY)] = _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost
-            }
+            val dataStoreData = DataStoreData(
+                health = initialData.health + (_statsUpgradeUiState.value.healthUpgrade * HEALTH_UPGRADE_MULTIPLIER),
+                attack = initialData.attack + _statsUpgradeUiState.value.attackUpgrade,
+                defense = initialData.defense + _statsUpgradeUiState.value.defenseUpgrade,
+                gold = _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost,
+                healthUpgradeCount = _statsUpgradeUiState.value.healthUpgrade + initialUpgradeCount.health,
+                attackUpgradeCount = _statsUpgradeUiState.value.attackUpgrade + initialUpgradeCount.attack,
+                defenseUpgradeCount = _statsUpgradeUiState.value.defenseUpgrade + initialUpgradeCount.defense
+            )
+            dataStoreManager?.saveToDataStore(dataStoreData)
         }
     }
 
@@ -275,8 +269,8 @@ class MenuViewModel : ViewModel() {
         mediaPlayer.release()
     }
 
-    fun returnToMain(onNavigate: (Int) -> Unit, destination: Int, context: Context) {
-        saveUpgrades(context)
+    fun returnToMain(onNavigate: (Int) -> Unit, destination: Int) {
+        saveUpgrades()
         onNavigate(destination)
     }
 }
