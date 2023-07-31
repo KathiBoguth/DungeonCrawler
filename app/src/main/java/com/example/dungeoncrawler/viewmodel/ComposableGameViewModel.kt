@@ -213,13 +213,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
         }
         //gameViewModel.interact()
-        var coordinates = chara.position
-
-        coordinates = when (chara.direction) {
-            Direction.UP -> Coordinates(coordinates.x, coordinates.y - 1)
-            Direction.DOWN -> Coordinates(coordinates.x, coordinates.y + 1)
-            Direction.LEFT -> Coordinates(coordinates.x - 1, coordinates.y)
-            Direction.RIGHT -> Coordinates(coordinates.x + 1, coordinates.y)
+        val coordinates = when (chara.direction) {
+            Direction.UP -> Coordinates(chara.position.x, chara.position.y - 1)
+            Direction.DOWN -> Coordinates(chara.position.x, chara.position.y + 1)
+            Direction.LEFT -> Coordinates(chara.position.x - 1, chara.position.y)
+            Direction.RIGHT -> Coordinates(chara.position.x + 1, chara.position.y)
         }
         // TODO: needed?
         if (coordinates.x < 0 || coordinates.y < 0) {
@@ -431,6 +429,17 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         placeCoin(attackedEnemy.position)
         attackedEnemy.position = Coordinates(-1, -1)
+        _enemiesStateFlow.update {
+            val newList = mutableStateListOf<EnemyState>()
+            it.forEach { enemyState ->
+                if (enemyState.id == attackedEnemy.id) {
+                    newList.add(enemyState.copy(visible = false))
+                } else {
+                    newList.add(enemyState)
+                }
+            }
+            return@update newList
+        }
     }
 
     fun reset(newGame: Boolean = true) {
@@ -453,7 +462,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                         is Ogre -> EnemyEnum.OGRE
                         else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
                     }
-                    list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType, flashRed = false ))
+                    list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType, flashRed = false, visible = true ))
                 }
                 return@update list
             }
@@ -478,6 +487,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun setupEnemyPositionChangeCollector() {
         viewModelScope.launch {
             level.enemyPositionFlow.collect { changeDto ->
+                val enemy = level.movableEntitiesList.find { it.id == changeDto.id }
+                if (enemy != null) {
+                    enemy.position = changeDto.newPosition
+                }
+
                 _enemiesStateFlow.update {
                     val newList = mutableStateListOf<EnemyState>()
                     it.forEach { enemyState ->
@@ -583,7 +597,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // TODO: enemy flash red not working
     private fun flashEnemiesRed(id: String) {
         _enemiesStateFlow.update {enemiesState ->
             val newList = enemiesState.toMutableStateList()

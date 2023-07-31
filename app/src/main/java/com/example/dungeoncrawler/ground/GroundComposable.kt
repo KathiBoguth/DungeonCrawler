@@ -52,7 +52,7 @@ fun BackgroundComposable(backgroundPosition: CoordinatesDp, enemiesState: List<E
                 }
             }
         }
-        enemiesState.forEach { enemy ->
+        enemiesState.filter { it.visible }.forEach { enemy ->
             EnemyScreen(enemy, backgroundPosition)
         }
     }

@@ -125,7 +125,8 @@ fun GamePreview() {
                 Direction.DOWN,
                 Coordinates(-2, -5),
                 EnemyEnum.SLIME,
-                flashRed = false
+                flashRed = false,
+                visible = true
             )
         ),
         {}, {}, {}, {}, {}, levelCount = 0
