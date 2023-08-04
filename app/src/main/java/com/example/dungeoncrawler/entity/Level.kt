@@ -1,7 +1,6 @@
 package com.example.dungeoncrawler.entity
 
 import androidx.compose.ui.unit.Dp
-import androidx.lifecycle.MutableLiveData
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.armor.Cuirass
@@ -23,12 +22,12 @@ class Level(
 ) {
 
     companion object {
-        private const val SWORD_WOODEN = "sword_wooden"
-        private const val SWORD_DIAMOND = "sword_diamond"
-        private const val CUIRASS_RAG = "cuirass_rag"
-        private const val CUIRASS_IRON = "cuirass_iron"
-        private const val CUIRASS_DIAMOND = "cuirass_diamond"
-        private const val BOW_WOODEN = "bow_wooden"
+        const val SWORD_WOODEN = "sword_wooden"
+        const val SWORD_DIAMOND = "sword_diamond"
+        const val CUIRASS_RAG = "cuirass_rag"
+        const val CUIRASS_IRON = "cuirass_iron"
+        const val CUIRASS_DIAMOND = "cuirass_diamond"
+        const val BOW_WOODEN = "bow_wooden"
         const val ARROW = "arrow"
         private const val LADDER = "ladder"
         private const val TREASURE = "treasure"
@@ -40,13 +39,11 @@ class Level(
 
     val coinStack = ArrayDeque<String>()
     val potionStack = ArrayDeque<String>()
-    lateinit var weapons: List<Weapon>
-    lateinit var armors: List<Armor>
+    private lateinit var weapons: List<Weapon>
+    private lateinit var armors: List<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
     val movableEntitiesList: MutableList<MovableEntity> = mutableListOf()
     val enemyPositionFlow = MutableStateFlow(LevelObjectPositionChangeDTO(Coordinates(-1,-1), Direction.DOWN,""))
-
-    val nextLevel: MutableLiveData<Int> by lazy { MutableLiveData() }
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1

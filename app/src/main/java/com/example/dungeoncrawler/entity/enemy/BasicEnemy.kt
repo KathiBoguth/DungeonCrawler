@@ -51,6 +51,9 @@ abstract class BasicEnemy(idEnemy: String,
     }
 
     private fun checkForChara(field: Array<Array<MutableList<LevelObject>>>): Direction? {
+        if (position.x <0 || position.y <0 || position.x >= field.size || position.y >= field[0].size){ // TODO should not happen
+            return null
+        }
         if(position.x != 0){
             val left = field[position.x-1][position.y]
             if (left.any { it.type == LevelObjectType.MAIN_CHARA }){

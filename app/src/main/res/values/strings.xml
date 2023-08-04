@@ -38,4 +38,5 @@
     <string name="potion">potion</string>
     <string name="upgrade_stats">Upgrade Stats</string>
     <string name="arrow">Arrow</string>
+    <string name="levelObject">a level object</string>
 </resources>

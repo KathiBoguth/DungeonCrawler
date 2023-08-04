@@ -1,5 +1,8 @@
 package com.example.dungeoncrawler.screen.gamescreen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.GenericShape
@@ -9,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
@@ -21,14 +25,16 @@ import com.example.dungeoncrawler.data.CharaState
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.GameState
+import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.ground.BackgroundComposable
 import com.example.dungeoncrawler.service.DataStoreManager
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
-
 
 val triangleShape = GenericShape { size, _ ->
     moveTo(size.width / 2f, 0f)
@@ -40,31 +46,60 @@ val triangleShape = GenericShape { size, _ ->
 fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate: (Int) -> Unit) {
     val charaState by gameViewModel.charaStateFlow.collectAsState()
     val enemiesState by gameViewModel.enemiesStateFlow.collectAsState()
+    val objectsState by gameViewModel.objectsStateFlow.collectAsState()
+
     LaunchedEffect(Unit) {
         gameViewModel.reset()
     }
 
-    val endGame by gameViewModel.endGame.collectAsState()
-    endGame?.let { onEndGame(it, onNavigate) }
+    var isVisible by remember {
+        mutableStateOf(true)
+    }
+    var levelCount by remember {
+        mutableStateOf(0)
+    }
+
+
+    val gameState by gameViewModel.gameState.collectAsState()
+    when(gameState) {
+        is GameState.EndGameOnGameOver -> onEndGame(victory = false, onNavigate)
+        is GameState.EndGameOnVictory -> onEndGame(victory = true, onNavigate)
+        is GameState.InitGame -> {}
+        is GameState.NextLevel -> {
+            isVisible = false
+        }
+
+        is GameState.NextLevelReady -> {
+            isVisible = true
+            levelCount = (gameState as GameState.NextLevelReady).levelCount
+        }
+    }
 
     gameViewModel.initDataStoreManager(DataStoreManager(LocalContext.current)) // TODO: not a singleton
 
-    GameScreen(
-        charaState,
-        enemiesState,
-        gameViewModel::interact,
-        gameViewModel::moveUp,
-        gameViewModel::moveDown,
-        gameViewModel::moveLeft,
-        gameViewModel::moveRight,
-        0 // TODO: levelCount
-    )
+    AnimatedVisibility(visible = isVisible,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        GameScreen(
+            charaState,
+            enemiesState,
+            objectsState,
+            gameViewModel::interact,
+            gameViewModel::moveUp,
+            gameViewModel::moveDown,
+            gameViewModel::moveLeft,
+            gameViewModel::moveRight,
+            levelCount
+        )
+    }
 }
 
 @Composable
 fun GameScreen(
     charaState: CharaState,
     enemiesState: List<EnemyState>,
+    objectsState: List<LevelObjectState>,
     interact: () -> Unit,
     moveUp: () -> Unit,
     moveDown: () -> Unit,
@@ -90,7 +125,7 @@ fun GameScreen(
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
-    BackgroundComposable(backgroundPosition, enemiesState)
+    BackgroundComposable(backgroundPosition, enemiesState, objectsState)
 
     Box(modifier = Modifier.fillMaxSize()) {
         CharacterScreen(charaState)
@@ -119,14 +154,21 @@ fun GamePreview() {
     ),
         enemiesState = listOf(
             EnemyState(
-                "",
-                false,
-                false,
-                Direction.DOWN,
-                Coordinates(-2, -5),
-                EnemyEnum.SLIME,
+                id = "",
+                nudge = false,
+                jump = false,
+                direction = Direction.DOWN,
+                position = Coordinates(-2, -5),
+                type = EnemyEnum.SLIME,
                 flashRed = false,
                 visible = true
+            )
+        ),
+        objectsState = listOf(
+            LevelObjectState(
+                "",
+                LevelObjectType.TREASURE,
+                Coordinates(3,3)
             )
         ),
         {}, {}, {}, {}, {}, levelCount = 0

@@ -19,20 +19,27 @@ import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.GroundType
 import kotlin.random.Random
 
 val backgroundLayout = computeBackgroundLayout()
 @Composable
-fun BackgroundComposable(backgroundPosition: CoordinatesDp, enemiesState: List<EnemyState>) {
+fun BackgroundComposable(backgroundPosition: CoordinatesDp,
+                         enemiesState: List<EnemyState>,
+                         objectsState: List<LevelObjectState>)
+{
 
 
-    val backgroundOffset: Offset by animateOffsetAsState(targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value))
+    val backgroundOffset: Offset by animateOffsetAsState(targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value),
+        label = "backgroundOffsetAnimation"
+    )
 
     val tileSize = Settings.moveLength
 
-    Box(modifier = Modifier.wrapContentSize(unbounded = true)
+    Box(modifier = Modifier
+        .wrapContentSize(unbounded = true)
         .offset(backgroundOffset.x.dp, backgroundOffset.y.dp)){
 
         Row(modifier = Modifier
@@ -54,6 +61,9 @@ fun BackgroundComposable(backgroundPosition: CoordinatesDp, enemiesState: List<E
         }
         enemiesState.filter { it.visible }.forEach { enemy ->
             EnemyScreen(enemy, backgroundPosition)
+        }
+        objectsState.forEach {levelObject ->
+            LevelObjectScreen(objectState = levelObject, backgroundPos = backgroundPosition)
         }
     }
 }

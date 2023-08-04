@@ -9,6 +9,8 @@ import com.example.dungeoncrawler.data.CharaState
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaStats
+import com.example.dungeoncrawler.data.GameState
+import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
@@ -26,6 +28,7 @@ import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.DataStoreManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +37,7 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 class ComposableGameViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -49,10 +53,16 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private val _enemiesStateFlow = MutableStateFlow(listOf<EnemyState>())
     val enemiesStateFlow = _enemiesStateFlow.asStateFlow()
 
-    private val _endGame: MutableStateFlow<Boolean?> = MutableStateFlow(null)
-    val endGame = _endGame.asStateFlow()
+    private val _objectsStateFlow = MutableStateFlow(listOf<LevelObjectState>())
+    val objectsStateFlow = _objectsStateFlow.asStateFlow()
+
+    private val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.InitGame)
+    val gameState = _gameState.asStateFlow()
 
     private var dataStoreManager: DataStoreManager? = null
+
+    private var enemyPositionChangeJob: Job? = null // TODO: better solution?
+    private val enemyAttackJobs: MutableList<Job> = mutableListOf()
 
     fun initDataStoreManager(newManager: DataStoreManager){
         dataStoreManager = newManager
@@ -173,8 +183,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         //updateLevel.value = true
 
         levelObjectList.add(chara)
+        chara.position = newCoordinates
         _charaStateFlow.update {
-            it.copy(position = newCoordinates)
+            it.copy(position = chara.position)
         }
     }
 
@@ -252,6 +263,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                         placeCoin(coordinates)
                     }
                 }
+                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             LevelObjectType.LADDER -> {
@@ -261,19 +273,23 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             LevelObjectType.COIN -> {
                 getRandomReward()
                 levelObjectList.removeIf { it.id == levelObject.id }
+                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             LevelObjectType.POTION -> {
                 heal((levelObject as Potion).hpCure)
                 levelObjectList.removeIf { it.id == levelObject.id }
+                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             LevelObjectType.WEAPON -> {
                 takeWeapon(coordinates)
+                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             LevelObjectType.ARMOR -> {
                 takeArmor(coordinates)
+                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             else -> {}
@@ -318,11 +334,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val levelCount = level.levelCount
         level.levelCount = levelCount + 1
         if (levelCount > Settings.levelsMax) {
-            _endGame.update {
-                true
+            _gameState.update {
+                GameState.EndGameOnVictory
             }
         } else {
-            level.nextLevel.value = levelCount
+            //level.nextLevel.value = levelCount
+            reset(newGame = false)
         }
     }
 
@@ -404,22 +421,43 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val coin = level.coinStack.removeFirst()
         level.field[position.x][position.y].add(Coin(coin))
         level.coinStack.addLast(coin)
+        addToLevelObjectStateFlow(LevelObjectState("", LevelObjectType.COIN, position))
     }
 
     private fun placePotion(position: Coordinates) {
         val potion = level.potionStack.removeFirst()
         level.field[position.x][position.y].add(Potion(potion))
-        level.coinStack.addLast(potion)
+        level.potionStack.addLast(potion)
+        addToLevelObjectStateFlow(LevelObjectState("", LevelObjectType.POTION, position))
     }
 
     private fun placeWeapon(position: Coordinates) {
         val weapon = level.randomWeapon()
         level.field[position.x][position.y].add(weapon)
+        addToLevelObjectStateFlow(LevelObjectState(weapon.id, LevelObjectType.WEAPON, position))
+
     }
 
     private fun placeArmor(position: Coordinates) {
         val armor = level.randomArmor()
         level.field[position.x][position.y].add(armor)
+        addToLevelObjectStateFlow(LevelObjectState(armor.id, LevelObjectType.ARMOR, position))
+    }
+
+    private fun addToLevelObjectStateFlow(levelObject: LevelObjectState) {
+        _objectsStateFlow.update {oldList ->
+            val newList = oldList.toMutableList()
+            newList.add(levelObject)
+            return@update newList
+        }
+    }
+
+    private fun removeFromLevelObjectStateFlow(levelObjectId: String) {
+        _objectsStateFlow.update {oldList ->
+            val newList = oldList.toMutableList()
+            newList.removeIf{it.id == levelObjectId}
+            return@update newList
+        }
     }
 
     private fun onEnemyDefeated(attackedEnemy: BasicEnemy) {
@@ -443,53 +481,101 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun reset(newGame: Boolean = true) {
-        _endGame.update {
-            null
+        _gameState.update {
+            GameState.InitGame
         }
         if (newGame) {
             chara = MainChara()
             level = Level(chara)
-            chara.position = findCoordinate(chara.id)
-            _charaStateFlow.update {
-                it.copy(position = chara.position, health = chara.health, gold = chara.gold)
-            }
-            _enemiesStateFlow.update {
-                val list = mutableStateListOf<EnemyState>()
-                level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach{
-                    val enemyType = when(it as BasicEnemy){
-                        is Slime -> EnemyEnum.SLIME
-                        is Wolf -> EnemyEnum.WOLF
-                        is Ogre -> EnemyEnum.OGRE
-                        else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
-                    }
-                    list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType, flashRed = false, visible = true ))
-                }
-                return@update list
-            }
-            setupEnemyPositionChangeCollector()
-            setupEnemyCollector()
-        }
 
-        viewModelScope.launch {
-            dataStoreManager?.getDataFromDataStore()?.collect{
-                val charaStats = CharaStats(
-                    health = it.health,
-                    attack = it.attack,
-                    defense = it.defense,
-                    gold = it.gold
-                )
-                chara.setBaseValues(charaStats)
+            viewModelScope.launch {
+                dataStoreManager?.getDataFromDataStore()?.collect{
+                    val charaStats = CharaStats(
+                        health = it.health,
+                        attack = it.attack,
+                        defense = it.defense,
+                        gold = it.gold
+                    )
+                    chara.setBaseValues(charaStats)
+                }
             }
+        } else {
+            //removeEnemyObservers()
+            //hideAllEnemies()
+            level.levelCount += 1
+            viewModelScope.launch {
+                _gameState.emit(GameState.NextLevel)
+            }
+            //fadeView()
+            //backgroundPos = Coordinates(-1,-1)
+
+            level.initLevel()
+
+            viewModelScope.launch {
+                delay(300.milliseconds)
+                _gameState.emit(GameState.NextLevelReady(level.levelCount))
+            }
+            //setupEnemyObservers(view)
+//            binding?.level?.text = String.format(
+//                resources.getString(
+//                    (R.string.level),
+//                    gameViewModel.level.levelCount.toString()
+//                )
+//            )
+            //redraw(0, true)
+
+//            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
+//                mediaPlayerDungeon.pause()
+//                mediaPlayerBoss.start()
+//            }
+        }
+        chara.position = findCoordinate(chara.id)
+        _charaStateFlow.update {
+            it.copy(position = chara.position, health = chara.health, gold = chara.gold)
+        }
+        _enemiesStateFlow.update {
+            val list = mutableStateListOf<EnemyState>()
+            level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach{
+                val enemyType = when(it as BasicEnemy){
+                    is Slime -> EnemyEnum.SLIME
+                    is Wolf -> EnemyEnum.WOLF
+                    is Ogre -> EnemyEnum.OGRE
+                    else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
+                }
+                list.add(EnemyState(it.id, nudge = false, jump = false, it.direction, it.position, enemyType, flashRed = false, visible = true ))
+            }
+            return@update list
+        }
+        stopAllEnemyCollectionJobs()
+        setupEnemyPositionChangeCollector()
+        setupEnemyCollector()
+
+        _objectsStateFlow.update {
+            val newList = mutableListOf<LevelObjectState>()
+            level.gameObjectIds.forEach{id ->
+                val coordinates = findCoordinate(id)
+                if (coordinates != Coordinates(-1,-1)){
+                    val newObject = level.field[coordinates.x][coordinates.y].find { it.id == id }
+                    if (newObject != null){
+                        newList.add(LevelObjectState(id, newObject.type, coordinates))
+                    }
+                }
+
+            }
+            return@update newList
         }
 
     }
 
     private fun setupEnemyPositionChangeCollector() {
-        viewModelScope.launch {
+        enemyPositionChangeJob = viewModelScope.launch {
             level.enemyPositionFlow.collect { changeDto ->
-                val enemy = level.movableEntitiesList.find { it.id == changeDto.id }
-                if (enemy != null) {
+                // TODO: probably not needed
+                val enemyIndex = level.movableEntitiesList.indexOfFirst { it.id == changeDto.id }
+                if (enemyIndex != -1) {
+                    val enemy = level.movableEntitiesList[enemyIndex]
                     enemy.position = changeDto.newPosition
+                    level.movableEntitiesList[enemyIndex] = enemy
                 }
 
                 _enemiesStateFlow.update {
@@ -509,11 +595,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private fun setupEnemyCollector() {
         level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
-            viewModelScope.launch {
+            enemyAttackJobs.add(viewModelScope.launch {
                 it.attackDamage.collect { dto ->
                     onEnemyAttack(dto)
                 }
-            }
+            })
         }
 //        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
 //            enemyPositionChangeFlowCollectionJobList.add(
@@ -533,6 +619,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 //        }
     }
 
+    private fun stopAllEnemyCollectionJobs() {
+        enemyPositionChangeJob?.cancel()
+        enemyAttackJobs.forEach{ it.cancel() }
+    }
+
     private fun onEnemyAttack(
         damageDTO: EnemyDamageDTO
     ) {
@@ -550,7 +641,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             //hideAllEnemies()
             saveGold()
             viewModelScope.launch {
-                _endGame.emit(false)
+                _gameState.emit(GameState.EndGameOnGameOver)
             }
         }
 
