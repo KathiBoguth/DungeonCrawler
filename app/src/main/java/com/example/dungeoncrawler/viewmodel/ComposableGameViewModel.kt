@@ -56,7 +56,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private val _objectsStateFlow = MutableStateFlow(listOf<LevelObjectState>())
     val objectsStateFlow = _objectsStateFlow.asStateFlow()
 
-    private val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.InitGame)
+    private val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.InitGame(0))
     val gameState = _gameState.asStateFlow()
 
     private var dataStoreManager: DataStoreManager? = null
@@ -462,9 +462,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun reset(newGame: Boolean = true) {
-        _gameState.update {
-            GameState.InitGame
-        }
+
         if (newGame) {
             chara = MainChara()
             level = Level(chara)
@@ -480,8 +478,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     chara.setBaseValues(charaStats)
                 }
             }
+            _gameState.update {
+                GameState.InitGame(level.levelCount)
+            }
         } else {
-            level.levelCount += 1
             viewModelScope.launch {
                 _gameState.emit(GameState.NextLevel)
             }

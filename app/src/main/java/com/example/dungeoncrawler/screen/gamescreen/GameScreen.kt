@@ -61,17 +61,19 @@ fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate:
 
 
     val gameState by gameViewModel.gameState.collectAsState()
-    when(gameState) {
+    when(val state = gameState) {
         is GameState.EndGameOnGameOver -> onEndGame(victory = false, onNavigate)
         is GameState.EndGameOnVictory -> onEndGame(victory = true, onNavigate)
-        is GameState.InitGame -> {}
+        is GameState.InitGame -> {
+            levelCount = state.levelCount
+        }
         is GameState.NextLevel -> {
             isVisible = false
         }
 
         is GameState.NextLevelReady -> {
             isVisible = true
-            levelCount = (gameState as GameState.NextLevelReady).levelCount
+            levelCount = state.levelCount
         }
     }
 

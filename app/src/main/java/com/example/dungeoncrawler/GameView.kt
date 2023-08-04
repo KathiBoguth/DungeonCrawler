@@ -40,8 +40,6 @@ class GameView : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        //gameViewModel.reset()
-
         return ComposeView(requireContext()).apply {
 
             setContent {

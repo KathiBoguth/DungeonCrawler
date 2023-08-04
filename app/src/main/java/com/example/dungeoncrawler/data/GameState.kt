@@ -1,7 +1,7 @@
 package com.example.dungeoncrawler.data
 
 sealed class GameState {
-    object InitGame : GameState()
+    data class InitGame(val levelCount: Int) : GameState()
     object EndGameOnGameOver : GameState()
     object EndGameOnVictory : GameState()
     object NextLevel: GameState()
