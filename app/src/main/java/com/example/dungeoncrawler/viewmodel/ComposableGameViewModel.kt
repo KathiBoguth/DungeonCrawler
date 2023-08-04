@@ -77,7 +77,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
-        //gameViewModel.moveUp()
         val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
@@ -97,14 +96,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
-        //gameViewModel.moveDown()
         val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x, coordinates.y + 1)
         moveIfPossible(newCoordinates, coordinates)
-        //redraw(charaMoves = true)
     }
 
     fun moveLeft() {
@@ -117,14 +114,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
-        //gameViewModel.moveLeft()
         val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x - 1, coordinates.y)
         moveIfPossible(newCoordinates, coordinates)
-        //redraw(charaMoves = true)
     }
 
     fun moveRight() {
@@ -137,15 +132,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
-        //gameViewModel.moveRight()
         val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
         val newCoordinates = Coordinates(coordinates.x + 1, coordinates.y)
         moveIfPossible(newCoordinates, coordinates)
-
-        //redraw(charaMoves = true)
     }
 
     private fun moveIfPossible(
@@ -179,8 +171,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 else -> {}
             }
         }
-        // TODO: level as state
-        //updateLevel.value = true
 
         levelObjectList.add(chara)
         chara.position = newCoordinates
@@ -223,7 +213,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 it.copy(nudge = false)
             }
         }
-        //gameViewModel.interact()
         val coordinates = when (chara.direction) {
             Direction.UP -> Coordinates(chara.position.x, chara.position.y - 1)
             Direction.DOWN -> Coordinates(chara.position.x, chara.position.y + 1)
@@ -295,11 +284,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             else -> {}
 
         }
-
-        //val charaView = getGameObjectView(view, gameViewModel.chara.id)
-        //nudge(charaView, gameViewModel.chara.id, gameViewModel.chara.direction)
-
-        //updateLevel()
     }
 
     private fun movePossible(coordinates: Coordinates): Boolean {
@@ -338,7 +322,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 GameState.EndGameOnVictory
             }
         } else {
-            //level.nextLevel.value = levelCount
             reset(newGame = false)
         }
     }
@@ -408,8 +391,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun attack(attackedEnemy: BasicEnemy) {
         val weaponBonus = chara.weapon?.attack ?: 0
         attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
-        // TODO: animate on screen
-        //attackedEntityAnimation.value = attackedEnemy.id
         flashEnemiesRed(attackedEnemy.id)
         if (attackedEnemy.health <= 0) {
             onEnemyDefeated(attackedEnemy)
@@ -500,14 +481,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 }
             }
         } else {
-            //removeEnemyObservers()
-            //hideAllEnemies()
             level.levelCount += 1
             viewModelScope.launch {
                 _gameState.emit(GameState.NextLevel)
             }
-            //fadeView()
-            //backgroundPos = Coordinates(-1,-1)
 
             level.initLevel()
 
@@ -515,14 +492,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 delay(300.milliseconds)
                 _gameState.emit(GameState.NextLevelReady(level.levelCount))
             }
-            //setupEnemyObservers(view)
 //            binding?.level?.text = String.format(
 //                resources.getString(
 //                    (R.string.level),
 //                    gameViewModel.level.levelCount.toString()
 //                )
 //            )
-            //redraw(0, true)
 
 //            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
 //                mediaPlayerDungeon.pause()
@@ -601,27 +576,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 }
             })
         }
-//        gameViewModel.level.movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
-//            enemyPositionChangeFlowCollectionJobList.add(
-//                scope.launch {
-//                    it.positionChange.collect { dto ->
-//                        onEnemyMove(view, dto)
-//                    }
-//                }
-//            )
-//            enemyAttackFlowCollectionJobList.add(
-//                scope.launch {
-//                    it.attackDamage.collect { dto ->
-//                        onEnemyAttack(dto, view)
-//                    }
-//                }
-//            )
-//        }
     }
 
     private fun stopAllEnemyCollectionJobs() {
         enemyPositionChangeJob?.cancel()
         enemyAttackJobs.forEach{ it.cancel() }
+        enemyAttackJobs.clear()
     }
 
     private fun onEnemyAttack(
@@ -646,15 +606,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
         flashCharaRed()
-
-//        binding?.health?.text = String.format(
-//            resources.getString(
-//                R.string.health,
-//                gameViewModel.chara.health
-//            )
-//        )
-//        val enemyView = getGameObjectView(view, it.id)
-//        //nudge(enemyView, it.id, it.direction)
     }
 
     private fun saveGold() {
