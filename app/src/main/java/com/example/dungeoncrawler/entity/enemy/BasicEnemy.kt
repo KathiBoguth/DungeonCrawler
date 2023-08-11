@@ -119,15 +119,20 @@ abstract class BasicEnemy(idEnemy: String,
                 val posY = position.y+1
                 Coordinates(position.x, posY)
             }
+
             Direction.LEFT -> {
-                val posX = position.x-1
-                Coordinates(posX, position.y)
-            }
-            Direction.RIGHT -> {
-                val posX = position.x +1
+                val posX = position.x - 1
                 Coordinates(posX, position.y)
             }
 
+            Direction.RIGHT -> {
+                val posX = position.x + 1
+                Coordinates(posX, position.y)
+            }
         }
+    }
+
+    fun destroy() {
+        handler.removeCallbacksAndMessages(null)
     }
 }

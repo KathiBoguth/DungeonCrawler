@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dungeoncrawler.data.CharaState
-import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.CharaState
 import com.example.dungeoncrawler.data.CharaStats
+import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.GameState
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coin
@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
@@ -44,7 +43,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     // TODO: UninitializedPropertyAccessException
     lateinit var level: Level
 
-    var chara = MainChara()
+    private var chara = MainChara()
 
     private val _charaStateFlow =
         MutableStateFlow(
@@ -372,7 +371,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         chara.putOnArmor(armor)
         _charaStateFlow.update {
-            it.copy(cuirassId = chara.armor?.id ?: "")
+            it.copy(gold = chara.gold)
         }
 
         if (oldArmor != null) {
@@ -483,16 +482,20 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
             return@update newList
         }
+        attackedEnemy.destroy()
     }
 
     fun reset(newGame: Boolean = true) {
+        _charaStateFlow.update {
+            it.copy(position = Coordinates(-1, -1))
+        }
 
         if (newGame) {
             chara = MainChara()
             level = Level(chara)
 
             viewModelScope.launch {
-                dataStoreManager?.getDataFromDataStore()?.collect{
+                dataStoreManager?.getDataFromDataStore()?.collect {
                     val charaStats = CharaStats(
                         health = it.health,
                         attack = it.attack,
@@ -516,12 +519,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 delay(300.milliseconds)
                 _gameState.emit(GameState.NextLevelReady(level.levelCount))
             }
-//            binding?.level?.text = String.format(
-//                resources.getString(
-//                    (R.string.level),
-//                    gameViewModel.level.levelCount.toString()
-//                )
-//            )
+
 
 //            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
 //                mediaPlayerDungeon.pause()
@@ -569,14 +567,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun setupEnemyPositionChangeCollector() {
         enemyPositionChangeJob = viewModelScope.launch {
             level.enemyPositionFlow.collect { changeDto ->
-                // TODO: probably not needed
-                val enemyIndex = level.movableEntitiesList.indexOfFirst { it.id == changeDto.id }
-                if (enemyIndex != -1) {
-                    val enemy = level.movableEntitiesList[enemyIndex]
-                    enemy.position = changeDto.newPosition
-                    level.movableEntitiesList[enemyIndex] = enemy
-                }
-
                 _enemiesStateFlow.update {
                     val newList = mutableStateListOf<EnemyState>()
                     it.forEach { enemyState ->

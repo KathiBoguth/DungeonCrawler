@@ -18,7 +18,7 @@ class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
             return
         }
 
-        val turn = if (canWalk(field)) false else random.nextFloat() > 0.5
+        val turn = !canWalk(field)
 
         if (turn) {
             direction = when(random.nextInt(4)) {

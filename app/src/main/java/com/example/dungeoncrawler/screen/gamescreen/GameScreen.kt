@@ -21,19 +21,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.dungeoncrawler.data.CharaState
-import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.CharaState
+import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.GameState
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObjectType
-import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
-import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.ground.BackgroundComposable
 import com.example.dungeoncrawler.service.DataStoreManager
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
@@ -122,14 +120,14 @@ fun GameScreen(
         (configuration.screenWidthDp / 2).dp + adjustHeight.dp
     )
 
-    val backgroundPosition by remember(key1 = charaState.position, key2 = backgroundOrigPosition) {
+    val backgroundPosition by remember(key1 = charaState.position, key2 = levelCount) {
         val moveLength = Settings.moveLength
         val xPosBackground = backgroundOrigPosition.x.minus((charaState.position.x * moveLength).dp)
         val yPosBackground = backgroundOrigPosition.y.minus((charaState.position.y * moveLength).dp)
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
-    BackgroundComposable(backgroundPosition, enemiesState, objectsState)
+    BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount)
 
     Box(modifier = Modifier.fillMaxSize()) {
         CharacterScreen(charaState)
@@ -161,8 +159,8 @@ fun GamePreview() {
         flashRed = false,
         gold = 0,
         health = 0,
-        weaponId = "sword_wooden",
-        cuirassId = "cuirass_rag"
+        weaponId = "",
+        cuirassId = ""
     ),
         enemiesState = listOf(
             EnemyState(

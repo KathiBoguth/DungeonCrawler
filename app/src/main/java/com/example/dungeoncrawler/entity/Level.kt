@@ -87,6 +87,7 @@ class Level(
         fillPotionStack()
         val randomStartCoordinates = randomFreeCoordinates()
         field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara) // TODO: should chara be on field or in movableEntities list?
+        chara.position = randomStartCoordinates
     }
 
     private fun placeWalls() {
@@ -128,9 +129,13 @@ class Level(
 
     private fun placeEnemies() {
         val enemyList = ArrayList<BasicEnemy>()
+        movableEntitiesList.filterIsInstance<BasicEnemy>().forEach {
+            it.destroy()
+        }
         movableEntitiesList.clear()
         Settings.enemiesPerLevel[levelCount]?.forEach { enemyType ->
-            val coordinates = randomFreeCoordinates() // TODO: should enemies be placed on non-steppable stuff as well?
+            val coordinates =
+                randomFreeCoordinates() // TODO: should enemies be placed on non-steppable stuff as well?
             val enemy = when (enemyType) {
                 EnemyEnum.SLIME -> {
                     val count =
