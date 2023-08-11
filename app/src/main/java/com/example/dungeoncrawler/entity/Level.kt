@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
 class Level(
-    private var chara: MainChara
+    var chara: MainChara
 ) {
 
     companion object {

@@ -41,7 +41,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class ComposableGameViewModel(application: Application) : AndroidViewModel(application) {
 
     // TODO: UninitializedPropertyAccessException
-    lateinit var level: Level
+    private lateinit var level: Level
 
     private var chara = MainChara()
 
@@ -486,9 +486,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun reset(newGame: Boolean = true) {
-        _charaStateFlow.update {
-            it.copy(position = Coordinates(-1, -1))
-        }
 
         if (newGame) {
             chara = MainChara()
@@ -516,10 +513,19 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             level.initLevel()
 
             viewModelScope.launch {
-                delay(300.milliseconds)
+                delay(100.milliseconds)
+                // TODO whatever the fuck is wrong with this
+                chara.position = findCoordinate(chara.id)
+                _charaStateFlow.update {
+                    it.copy(
+                        position = findCoordinate(chara.id),
+                        health = chara.health,
+                        gold = chara.gold
+                    )
+                }
+                delay(200.milliseconds)
                 _gameState.emit(GameState.NextLevelReady(level.levelCount))
             }
-
 
 //            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
 //                mediaPlayerDungeon.pause()
