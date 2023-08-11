@@ -12,5 +12,6 @@ data class EnemyState(
     val position: Coordinates,
     val type: EnemyEnum,
     val flashRed: Boolean,
-    val visible: Boolean
+    val visible: Boolean,
+    val loadsAttack: Boolean
 )

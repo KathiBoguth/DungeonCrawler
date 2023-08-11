@@ -66,6 +66,7 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             Direction.LEFT -> R.drawable.slime_left
             Direction.RIGHT -> R.drawable.slime_right
         }
+
         EnemyEnum.WOLF -> when (enemyState.direction) {
             Direction.UP -> R.drawable.wolf_back
             Direction.DOWN -> R.drawable.wolf_front
@@ -73,11 +74,17 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             Direction.RIGHT -> R.drawable.wolf_right
         }
 
-        EnemyEnum.OGRE -> when (enemyState.direction) {
-            Direction.UP -> R.drawable.ogre_back
-            Direction.DOWN -> R.drawable.ogre_back
-            Direction.LEFT -> R.drawable.ogre_left
-            Direction.RIGHT -> R.drawable.ogre_right
+        EnemyEnum.OGRE -> {
+            if (enemyState.loadsAttack) {
+                R.drawable.ogre_attack
+            } else {
+                when (enemyState.direction) {
+                    Direction.UP -> R.drawable.ogre_back
+                    Direction.DOWN -> R.drawable.ogre_front
+                    Direction.LEFT -> R.drawable.ogre_left
+                    Direction.RIGHT -> R.drawable.ogre_right
+                }
+            }
         }
     }
     val width = if (enemyState.type == EnemyEnum.OGRE) 140.dp else 62.dp

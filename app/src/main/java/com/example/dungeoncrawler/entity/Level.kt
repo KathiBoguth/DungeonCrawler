@@ -43,7 +43,14 @@ class Level(
     private lateinit var armors: List<Armor>
     val gameObjectIds: MutableList<String> = mutableListOf()
     val movableEntitiesList: MutableList<MovableEntity> = mutableListOf()
-    val enemyPositionFlow = MutableStateFlow(LevelObjectPositionChangeDTO(Coordinates(-1,-1), Direction.DOWN,""))
+    val enemyPositionFlow = MutableStateFlow(
+        LevelObjectPositionChangeDTO(
+            Coordinates(-1, -1),
+            Direction.DOWN,
+            false,
+            ""
+        )
+    )
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1

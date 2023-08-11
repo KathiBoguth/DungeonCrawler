@@ -88,7 +88,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     fun setupMediaPlayer(context: Context) {
         mediaPlayerDungeon = MediaPlayer.create(context, R.raw.dungeon)
         mediaPlayerDungeon.isLooping = true
-        mediaPlayerDungeon.start()
         mediaPlayerBoss = MediaPlayer.create(context, R.raw.boss)
         mediaPlayerBoss.isLooping = true
     }
@@ -97,16 +96,13 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         mediaPlayerDungeon.start()
     }
 
-    fun pauseMediaPlayerDungeon() {
+    fun pauseMediaPlayers() {
         mediaPlayerDungeon.pause()
+        mediaPlayerBoss.pause()
     }
 
     fun startMediaPlayerBoss() {
         mediaPlayerBoss.start()
-    }
-
-    fun pauseMediaPlayerBoss() {
-        mediaPlayerBoss.pause()
     }
 
     fun moveUp() {
@@ -576,7 +572,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     it.position,
                     enemyType,
                     flashRed = false,
-                    visible = true
+                    visible = true,
+                    loadsAttack = false
                 )
             )
         }
@@ -603,7 +600,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     if (it.id == changeDto.id) {
                         it.copy(
                             position = changeDto.newPosition,
-                            direction = changeDto.newDirection
+                            direction = changeDto.newDirection,
+                            loadsAttack = changeDto.loadAttack
                         )
                     } else {
                         it

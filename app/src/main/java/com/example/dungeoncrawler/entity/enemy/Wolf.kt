@@ -31,6 +31,6 @@ class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
             position = moveOneStep()
 
         }
-        enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, id) }
+        enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, false, id) }
     }
 }

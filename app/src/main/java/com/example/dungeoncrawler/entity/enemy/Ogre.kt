@@ -11,7 +11,7 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
 
     override var speed = 800
     override var power = 80
-    var attackCharged = false
+    private var attackCharged = false
 
     override fun move(field: Array<Array<MutableList<LevelObject>>>) {
         if(health <= 0) {
@@ -36,7 +36,7 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
             position = moveOneStep()
 
         }
-        enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, id) }
+        enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, false, id) }
     }
 
     private fun findChara(field: Array<Array<MutableList<LevelObject>>>): Coordinates {
@@ -70,6 +70,14 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         if (health > 0) {
             if (!attackCharged) {
                 attackCharged = true
+                enemyPositionFlow.update {
+                    LevelObjectPositionChangeDTO(
+                        newPosition = position,
+                        newDirection = direction,
+                        id = id,
+                        loadAttack = true
+                    )
+                }
                 return
             }
             attackDamage.value = EnemyDamageDTO(random.nextInt(power-10, power+10), direction, id)

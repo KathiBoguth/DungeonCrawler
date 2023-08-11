@@ -6,6 +6,7 @@ import com.example.dungeoncrawler.entity.Direction
 data class LevelObjectPositionChangeDTO(
     val newPosition: Coordinates,
     val newDirection: Direction,
+    val loadAttack: Boolean = false,
     val id: String
 )
 
