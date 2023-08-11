@@ -1,9 +1,12 @@
 package com.example.dungeoncrawler.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaState
 import com.example.dungeoncrawler.data.CharaStats
@@ -72,12 +75,38 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     val gameState = _gameState.asStateFlow()
 
     private var dataStoreManager: DataStoreManager? = null
+    private lateinit var mediaPlayerDungeon: MediaPlayer
+    private lateinit var mediaPlayerBoss: MediaPlayer
 
     private var enemyPositionChangeJob: Job? = null // TODO: better solution?
     private val enemyAttackJobs: MutableList<Job> = mutableListOf()
 
     fun initDataStoreManager(newManager: DataStoreManager) {
         dataStoreManager = newManager
+    }
+
+    fun setupMediaPlayer(context: Context) {
+        mediaPlayerDungeon = MediaPlayer.create(context, R.raw.dungeon)
+        mediaPlayerDungeon.isLooping = true
+        mediaPlayerDungeon.start()
+        mediaPlayerBoss = MediaPlayer.create(context, R.raw.boss)
+        mediaPlayerBoss.isLooping = true
+    }
+
+    fun startMediaPlayerDungeon() {
+        mediaPlayerDungeon.start()
+    }
+
+    fun pauseMediaPlayerDungeon() {
+        mediaPlayerDungeon.pause()
+    }
+
+    fun startMediaPlayerBoss() {
+        mediaPlayerBoss.start()
+    }
+
+    fun pauseMediaPlayerBoss() {
+        mediaPlayerBoss.pause()
     }
 
     fun moveUp() {

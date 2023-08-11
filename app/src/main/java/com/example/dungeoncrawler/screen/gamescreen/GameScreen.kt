@@ -48,8 +48,12 @@ fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate:
     val enemiesState = gameViewModel.enemiesStateList
     val objectsState = gameViewModel.objectsStateList
 
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         gameViewModel.reset()
+        gameViewModel.initDataStoreManager(DataStoreManager(context)) // TODO: not a singleton
+        gameViewModel.setupMediaPlayer(context)
+        gameViewModel.startMediaPlayerDungeon()
     }
 
     var isVisible by remember {
@@ -74,10 +78,12 @@ fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate:
         is GameState.NextLevelReady -> {
             isVisible = true
             levelCount = state.levelCount
+            if (levelCount == Settings.levelsMax) {
+                gameViewModel.pauseMediaPlayerDungeon()
+                gameViewModel.startMediaPlayerBoss()
+            }
         }
     }
-
-    gameViewModel.initDataStoreManager(DataStoreManager(LocalContext.current)) // TODO: not a singleton
 
     AnimatedVisibility(visible = isVisible,
         enter = fadeIn(),

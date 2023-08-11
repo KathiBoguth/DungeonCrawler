@@ -23,9 +23,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
@@ -72,6 +72,7 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             Direction.LEFT -> R.drawable.wolf_left
             Direction.RIGHT -> R.drawable.wolf_right
         }
+
         EnemyEnum.OGRE -> when (enemyState.direction) {
             Direction.UP -> R.drawable.ogre_back
             Direction.DOWN -> R.drawable.ogre_back
@@ -79,17 +80,21 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             Direction.RIGHT -> R.drawable.ogre_right
         }
     }
+    val width = if (enemyState.type == EnemyEnum.OGRE) 140.dp else 62.dp
+    val height = if (enemyState.type == EnemyEnum.OGRE) 140.dp else 73.dp
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .offset(positionAsOffset.x.dp, positionAsOffset.y.dp)
-        .wrapContentSize(unbounded = true)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .offset(positionAsOffset.x.dp, positionAsOffset.y.dp)
+            .wrapContentSize(unbounded = true)
+    ) {
         Image(
             painter = painterResource(id = skin),
             contentDescription = stringResource(id = R.string.enemy),
             modifier = Modifier
-                .width(62.dp)
-                .height(73.dp)
+                .width(width)
+                .height(height)
                 .offset(enemyOffset.x.dp, enemyOffset.y.dp),
             colorFilter = ColorFilter.tint(animatedFlashColor, BlendMode.SrcAtop)
         )

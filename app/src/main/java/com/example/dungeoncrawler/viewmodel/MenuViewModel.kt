@@ -5,8 +5,8 @@ import android.media.MediaPlayer
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.R
+import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.DataStoreData
 import com.example.dungeoncrawler.data.StatsUpgradeUiState
 import com.example.dungeoncrawler.service.DataStoreManager
@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.launch
 
 val Context.dataStore by preferencesDataStore(
     name = MenuViewModel.SAVED_STATS_KEY
@@ -38,8 +38,8 @@ class MenuViewModel : ViewModel() {
         dataStoreManager = newManager
     }
 
-    var initialData = CharaStats(0, 0, 0, 0)
-    private var initialUpgradeCount = CharaStats(0,0,0, 0)
+    private var initialData = CharaStats(0, 0, 0, 0)
+    private var initialUpgradeCount = CharaStats(0, 0, 0, 0)
 
     var gold = initialData.gold
 

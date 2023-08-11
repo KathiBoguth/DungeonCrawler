@@ -1,6 +1,5 @@
 package com.example.dungeoncrawler
 
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -33,9 +32,6 @@ class GameView : Fragment() {
     private lateinit var charaArmorObserver: Observer<Armor>
     private lateinit var updateLevelObserver: Observer<Boolean>
 
-    private lateinit var mediaPlayerDungeon: MediaPlayer
-    private lateinit var mediaPlayerBoss: MediaPlayer
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -59,18 +55,6 @@ class GameView : Fragment() {
         }
 
         setupObserver(view)
-
-        mediaPlayerDungeon = MediaPlayer.create(requireContext(), R.raw.dungeon)
-        mediaPlayerDungeon.isLooping = true
-        mediaPlayerDungeon.start()
-        mediaPlayerBoss = MediaPlayer.create(requireContext(), R.raw.boss)
-        mediaPlayerBoss.isLooping = true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mediaPlayerDungeon.pause()
-        mediaPlayerBoss.pause()
     }
 
     override fun onResume() {
@@ -80,14 +64,6 @@ class GameView : Fragment() {
 //        } else {
 //            mediaPlayerDungeon.start()
 //        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaPlayerDungeon.stop()
-        mediaPlayerBoss.stop()
-        mediaPlayerDungeon.release()
-        mediaPlayerBoss.release()
     }
 
     private fun setupObserver(view: View) {
