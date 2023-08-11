@@ -31,7 +31,9 @@ import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObjectType
+import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
+import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.ground.BackgroundComposable
 import com.example.dungeoncrawler.service.DataStoreManager
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
@@ -140,7 +142,8 @@ fun GameScreen(
             moveRight,
             charaState.gold,
             charaState.health,
-            levelCount
+            levelCount,
+            charaState.weaponId, charaState.cuirassId
         )
 
     }
@@ -151,8 +154,15 @@ fun GameScreen(
 @Composable
 fun GamePreview() {
     GameScreen(charaState = CharaState(
-        direction = Direction.DOWN, nudge = false, jump = false,
-        position = Coordinates(0, 0), flashRed = false, gold = 0, health = 0
+        direction = Direction.DOWN,
+        nudge = false,
+        jump = false,
+        position = Coordinates(0, 0),
+        flashRed = false,
+        gold = 0,
+        health = 0,
+        weaponId = "sword_wooden",
+        cuirassId = "cuirass_rag"
     ),
         enemiesState = listOf(
             EnemyState(

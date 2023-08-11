@@ -10,5 +10,7 @@ data class CharaState(
     val position: Coordinates,
     val flashRed: Boolean,
     val health: Int,
-    val gold: Int
+    val gold: Int,
+    val weaponId: String,
+    val cuirassId: String
 )

@@ -47,7 +47,19 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     var chara = MainChara()
 
     private val _charaStateFlow =
-        MutableStateFlow(CharaState(direction = Direction.DOWN, nudge = false, jump = false, position = chara.position, flashRed = false, health = Settings.healthBaseValue, gold = 0))
+        MutableStateFlow(
+            CharaState(
+                direction = Direction.DOWN,
+                nudge = false,
+                jump = false,
+                position = chara.position,
+                flashRed = false,
+                health = Settings.healthBaseValue,
+                gold = 0,
+                weaponId = "",
+                cuirassId = ""
+            )
+        )
     val charaStateFlow = _charaStateFlow.asStateFlow()
 
     private val _enemiesStateFlow = MutableStateFlow(listOf<EnemyState>())
@@ -308,10 +320,16 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private fun getRandomReward() {
         chara.gold += level.randomMoney(Settings.treasureMaxMoney)
+        _charaStateFlow.update {
+            it.copy(gold = chara.gold)
+        }
     }
 
     private fun heal(hpCure: Int) {
         chara.health = min(hpCure + chara.health, chara.maxHealth)
+        _charaStateFlow.update {
+            it.copy(health = chara.health)
+        }
     }
 
     private fun nextLevel() {
@@ -336,6 +354,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             .find { it.type == LevelObjectType.WEAPON } as Weapon
 
         chara.putOnWeapon(weapon)
+        _charaStateFlow.update {
+            it.copy(weaponId = chara.weapon?.id ?: "")
+        }
 
         if (oldWeapon != null) {
             level.field[coordinates.x][coordinates.y].add(0, oldWeapon)
@@ -350,6 +371,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             .find { it.type == LevelObjectType.ARMOR } as Armor
 
         chara.putOnArmor(armor)
+        _charaStateFlow.update {
+            it.copy(cuirassId = chara.armor?.id ?: "")
+        }
 
         if (oldArmor != null) {
             level.field[coordinates.x][coordinates.y].add(0, oldArmor)

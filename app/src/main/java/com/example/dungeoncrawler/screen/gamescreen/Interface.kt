@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.screen.gamescreen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,12 +21,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
+import com.example.dungeoncrawler.entity.Level.Companion.BOW_WOODEN
+import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_DIAMOND
+import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_IRON
+import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_RAG
+import com.example.dungeoncrawler.entity.Level.Companion.SWORD_DIAMOND
+import com.example.dungeoncrawler.entity.Level.Companion.SWORD_WOODEN
 
 @Composable
 fun Controls(
@@ -36,7 +44,9 @@ fun Controls(
     moveRight: () -> Unit,
     gold: Int,
     health: Int,
-    levelCount: Int
+    levelCount: Int,
+    weaponId: String,
+    cuirassId: String
 ) {
     Box(
         modifier = Modifier
@@ -66,7 +76,11 @@ fun Controls(
             .padding(76.dp, 56.dp),
         contentAlignment = Alignment.TopStart
     ) {
-        Stats(gold, health, levelCount)
+        Row(Modifier.background(colorResource(id = R.color.blue_transparent))) {
+            Stats(gold, health, levelCount)
+            Inventory(weaponId, cuirassId)
+        }
+
     }
 }
 
@@ -85,19 +99,15 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
 
 @Composable
 fun Stats(gold: Int, health: Int, levelCount: Int) {
-    Column{
-        Box(modifier = Modifier.background(colorResource(id = R.color.blue_transparent) ),
-            contentAlignment = Alignment.Center
-        ){
+    Column {
+        Box(contentAlignment = Alignment.Center)
+        {
             StatsText(text = stringResource(id = R.string.gold, gold))
         }
-        Box(modifier = Modifier.background(colorResource(id = R.color.blue_transparent))
-        ){
+        Box {
             StatsText(stringResource(id = R.string.health, health))
-
         }
-        Box(modifier = Modifier.background(colorResource(id = R.color.blue_transparent))
-        ) {
+        Box {
             StatsText(text = stringResource(id = R.string.level, levelCount))
         }
     }
@@ -106,13 +116,54 @@ fun Stats(gold: Int, health: Int, levelCount: Int) {
 
 @Composable
 fun StatsText(text: String) {
-    Text(modifier = Modifier
-        .padding(4.dp)
-        .width(65.dp)
-        .height(22.dp),
+    Text(
+        modifier = Modifier
+            .padding(4.dp)
+            .width(65.dp)
+            .height(22.dp),
         text = text,
         fontFamily = FontFamily(Font(R.font.carrois_gothic_sc)),
-        color = Color.White)
+        color = Color.White
+    )
+}
+
+@Composable
+fun Inventory(weaponId: String, cuirassId: String) {
+    val weaponResource = when (weaponId) {
+        SWORD_WOODEN -> R.drawable.sword_wooden
+        SWORD_DIAMOND -> R.drawable.sword_diamond
+        BOW_WOODEN -> R.drawable.bow
+        else -> -1
+    }
+    val cuirassResource = when (cuirassId) {
+        CUIRASS_RAG -> R.drawable.cuirass_rag
+        CUIRASS_IRON -> R.drawable.cuirass_iron
+        CUIRASS_DIAMOND -> R.drawable.cuirass_diamond
+        else -> -1
+    }
+
+    Column {
+        if (weaponResource != -1) {
+            Image(
+                painter = painterResource(id = weaponResource),
+                contentDescription = stringResource(id = R.string.wooden_sword),
+                modifier = Modifier
+                    .width(26.dp)
+                    .height(27.dp)
+            )
+        }
+        if (cuirassResource != -1) {
+            Image(
+                painter = painterResource(id = cuirassResource),
+                contentDescription = stringResource(id = R.string.iron_cuirass),
+                modifier = Modifier
+                    .width(26.dp)
+                    .height(27.dp)
+            )
+        }
+
+
+    }
 }
 
 

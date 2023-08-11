@@ -93,16 +93,6 @@ class GameView : Fragment() {
     private fun setupObserver(view: View) {
         //setupEnemyObservers(view)
 
-        charaWeaponObserver = Observer<Weapon> {
-            showWeapon(it.id)
-        }
-        charaArmorObserver = Observer<Armor> {
-            showArmor(it.id)
-        }
-
-        gameViewModel.chara.weaponObservable.observe(viewLifecycleOwner, charaWeaponObserver)
-        gameViewModel.chara.armorObservable.observe(viewLifecycleOwner, charaArmorObserver)
-
         updateLevelObserver = Observer<Boolean> {
             updateLevel()
         }
