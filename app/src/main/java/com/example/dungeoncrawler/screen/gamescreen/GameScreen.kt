@@ -45,8 +45,8 @@ val triangleShape = GenericShape { size, _ ->
 @Composable
 fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate: (Int) -> Unit) {
     val charaState by gameViewModel.charaStateFlow.collectAsState()
-    val enemiesState by gameViewModel.enemiesStateFlow.collectAsState()
-    val objectsState by gameViewModel.objectsStateFlow.collectAsState()
+    val enemiesState = gameViewModel.enemiesStateList
+    val objectsState = gameViewModel.objectsStateList
 
     LaunchedEffect(Unit) {
         gameViewModel.reset()

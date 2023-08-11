@@ -16,6 +16,9 @@ class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
         }
         val charaNearby = attackCharaIfCloseBy(field)
         if (charaNearby) {
+            enemyPositionFlow.update {
+                LevelObjectPositionChangeDTO(position, direction, id)
+            }
             return
         }
 
