@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,19 +30,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.dungeoncrawler.viewmodel.MenuViewModel
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.data.StatsUpgradeUiState
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 @Composable
 fun UpgradeStatsScreen(
-    onNavigate: (Int) -> Unit,
+    onNavigateBack: () -> Unit,
     menuViewModel: MenuViewModel = viewModel()
 ) {
     val state by menuViewModel.uiState.collectAsState()
 
     fun saveAndReturnToMain() {
-        menuViewModel.returnToMain(onNavigate, R.id.action_statsUpgradeFragment_to_mainFragment)
+        menuViewModel.returnToMain(onNavigateBack)
     }
     UpgradeStatsScreen(
         statsUpgradeUiState = state,

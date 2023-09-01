@@ -15,21 +15,34 @@ import com.example.dungeoncrawler.screen.mainMenu.NavigationButton
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 @Composable
-fun VictoryScreen(onNavigate: (Int) -> Unit, pauseMusicPlayer: () -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+fun VictoryScreen(
+    onRestartClicked: () -> Unit,
+    onUpgradeStatsClicked: () -> Unit,
+    pauseMusicPlayer: () -> Unit
+) {
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
         MenuTitle(stringResource(R.string.victory))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             NavigationButton(
                 stringResource(id = R.string.restart),
-                onNavigate, R.id.action_victoryView_to_gameView, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer)
-            NavigationButton(text = stringResource(id = R.string.upgrade_stats), onNavigate, R.id.action_victoryView_to_statsUpgradeFragment)
+                onRestartClicked, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer
+            )
+            NavigationButton(
+                text = stringResource(id = R.string.upgrade_stats),
+                onUpgradeStatsClicked
+            )
         }
     }
 }
 
 @Composable
 fun VictoryScreen(
-    onNavigate: (Int) -> Unit,
+    onRestartClicked: () -> Unit,
+    onUpgradeStatsClicked: () -> Unit,
     menuViewModel: MenuViewModel = viewModel()
 ) {
 
@@ -37,7 +50,8 @@ fun VictoryScreen(
     menuViewModel.startMediaPlayer()
 
     VictoryScreen(
-        onNavigate = onNavigate,
+        onRestartClicked = onRestartClicked,
+        onUpgradeStatsClicked = onUpgradeStatsClicked,
         pauseMusicPlayer = menuViewModel::pauseMediaPlayer
     )
 }

@@ -32,27 +32,45 @@ import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 
 @Composable
-fun MainMenuScreen(onNavigate: (Int) -> Unit, pauseMusicPlayer: () -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+fun MainMenuScreen(
+    onStartGameClicked: () -> Unit,
+    onUpgradeStatsClicked: () -> Unit,
+    pauseMusicPlayer: () -> Unit
+) {
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
         MenuTitle(stringResource(R.string.main_menu))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            NavigationButton(stringResource(id = R.string.start_game),
-                onNavigate, R.id.action_mainFragment_to_gameView, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer)
-            NavigationButton(text = stringResource(id = R.string.upgrade_stats), onNavigate, R.id.action_mainFragment_to_statsUpgradeFragment)
+            NavigationButton(
+                stringResource(id = R.string.start_game),
+                onStartGameClicked, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer
+            )
+            NavigationButton(
+                text = stringResource(id = R.string.upgrade_stats),
+                onUpgradeStatsClicked
+            )
         }
 
     }
 }
 @Composable
 fun MainMenuScreen(
-    onNavigate: (Int) -> Unit,
-    menuViewModel: MenuViewModel = viewModel()) {
+    onStartGameClicked: () -> Unit, onUpgradeStatsClicked: () -> Unit,
+    menuViewModel: MenuViewModel = viewModel()
+) {
 
     menuViewModel.setupMediaPlayer(LocalContext.current)
     menuViewModel.startMediaPlayer()
     menuViewModel.initDataStoreManager(DataStoreManager(LocalContext.current))
 
-    MainMenuScreen(onNavigate = onNavigate, pauseMusicPlayer = menuViewModel::pauseMediaPlayer)
+    MainMenuScreen(
+        onStartGameClicked,
+        onUpgradeStatsClicked,
+        pauseMusicPlayer = menuViewModel::pauseMediaPlayer
+    )
 }
 
 @Composable
@@ -74,12 +92,17 @@ fun MenuButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
 }
 
 @Composable
-fun NavigationButton(text: String, onNavigate: (Int) -> Unit, destination: Int, pauseMusic: Boolean = false, pauseMusicPlayer: () -> Unit = {}){
+fun NavigationButton(
+    text: String,
+    onNavigate: () -> Unit,
+    pauseMusic: Boolean = false,
+    pauseMusicPlayer: () -> Unit = {}
+) {
     fun navigate() {
-        if(pauseMusic){
+        if (pauseMusic) {
             pauseMusicPlayer()
         }
-        onNavigate(destination)
+        onNavigate()
     }
 
     MenuButton(text = text, onClick = ::navigate)
@@ -94,5 +117,5 @@ fun MenuTitle(text: String) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun MainMenuPreview() {
-    MainMenuScreen(onNavigate = {}, pauseMusicPlayer = {})
+    MainMenuScreen(onStartGameClicked = {}, onUpgradeStatsClicked = {}, pauseMusicPlayer = {})
 }

@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaState
 import com.example.dungeoncrawler.data.EnemyState
@@ -43,7 +42,11 @@ val triangleShape = GenericShape { size, _ ->
 }
 
 @Composable
-fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate: (Int) -> Unit) {
+fun GameScreen(
+    gameViewModel: ComposableGameViewModel = viewModel(),
+    onGameOver: () -> Unit,
+    onVictory: () -> Unit
+) {
     val charaState by gameViewModel.charaStateFlow.collectAsState()
     val enemiesState = gameViewModel.enemiesStateList
     val objectsState = gameViewModel.objectsStateList
@@ -65,33 +68,34 @@ fun GameScreen(gameViewModel: ComposableGameViewModel = viewModel(), onNavigate:
 
 
     val gameState by gameViewModel.gameState.collectAsState()
-    when (val state = gameState) {
-        is GameState.EndGameOnGameOver -> onEndGame(
-            victory = false,
-            onNavigate,
-            gameViewModel::pauseMediaPlayers
-        )
 
-        is GameState.EndGameOnVictory -> onEndGame(
-            victory = true,
-            onNavigate,
-            gameViewModel::pauseMediaPlayers
-        )
+    LaunchedEffect(key1 = gameState) {
+        when (val state = gameState) {
+            is GameState.EndGameOnGameOver -> onEndGame(
+                onGameOver,
+                gameViewModel::pauseMediaPlayers
+            )
 
-        is GameState.InitGame -> {
-            levelCount = state.levelCount
-        }
+            is GameState.EndGameOnVictory -> onEndGame(
+                onVictory,
+                gameViewModel::pauseMediaPlayers
+            )
 
-        is GameState.NextLevel -> {
-            isVisible = false
-        }
+            is GameState.InitGame -> {
+                levelCount = state.levelCount
+            }
 
-        is GameState.NextLevelReady -> {
-            isVisible = true
-            levelCount = state.levelCount
-            if (levelCount > Settings.levelsMax) {
-                gameViewModel.pauseMediaPlayers()
-                gameViewModel.startMediaPlayerBoss()
+            is GameState.NextLevel -> {
+                isVisible = false
+            }
+
+            is GameState.NextLevelReady -> {
+                isVisible = true
+                levelCount = state.levelCount
+                if (levelCount > Settings.levelsMax) {
+                    gameViewModel.pauseMediaPlayers()
+                    gameViewModel.startMediaPlayerBoss()
+                }
             }
         }
     }
@@ -224,19 +228,7 @@ fun getOffset(jump: Boolean, nudge: Boolean, direction: Direction): Offset {
     return Offset(Settings.nudgeWidth * deltaX, Settings.nudgeWidth * deltaY)
 }
 
-private fun onEndGame(victory: Boolean, onNavigate: (Int) -> Unit, pauseMediaPlayers: () -> Unit) {
-
-//            removeEnemyObservers()
-//            hideAllEnemies()
-//            saveGold()
-
+private fun onEndGame(onNavigate: () -> Unit, pauseMediaPlayers: () -> Unit) {
     pauseMediaPlayers()
-    //if (findNavController(view).currentDestination?.id == R.id.gameView) {
-    if (victory) {
-        onNavigate(R.id.action_gameView_to_victoryView)
-    } else {
-        onNavigate(R.id.action_gameView_to_gameOverView)
-    }
-    //this.cancel()
-    //}
+    onNavigate()
 }

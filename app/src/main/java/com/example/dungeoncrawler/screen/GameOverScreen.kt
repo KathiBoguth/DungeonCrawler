@@ -16,21 +16,34 @@ import com.example.dungeoncrawler.screen.mainMenu.NavigationButton
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
 @Composable
-fun GameOverScreen(onNavigate: (Int) -> Unit, pauseMusicPlayer: () -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+fun GameOverScreen(
+    onRestartClicked: () -> Unit,
+    onUpgradeStatsClicked: () -> Unit,
+    pauseMusicPlayer: () -> Unit
+) {
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
         MenuTitle(stringResource(R.string.game_over))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             NavigationButton(
                 stringResource(id = R.string.restart),
-                onNavigate, R.id.action_gameOverView_to_gameView, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer)
-            NavigationButton(text = stringResource(id = R.string.upgrade_stats), onNavigate, R.id.action_gameOverView_to_statsUpgradeFragment)
+                onRestartClicked, pauseMusic = true, pauseMusicPlayer = pauseMusicPlayer
+            )
+            NavigationButton(
+                text = stringResource(id = R.string.upgrade_stats),
+                onUpgradeStatsClicked
+            )
         }
     }
 }
 
 @Composable
 fun GameOverScreen(
-    onNavigate: (Int) -> Unit,
+    onRestartClicked: () -> Unit,
+    onUpgradeStatsClicked: () -> Unit,
     menuViewModel: MenuViewModel = viewModel()
 ) {
 
@@ -38,7 +51,8 @@ fun GameOverScreen(
     menuViewModel.startMediaPlayer()
 
     GameOverScreen(
-        onNavigate = onNavigate,
+        onRestartClicked = onRestartClicked,
+        onUpgradeStatsClicked = onUpgradeStatsClicked,
         pauseMusicPlayer = menuViewModel::pauseMediaPlayer
     )
 }

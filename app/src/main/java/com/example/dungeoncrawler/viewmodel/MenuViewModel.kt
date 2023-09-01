@@ -269,8 +269,8 @@ class MenuViewModel : ViewModel() {
         mediaPlayer.release()
     }
 
-    fun returnToMain(onNavigate: (Int) -> Unit, destination: Int) {
+    fun returnToMain(onNavigateBack: () -> Unit) {
         saveUpgrades()
-        onNavigate(destination)
+        onNavigateBack()
     }
 }

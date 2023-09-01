@@ -489,9 +489,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun onEnemyDefeated(attackedEnemy: BasicEnemy) {
         if (attackedEnemy is Ogre) {
             level.endBossDefeated()
-            return
+            addNewGameObjectsToObjectsList()
+        } else {
+            placeCoin(attackedEnemy.position)
         }
-        placeCoin(attackedEnemy.position)
+
         // TODO: maybe this could be removed?
         attackedEnemy.position = Coordinates(-1, -1)
         _enemiesStateList.replaceAll {
@@ -503,6 +505,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         _enemiesStateList.removeIf { it.id == attackedEnemy.id }
         attackedEnemy.destroy()
+
     }
 
     fun reset(newGame: Boolean = true) {
@@ -556,6 +559,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         _charaStateFlow.update {
             it.copy(position = chara.position, health = chara.health, gold = chara.gold)
         }
+        _enemiesStateList.clear()
         level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach {
             val enemyType = when (it as BasicEnemy) {
                 is Slime -> EnemyEnum.SLIME
@@ -582,6 +586,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         setupEnemyCollector()
 
         _objectsStateList.clear()
+        addNewGameObjectsToObjectsList()
+    }
+
+    private fun addNewGameObjectsToObjectsList() {
         level.gameObjectIds.forEach { id ->
             val coordinates = findCoordinate(id)
             if (coordinates != Coordinates(-1, -1)) {
