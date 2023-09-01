@@ -101,6 +101,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         mediaPlayerBoss.pause()
     }
 
+    fun pauseMediaPlayerDungeon() {
+        mediaPlayerDungeon.pause()
+    }
+
     fun startMediaPlayerBoss() {
         mediaPlayerBoss.start()
     }

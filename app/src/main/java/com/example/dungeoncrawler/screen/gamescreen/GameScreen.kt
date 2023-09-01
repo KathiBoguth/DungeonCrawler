@@ -97,7 +97,7 @@ fun GameScreen(
                 isVisible = true
                 levelCount = state.levelCount
                 if (levelCount > Settings.levelsMax) {
-                    gameViewModel.pauseMediaPlayers()
+                    gameViewModel.pauseMediaPlayerDungeon()
                     gameViewModel.startMediaPlayerBoss()
                 }
             }
