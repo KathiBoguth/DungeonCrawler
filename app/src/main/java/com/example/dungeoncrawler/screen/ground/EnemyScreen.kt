@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler.ground
+package com.example.dungeoncrawler.screen.ground
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateOffsetAsState

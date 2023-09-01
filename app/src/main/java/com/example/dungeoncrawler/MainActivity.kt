@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.dungeoncrawler.screen.gamescreen.GameScreen
 import com.example.dungeoncrawler.screen.mainMenu.MainMenuScreen
 import com.example.dungeoncrawler.screen.mainMenu.UpgradeStatsScreen
+import com.example.dungeoncrawler.service.DataStoreManager
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
@@ -22,6 +23,9 @@ class MainActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = "mainMenu") {
                 val menuViewModel: MenuViewModel by viewModels()
                 val gameViewModel: ComposableGameViewModel by viewModels()
+                val datastoreManager = DataStoreManager(applicationContext)
+                menuViewModel.initDataStoreManager(datastoreManager)
+                gameViewModel.initDataStoreManager(datastoreManager)
                 composable("mainMenu") {
                     MainMenuScreen(
                         onUpgradeStatsClicked = { navController.navigate("upgradeStats") },

@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler.ground
+package com.example.dungeoncrawler.screen.ground
 
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image
@@ -96,7 +96,7 @@ fun computeBackgroundLayout(): List<List<GroundType>> {
         MutableList(2) { GroundType.STONE }
     }
     layout.forEach {
-        val newFields = MutableList(Settings.fieldSize - 2) {randomGroundType(random)}
+        val newFields = MutableList(Settings.fieldSize - 2) { randomGroundType(random) }
         it.addAll(1, newFields)
     }
     layout.add(0, MutableList(Settings.fieldSize) { GroundType.STONE })

@@ -31,8 +31,7 @@ import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
-import com.example.dungeoncrawler.ground.BackgroundComposable
-import com.example.dungeoncrawler.service.DataStoreManager
+import com.example.dungeoncrawler.screen.ground.BackgroundComposable
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 
 val triangleShape = GenericShape { size, _ ->
@@ -54,7 +53,6 @@ fun GameScreen(
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         gameViewModel.reset()
-        gameViewModel.initDataStoreManager(DataStoreManager(context)) // TODO: not a singleton
         gameViewModel.setupMediaPlayer(context)
         gameViewModel.startMediaPlayerDungeon()
     }
@@ -71,15 +69,21 @@ fun GameScreen(
 
     LaunchedEffect(key1 = gameState) {
         when (val state = gameState) {
-            is GameState.EndGameOnGameOver -> onEndGame(
-                onGameOver,
-                gameViewModel::pauseMediaPlayers
-            )
+            is GameState.EndGameOnGameOver -> {
+                gameViewModel.reset()
+                onEndGame(
+                    onGameOver,
+                    gameViewModel::pauseMediaPlayers
+                )
+            }
 
-            is GameState.EndGameOnVictory -> onEndGame(
-                onVictory,
-                gameViewModel::pauseMediaPlayers
-            )
+            is GameState.EndGameOnVictory -> {
+                gameViewModel.reset()
+                onEndGame(
+                    onVictory,
+                    gameViewModel::pauseMediaPlayers
+                )
+            }
 
             is GameState.InitGame -> {
                 levelCount = state.levelCount
