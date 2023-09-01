@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,11 @@ fun GameOverScreen(
     LaunchedEffect(Unit) {
         menuViewModel.setupMediaPlayer(context)
         menuViewModel.startMediaPlayer()
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            menuViewModel.pauseMediaPlayer()
+        }
     }
 
     GameOverScreen(

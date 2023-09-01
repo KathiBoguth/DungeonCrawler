@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,8 +67,14 @@ fun GameScreen(
 
 
     val gameState by gameViewModel.gameState.collectAsState()
+    DisposableEffect(Unit) {
+        onDispose {
+            gameViewModel.pauseMediaPlayers()
+        }
+    }
 
     LaunchedEffect(key1 = gameState) {
+        // TODO: maybe add state "loading" and loading screen tp remove the reset()
         when (val state = gameState) {
             is GameState.EndGameOnGameOver -> {
                 gameViewModel.reset()
@@ -204,7 +211,8 @@ fun GamePreview() {
             LevelObjectState(
                 "",
                 LevelObjectType.TREASURE,
-                Coordinates(3,3)
+                Coordinates(3, 3),
+                Direction.DOWN
             )
         ),
         {}, {}, {}, {}, {}, levelCount = 0

@@ -27,6 +27,7 @@ import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.entity.enemy.Ogre
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
+import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.DataStoreManager
@@ -376,6 +377,20 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private fun throwArrow(coordinates: Coordinates, direction: Direction) {
         level.throwArrow(coordinates, direction, ::attack)
+        viewModelScope.launch {
+            level.arrowFlow?.collect { arrow ->
+                if (arrow.newPosition == Coordinates(-1, -1)) {
+                    _objectsStateList.removeIf { it.id == arrow.id }
+                }
+                _objectsStateList.replaceAll {
+                    if (it.id == arrow.id) {
+                        it.copy(position = arrow.newPosition)
+                    } else {
+                        it
+                    }
+                }
+            }
+        }
     }
 
     private fun takeWeapon(coordinates: Coordinates) {
@@ -390,7 +405,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         if (oldWeapon != null) {
             level.field[coordinates.x][coordinates.y].add(0, oldWeapon)
-            _objectsStateList.add(LevelObjectState(oldWeapon.id, oldWeapon.type, coordinates))
+            _objectsStateList.add(
+                LevelObjectState(
+                    oldWeapon.id,
+                    oldWeapon.type,
+                    coordinates,
+                    Direction.DOWN
+                )
+            )
         }
         level.field[coordinates.x][coordinates.y].removeIf { it.id == weapon.id }
         _objectsStateList.removeIf { it.id == weapon.id }
@@ -409,7 +431,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         if (oldArmor != null) {
             level.field[coordinates.x][coordinates.y].add(0, oldArmor)
-            _objectsStateList.add(LevelObjectState(oldArmor.id, oldArmor.type, coordinates))
+            _objectsStateList.add(
+                LevelObjectState(
+                    oldArmor.id,
+                    oldArmor.type,
+                    coordinates,
+                    Direction.DOWN
+                )
+            )
         }
         level.field[coordinates.x][coordinates.y].removeIf { armor.id == it.id }
         _objectsStateList.removeIf { it.id == armor.id }
@@ -460,27 +489,55 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val coin = level.coinStack.removeFirst()
         level.field[position.x][position.y].add(Coin(coin))
         level.coinStack.addLast(coin)
-        addToLevelObjectStateFlow(LevelObjectState(coin, LevelObjectType.COIN, position))
+        addToLevelObjectStateFlow(
+            LevelObjectState(
+                coin,
+                LevelObjectType.COIN,
+                position,
+                Direction.DOWN
+            )
+        )
     }
 
     private fun placePotion(position: Coordinates) {
         val potion = level.potionStack.removeFirst()
         level.field[position.x][position.y].add(Potion(potion))
         level.potionStack.addLast(potion)
-        addToLevelObjectStateFlow(LevelObjectState(potion, LevelObjectType.POTION, position))
+        addToLevelObjectStateFlow(
+            LevelObjectState(
+                potion,
+                LevelObjectType.POTION,
+                position,
+                Direction.DOWN
+            )
+        )
     }
 
     private fun placeWeapon(position: Coordinates) {
         val weapon = level.randomWeapon()
         level.field[position.x][position.y].add(weapon)
-        addToLevelObjectStateFlow(LevelObjectState(weapon.id, LevelObjectType.WEAPON, position))
+        addToLevelObjectStateFlow(
+            LevelObjectState(
+                weapon.id,
+                LevelObjectType.WEAPON,
+                position,
+                Direction.DOWN
+            )
+        )
 
     }
 
     private fun placeArmor(position: Coordinates) {
         val armor = level.randomArmor()
         level.field[position.x][position.y].add(armor)
-        addToLevelObjectStateFlow(LevelObjectState(armor.id, LevelObjectType.ARMOR, position))
+        addToLevelObjectStateFlow(
+            LevelObjectState(
+                armor.id,
+                LevelObjectType.ARMOR,
+                position,
+                Direction.DOWN
+            )
+        )
     }
 
     private fun addToLevelObjectStateFlow(levelObject: LevelObjectState) {
@@ -600,7 +657,18 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             if (coordinates != Coordinates(-1, -1)) {
                 val newObject = level.field[coordinates.x][coordinates.y].find { it.id == id }
                 if (newObject != null) {
-                    _objectsStateList.add(LevelObjectState(id, newObject.type, coordinates))
+                    var direction = Direction.DOWN
+                    if (newObject is Arrow) {
+                        direction = newObject.direction
+                    }
+                    _objectsStateList.add(
+                        LevelObjectState(
+                            id,
+                            newObject.type,
+                            coordinates,
+                            direction
+                        )
+                    )
                 }
             }
         }
@@ -722,12 +790,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             _charaStateFlow.update {
                 it.copy(flashRed = false)
             }
-        }
-    }
-
-    fun resetState() {
-        _gameState.update {
-            GameState.InitGame(0)
         }
     }
 }

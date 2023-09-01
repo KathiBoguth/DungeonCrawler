@@ -15,6 +15,7 @@ import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.random.Random
 
 class Level(
@@ -51,6 +52,8 @@ class Level(
             ""
         )
     )
+
+    var arrowFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
@@ -281,6 +284,10 @@ class Level(
             Direction.RIGHT -> "${ARROW}_right"
         }
         val arrow = Arrow(id, direction, coordinates)
+
+        gameObjectIds.add(id)
+        field[coordinates.x][coordinates.y].add(arrow)
+        arrowFlow = arrow.positionFlow
 
         val runnableCode: Runnable = object : Runnable {
             override fun run() {

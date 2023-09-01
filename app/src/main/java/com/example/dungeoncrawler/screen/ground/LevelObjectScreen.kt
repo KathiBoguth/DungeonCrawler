@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.CoordinatesDp
+import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.Level.Companion.BOW_WOODEN
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_DIAMOND
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_IRON
@@ -47,16 +48,25 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
         LevelObjectType.COIN -> R.drawable.coin
         LevelObjectType.POTION -> R.drawable.potion
         LevelObjectType.WEAPON -> {
-            when(objectState.id){
+            when (objectState.id) {
                 BOW_WOODEN -> R.drawable.bow
                 SWORD_WOODEN -> R.drawable.sword_wooden
                 SWORD_DIAMOND -> R.drawable.sword_diamond
                 else -> -1
             }
         }
-        LevelObjectType.ARROW -> -1 // TODO: direction
+
+        LevelObjectType.ARROW -> {
+            when (objectState.direction) {
+                Direction.DOWN -> R.drawable.arrow_down
+                Direction.LEFT -> R.drawable.arrow_left
+                Direction.RIGHT -> R.drawable.arrow_right
+                Direction.UP -> R.drawable.arrow_up
+            }
+        }
+
         LevelObjectType.ARMOR -> {
-            when(objectState.id) {
+            when (objectState.id) {
                 CUIRASS_RAG -> R.drawable.cuirass_rag
                 CUIRASS_IRON -> R.drawable.cuirass_iron
                 CUIRASS_DIAMOND -> R.drawable.cuirass_diamond
