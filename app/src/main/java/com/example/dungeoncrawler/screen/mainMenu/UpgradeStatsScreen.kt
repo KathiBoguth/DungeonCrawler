@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +42,10 @@ fun UpgradeStatsScreen(
     menuViewModel: MenuViewModel = viewModel()
 ) {
     val state by menuViewModel.uiState.collectAsState()
+
+    LaunchedEffect(key1 = Unit) {
+        menuViewModel.loadStats()
+    }
 
     fun saveAndReturnToMain() {
         menuViewModel.returnToMain(onNavigateBack)
@@ -77,8 +82,6 @@ fun  UpgradeStatsScreen(
     onDefenseMinusButtonClicked: () -> Unit,
     reset: () -> Unit
 ) {
-    //val menuViewModel: MenuViewModel = viewModel()
-
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
         MenuTitle(text = stringResource(R.string.upgrade_stats))
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {

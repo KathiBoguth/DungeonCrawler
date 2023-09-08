@@ -21,32 +21,34 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.dungeoncrawler.data.CharaState
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.CharaScreenState
 import com.example.dungeoncrawler.entity.Direction
 
 @Composable
-fun CharacterScreen(charaState: CharaState) {
+fun CharacterScreen(charaScreenState: CharaScreenState) {
 
     val charaOffset: Offset by animateOffsetAsState(
         getOffset(
-            nudge = charaState.nudge,
-            jump = charaState.jump,
-            direction = charaState.direction
+            nudge = charaScreenState.nudge,
+            jump = charaScreenState.jump,
+            direction = charaScreenState.direction
         ), label = "chara offset"
     )
 
-    val flashColor = if (charaState.flashRed) {
+    val flashColor = if (charaScreenState.flashRed) {
         colorResource(id = R.color.red_semitransparent)
     } else {
         colorResource(id = R.color.transparent)
     }
-    val animatedFlashColor: Color by animateColorAsState(targetValue = flashColor, animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
+    val animatedFlashColor: Color by animateColorAsState(
+        targetValue = flashColor,
+        animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
         label = "chara flash red"
     )
 
-    val charaSkin = when (charaState.direction) {
+    val charaSkin = when (charaScreenState.direction) {
         Direction.UP -> R.drawable.chara_back
         Direction.DOWN -> R.drawable.chara_front
         Direction.RIGHT -> R.drawable.chara_right

@@ -165,7 +165,6 @@ class Level(
             }
             setMoveRunnable(enemy)
 
-            // field[coordinates.x][coordinates.y].add(enemy)
             enemy.position = coordinates
             enemy.direction = randomDirection()
             enemyList.add(enemy)

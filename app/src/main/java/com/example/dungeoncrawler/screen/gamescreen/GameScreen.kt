@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.data.CharaState
+import com.example.dungeoncrawler.data.CharaScreenState
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.GameState
 import com.example.dungeoncrawler.data.LevelObjectState
@@ -131,7 +131,7 @@ fun GameScreen(
 
 @Composable
 fun GameScreen(
-    charaState: CharaState,
+    charaScreenState: CharaScreenState,
     enemiesState: List<EnemyState>,
     objectsState: List<LevelObjectState>,
     interact: () -> Unit,
@@ -152,17 +152,19 @@ fun GameScreen(
         (configuration.screenWidthDp / 2).dp + adjustHeight.dp
     )
 
-    val backgroundPosition by remember(key1 = charaState.position, key2 = levelCount) {
+    val backgroundPosition by remember(key1 = charaScreenState.position, key2 = levelCount) {
         val moveLength = Settings.moveLength
-        val xPosBackground = backgroundOrigPosition.x.minus((charaState.position.x * moveLength).dp)
-        val yPosBackground = backgroundOrigPosition.y.minus((charaState.position.y * moveLength).dp)
+        val xPosBackground =
+            backgroundOrigPosition.x.minus((charaScreenState.position.x * moveLength).dp)
+        val yPosBackground =
+            backgroundOrigPosition.y.minus((charaScreenState.position.y * moveLength).dp)
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
     BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        CharacterScreen(charaState)
+        CharacterScreen(charaScreenState)
 
         Controls(
             interact,
@@ -170,10 +172,10 @@ fun GameScreen(
             moveDown,
             moveLeft,
             moveRight,
-            charaState.gold,
-            charaState.health,
+            charaScreenState.gold,
+            charaScreenState.health,
             levelCount,
-            charaState.weaponId, charaState.cuirassId
+            charaScreenState.weaponId, charaScreenState.cuirassId
         )
 
     }
@@ -183,17 +185,18 @@ fun GameScreen(
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun GamePreview() {
-    GameScreen(charaState = CharaState(
-        direction = Direction.DOWN,
-        nudge = false,
-        jump = false,
-        position = Coordinates(0, 0),
-        flashRed = false,
-        gold = 0,
-        health = 0,
-        weaponId = "",
-        cuirassId = ""
-    ),
+    GameScreen(
+        charaScreenState = CharaScreenState(
+            direction = Direction.DOWN,
+            nudge = false,
+            jump = false,
+            position = Coordinates(0, 0),
+            flashRed = false,
+            gold = 0,
+            health = 0,
+            weaponId = "",
+            cuirassId = ""
+        ),
         enemiesState = listOf(
             EnemyState(
                 id = "",

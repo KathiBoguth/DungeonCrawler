@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.data.CharaState
+import com.example.dungeoncrawler.data.CharaScreenState
 import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.GameState
@@ -48,9 +48,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private var chara = MainChara()
 
-    private val _charaStateFlow =
+    private val _charaScreenStateFlow =
         MutableStateFlow(
-            CharaState(
+            CharaScreenState(
                 direction = Direction.DOWN,
                 nudge = false,
                 jump = false,
@@ -62,7 +62,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 cuirassId = ""
             )
         )
-    val charaStateFlow = _charaStateFlow.asStateFlow()
+    val charaStateFlow = _charaScreenStateFlow.asStateFlow()
 
     private val _enemiesStateList = mutableStateListOf<EnemyState>()
     val enemiesStateList: List<EnemyState>
@@ -113,7 +113,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     fun moveUp() {
 
         if (turn(Direction.UP)) {
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(direction = Direction.UP)
             }
             return
@@ -132,7 +132,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val turn = turn(Direction.DOWN)
 
         if (turn) {
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(direction = Direction.DOWN)
             }
             return
@@ -150,7 +150,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val turn = turn(Direction.LEFT)
 
         if (turn) {
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(direction = Direction.LEFT)
             }
             return
@@ -168,7 +168,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val turn = turn(Direction.RIGHT)
 
         if (turn) {
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(direction = Direction.RIGHT)
             }
             return
@@ -216,18 +216,18 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         levelObjectList.add(chara)
         chara.position = newCoordinates
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(position = chara.position)
         }
     }
 
     private fun jumpAnimation() {
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(jump = true)
         }
         viewModelScope.launch {
             delay(Settings.animDuration)
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(jump = false)
             }
         }
@@ -239,19 +239,19 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return false
         }
         chara.direction = direction
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(direction = direction)
         }
         return true
     }
 
     fun interact() {
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(nudge = true)
         }
         viewModelScope.launch {
             delay(Settings.animDuration)
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(nudge = false)
             }
         }
@@ -351,14 +351,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private fun getRandomReward() {
         chara.gold += level.randomMoney(Settings.treasureMaxMoney)
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(gold = chara.gold)
         }
     }
 
     private fun heal(hpCure: Int) {
         chara.health = min(hpCure + chara.health, chara.maxHealth)
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(health = chara.health)
         }
     }
@@ -367,6 +367,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val levelCount = level.levelCount
         level.levelCount = levelCount + 1
         if (levelCount > Settings.levelsMax) {
+            saveGold()
             _gameState.update {
                 GameState.EndGameOnVictory
             }
@@ -399,7 +400,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             .find { it.type == LevelObjectType.WEAPON } as Weapon
 
         chara.putOnWeapon(weapon)
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(weaponId = weapon.id)
         }
 
@@ -425,7 +426,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             .find { it.type == LevelObjectType.ARMOR } as Armor
 
         chara.putOnArmor(armor)
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(cuirassId = armor.id)
         }
 
@@ -577,7 +578,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             level = Level(chara)
 
             viewModelScope.launch {
-                dataStoreManager?.getDataFromDataStore()?.collect {
+                dataStoreManager?.getDataFromDataStoreGameScreen()?.collect {
                     val charaStats = CharaStats(
                         health = it.health,
                         attack = it.attack,
@@ -601,7 +602,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 delay(100.milliseconds)
                 // TODO whatever the fuck is wrong with this
                 chara.position = findCoordinate(chara.id)
-                _charaStateFlow.update {
+                _charaScreenStateFlow.update {
                     it.copy(
                         position = findCoordinate(chara.id),
                         health = chara.health,
@@ -611,14 +612,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 delay(200.milliseconds)
                 _gameState.emit(GameState.NextLevelReady(level.levelCount))
             }
-
-//            if (gameViewModel.level.levelCount >= Settings.enemiesPerLevel.size){
-//                mediaPlayerDungeon.pause()
-//                mediaPlayerBoss.start()
-//            }
         }
         chara.position = findCoordinate(chara.id)
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(position = chara.position, health = chara.health, gold = chara.gold)
         }
         _enemiesStateList.clear()
@@ -718,7 +714,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         val protection = chara.armor?.protection ?: 0
         chara.health -= max(0, (damageDTO.damage - (chara.baseDefense + protection)))
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(health = chara.health)
         }
 
@@ -782,12 +778,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun flashCharaRed() {
-        _charaStateFlow.update {
+        _charaScreenStateFlow.update {
             it.copy(flashRed = true)
         }
         viewModelScope.launch {
             delay(Settings.animDuration)
-            _charaStateFlow.update {
+            _charaScreenStateFlow.update {
                 it.copy(flashRed = false)
             }
         }

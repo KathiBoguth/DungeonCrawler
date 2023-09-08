@@ -196,20 +196,27 @@ class MenuViewModel : ViewModel() {
     }
 
     fun loadStats() {
-
         viewModelScope.launch {
-            dataStoreManager?.getDataFromDataStore()?.collect{
+            dataStoreManager?.getDataFromDataStoreUpgradeScreen()?.collect {
                 initialData = CharaStats(it.health, it.attack, it.defense, it.gold)
                 gold = it.gold
-                initialUpgradeCount = CharaStats(it.healthUpgradeCount, it.attackUpgradeCount, it.defenseUpgradeCount, 0)
-                // TODO: get this and fix this
+                initialUpgradeCount = CharaStats(
+                    it.healthUpgradeCount,
+                    it.attackUpgradeCount,
+                    it.defenseUpgradeCount,
+                    0
+                )
                 _statsUpgradeUiState.update {
                     StatsUpgradeUiState(
                         initialData = initialData,
                         healthUpgrade = 0,
                         attackUpgrade = 0,
                         defenseUpgrade = 0,
-                        healthUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.health, 0),
+                        healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                            0,
+                            initialUpgradeCount.health,
+                            0
+                        ),
                         healthUpgradeMinusButtonEnabled = false,
                         attackUpgradePlusButtonEnabled = isUpgradeAffordable(0, initialUpgradeCount.attack, 0),
                         attackUpgradeMinusButtonEnabled = false,
@@ -221,20 +228,14 @@ class MenuViewModel : ViewModel() {
                     )
                 }
             }
-
-
-
-
         }
-
     }
+
     private fun saveUpgrades() {
         viewModelScope.launch {
             val dataStoreData = DataStoreData(
-                health = initialData.health + (_statsUpgradeUiState.value.healthUpgrade * HEALTH_UPGRADE_MULTIPLIER),
-                attack = initialData.attack + _statsUpgradeUiState.value.attackUpgrade,
-                defense = initialData.defense + _statsUpgradeUiState.value.defenseUpgrade,
-                gold = _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost,
+                0, 0, 0,
+                gold = _statsUpgradeUiState.value.gold - _statsUpgradeUiState.value.goldCost,
                 healthUpgradeCount = _statsUpgradeUiState.value.healthUpgrade + initialUpgradeCount.health,
                 attackUpgradeCount = _statsUpgradeUiState.value.attackUpgrade + initialUpgradeCount.attack,
                 defenseUpgradeCount = _statsUpgradeUiState.value.defenseUpgrade + initialUpgradeCount.defense

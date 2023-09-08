@@ -4,16 +4,15 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import com.example.dungeoncrawler.Settings
+import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.DataStoreData
+import com.example.dungeoncrawler.viewmodel.MenuViewModel
 import com.example.dungeoncrawler.viewmodel.dataStore
 import kotlinx.coroutines.flow.map
 
 class DataStoreManager(private val context: Context) {
 
     companion object {
-        const val HEALTH_KEY = "healthValue"
-        const val ATTACK_KEY = "attackValue"
-        const val DEFENSE_KEY = "defenseValue"
         const val GOLD_KEY = "goldValue"
         const val HEALTH_UPGRADE_COUNT_KEY = "healthUpgradeCount"
         const val ATTACK_UPGRADE_COUNT_KEY = "attackUpgradeCount"
@@ -23,10 +22,6 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveToDataStore(dataStoreData: DataStoreData) {
 
         context.dataStore.edit { preferences ->
-
-            preferences[intPreferencesKey(HEALTH_KEY)] = dataStoreData.health
-            preferences[intPreferencesKey(ATTACK_KEY)] = dataStoreData.attack
-            preferences[intPreferencesKey(DEFENSE_KEY)] = dataStoreData.defense
             preferences[intPreferencesKey(GOLD_KEY)] = dataStoreData.gold
             preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] = dataStoreData.healthUpgradeCount
             preferences[intPreferencesKey(ATTACK_UPGRADE_COUNT_KEY)] = dataStoreData.attackUpgradeCount
@@ -43,13 +38,7 @@ class DataStoreManager(private val context: Context) {
     }
 
 
-    fun getDataFromDataStore() = context.dataStore.data.map { preferences ->
-        val health = preferences[intPreferencesKey(HEALTH_KEY)]
-            ?: Settings.healthBaseValue
-        val attack = preferences[intPreferencesKey(ATTACK_KEY)]
-            ?: Settings.attackBaseValue
-        val defense = preferences[intPreferencesKey(DEFENSE_KEY)]
-            ?: Settings.defenseBaseValue
+    fun getDataFromDataStoreUpgradeScreen() = context.dataStore.data.map { preferences ->
         val gold = preferences[intPreferencesKey(GOLD_KEY)]
             ?: 0
 
@@ -58,9 +47,9 @@ class DataStoreManager(private val context: Context) {
         val defenseUpgradeCount = preferences[intPreferencesKey(DEFENSE_UPGRADE_COUNT_KEY)] ?: 0
 
         return@map DataStoreData(
-            health = health,
-            attack = attack,
-            defense = defense,
+            health = calcHealth(healthUpgradeCount),
+            attack = calcAttack(attackUpgradeCount),
+            defense = calcDefense(defenseUpgradeCount),
             gold = gold,
             healthUpgradeCount = healthUpgradeCount,
             attackUpgradeCount = attackUpgradeCount,
@@ -68,6 +57,27 @@ class DataStoreManager(private val context: Context) {
         )
 
     }
+
+    fun getDataFromDataStoreGameScreen() = context.dataStore.data.map { preferences ->
+        val healthUpgradeCount = preferences[intPreferencesKey(HEALTH_UPGRADE_COUNT_KEY)] ?: 0
+        val attackUpgradeCount = preferences[intPreferencesKey(ATTACK_UPGRADE_COUNT_KEY)] ?: 0
+        val defenseUpgradeCount = preferences[intPreferencesKey(DEFENSE_UPGRADE_COUNT_KEY)] ?: 0
+
+        return@map CharaStats(
+            health = calcHealth(healthUpgradeCount),
+            attack = calcAttack(attackUpgradeCount),
+            defense = calcDefense(defenseUpgradeCount),
+            gold = 0,
+        )
+
+    }
+
+    private fun calcHealth(healthUpgradeCount: Int) =
+        Settings.healthBaseValue + (healthUpgradeCount * MenuViewModel.HEALTH_UPGRADE_MULTIPLIER)
+
+    private fun calcAttack(attackUpgradeCount: Int) = Settings.attackBaseValue + attackUpgradeCount
+    private fun calcDefense(defenseUpgradeCount: Int) =
+        Settings.defenseBaseValue + defenseUpgradeCount
 
     suspend fun clearDataStore() = context.dataStore.edit {
         it.clear()
