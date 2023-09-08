@@ -25,7 +25,7 @@
     <string name="reset">Reset</string>
     <string name="ladder">ladder</string>
     <string name="final_score_message">You earned %1$s gold!</string>
-    <string name="killed_by_message">Killed by %1$s</string>
+    <string name="killed_by_message">Killed by </string>
     <string name="enemy">Enemy</string>
     <string name="game_over">Game Over</string>
     <string name="coin">coin</string>

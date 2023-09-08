@@ -13,5 +13,6 @@ data class LevelObjectPositionChangeDTO(
 data class EnemyDamageDTO(
     val damage: Int,
     val direction: Direction,
+    val enemyType: EnemyEnum,
     val id: String
 )

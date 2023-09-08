@@ -80,7 +80,12 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
                 }
                 return
             }
-            attackDamage.value = EnemyDamageDTO(random.nextInt(power-10, power+10), direction, id)
+            attackDamage.value = EnemyDamageDTO(
+                random.nextInt(power - 10, power + 10),
+                direction,
+                EnemyEnum.OGRE,
+                id
+            )
             attackCharged = false
         }
     }

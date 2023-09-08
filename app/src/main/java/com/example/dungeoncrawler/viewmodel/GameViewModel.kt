@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dungeoncrawler.KilledBy
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
@@ -81,6 +82,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private var enemyPositionChangeJob: Job? = null // TODO: better solution?
     private val enemyAttackJobs: MutableList<Job> = mutableListOf()
+
+    var killedBy = KilledBy(EnemyEnum.SLIME)
 
     fun initDataStoreManager(newManager: DataStoreManager) {
         dataStoreManager = newManager
@@ -736,8 +739,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
         if (chara.health <= 0) {
-            //TODO
-            //killedBy = enemyId
+            killedBy.enemyType = damageDTO.enemyType
             saveGold()
 
             viewModelScope.launch {

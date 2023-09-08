@@ -8,6 +8,7 @@ import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.Wall
+import com.example.dungeoncrawler.viewmodel.MissingEnemyTypeException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
@@ -20,7 +21,8 @@ abstract class BasicEnemy(idEnemy: String,
     abstract var speed: Int
     abstract var power: Int
 
-    val attackDamage: MutableStateFlow<EnemyDamageDTO> = MutableStateFlow(EnemyDamageDTO(0, Direction.UP, ""))
+    val attackDamage: MutableStateFlow<EnemyDamageDTO> =
+        MutableStateFlow(EnemyDamageDTO(0, Direction.UP, EnemyEnum.SLIME, ""))
 
     var handler = Handler(Looper.getMainLooper())
     var random: Random = Random(System.currentTimeMillis())
@@ -33,7 +35,14 @@ abstract class BasicEnemy(idEnemy: String,
 
     open fun attack() {
         if (health > 0) {
-            attackDamage.value = EnemyDamageDTO(random.nextInt(power-10, power+10), direction, id)
+            val enemyEnum = when (this) {
+                is Slime -> EnemyEnum.SLIME
+                is Wolf -> EnemyEnum.WOLF
+                is Ogre -> EnemyEnum.OGRE
+                else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
+            }
+            attackDamage.value =
+                EnemyDamageDTO(random.nextInt(power - 10, power + 10), direction, enemyEnum, id)
         }
     }
 

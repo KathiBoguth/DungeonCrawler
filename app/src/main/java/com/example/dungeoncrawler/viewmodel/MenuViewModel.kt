@@ -5,10 +5,12 @@ import android.media.MediaPlayer
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dungeoncrawler.KilledBy
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.DataStoreData
 import com.example.dungeoncrawler.data.StatsUpgradeUiState
+import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.service.DataStoreManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,12 +57,14 @@ class MenuViewModel : ViewModel() {
 
     private lateinit var mediaPlayer: MediaPlayer
 
+    var killedBy = KilledBy(EnemyEnum.SLIME)
+
     fun onHealthPlusButtonClicked() {
         val cost = calcCost(_statsUpgradeUiState.value.healthUpgrade + initialUpgradeCount.health)
-        if (cost < _statsUpgradeUiState.value.gold-_statsUpgradeUiState.value.goldCost) {
+        if (cost < _statsUpgradeUiState.value.gold - _statsUpgradeUiState.value.goldCost) {
             _statsUpgradeUiState.update {
-                val newGoldCost = it.goldCost+cost
-                val newHealthUpgrade = it.healthUpgrade+1
+                val newGoldCost = it.goldCost + cost
+                val newHealthUpgrade = it.healthUpgrade + 1
                 it.copy(
                     goldCost = newGoldCost,
                     healthUpgrade = newHealthUpgrade,

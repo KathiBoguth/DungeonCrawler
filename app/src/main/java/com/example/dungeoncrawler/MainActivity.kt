@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.screen.GameOverScreen
 import com.example.dungeoncrawler.screen.gamescreen.GameScreen
 import com.example.dungeoncrawler.screen.mainMenu.MainMenuScreen
@@ -25,6 +26,9 @@ class MainActivity : ComponentActivity() {
                 val menuViewModel: MenuViewModel by viewModels()
                 val gameViewModel: ComposableGameViewModel by viewModels()
                 val datastoreManager = DataStoreManager(applicationContext)
+                val killedBy = KilledBy(EnemyEnum.SLIME)
+                menuViewModel.killedBy = killedBy
+                gameViewModel.killedBy = killedBy
                 menuViewModel.initDataStoreManager(datastoreManager)
                 gameViewModel.initDataStoreManager(datastoreManager)
                 composable("mainMenu") {
@@ -67,3 +71,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+data class KilledBy(
+    var enemyType: EnemyEnum
+)

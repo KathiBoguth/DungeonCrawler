@@ -133,7 +133,24 @@ fun NavigationButton(
 
 @Composable
 fun MenuTitle(text: String) {
-    Text(text = text, color = Color.White, modifier = Modifier.padding(PaddingValues(horizontal = 80.dp)), fontSize = 32.sp, fontFamily = FontFamily(Font(R.font.carrois_gothic_sc)))
+    Text(
+        text = text,
+        color = Color.White,
+        modifier = Modifier.padding(PaddingValues(horizontal = 80.dp)),
+        fontSize = 32.sp,
+        fontFamily = FontFamily(Font(R.font.carrois_gothic_sc))
+    )
+}
+
+@Composable
+fun MenuText(text: String) {
+    Text(
+        text = text,
+        color = Color.White,
+        modifier = Modifier.padding(PaddingValues(horizontal = 80.dp)),
+        fontSize = 24.sp,
+        fontFamily = FontFamily(Font(R.font.carrois_gothic_sc))
+    )
 }
 
 
