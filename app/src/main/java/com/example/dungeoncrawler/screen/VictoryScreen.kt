@@ -9,7 +9,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.screen.mainMenu.MenuTitle
@@ -43,6 +47,7 @@ fun VictoryScreen(
 
 @Composable
 fun VictoryScreen(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onRestartClicked: () -> Unit,
     onUpgradeStatsClicked: () -> Unit,
     menuViewModel: MenuViewModel = viewModel()
@@ -51,12 +56,21 @@ fun VictoryScreen(
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         menuViewModel.setupMediaPlayer(context)
-        menuViewModel.startMediaPlayer()
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(lifecycleOwner) {
+        menuViewModel.setupMediaPlayer(context)
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
+                menuViewModel.startMediaPlayer()
+            } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
+                menuViewModel.pauseMediaPlayer()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
         onDispose {
-            menuViewModel.pauseMediaPlayer()
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 

@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -27,6 +28,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
@@ -59,19 +63,29 @@ fun MainMenuScreen(
 }
 @Composable
 fun MainMenuScreen(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onStartGameClicked: () -> Unit, onUpgradeStatsClicked: () -> Unit,
     menuViewModel: MenuViewModel = viewModel()
 ) {
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        menuViewModel.setupMediaPlayer(context)
         menuViewModel.startMediaPlayer()
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(lifecycleOwner) {
+        menuViewModel.setupMediaPlayer(context)
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
+                menuViewModel.startMediaPlayer()
+            } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
+                menuViewModel.pauseMediaPlayer()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
         onDispose {
-            menuViewModel.pauseMediaPlayer()
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 

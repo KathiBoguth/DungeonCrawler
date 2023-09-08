@@ -19,8 +19,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
@@ -43,6 +47,7 @@ val triangleShape = GenericShape { size, _ ->
 
 @Composable
 fun GameScreen(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     gameViewModel: ComposableGameViewModel = viewModel(),
     onGameOver: () -> Unit,
     onVictory: () -> Unit
@@ -54,8 +59,7 @@ fun GameScreen(
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         gameViewModel.reset()
-        gameViewModel.setupMediaPlayer(context)
-        gameViewModel.startMediaPlayerDungeon()
+
     }
 
     var isVisible by remember {
@@ -67,9 +71,23 @@ fun GameScreen(
 
 
     val gameState by gameViewModel.gameState.collectAsState()
-    DisposableEffect(Unit) {
+    DisposableEffect(lifecycleOwner) {
+        gameViewModel.setupMediaPlayer(context)
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
+                if (levelCount > Settings.levelsMax) {
+                    gameViewModel.startMediaPlayerBoss()
+                } else {
+                    gameViewModel.startMediaPlayerDungeon()
+                }
+            } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
+                gameViewModel.pauseMediaPlayers()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
         onDispose {
-            gameViewModel.pauseMediaPlayers()
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 

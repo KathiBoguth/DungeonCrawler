@@ -35,10 +35,10 @@ class MainActivity : ComponentActivity() {
                 }
                 composable("upgradeStats") {
                     UpgradeStatsScreen(
-                        {
+                        onNavigateBack = {
                             navController.navigate("mainMenu")
                         },
-                        menuViewModel
+                        menuViewModel = menuViewModel
                     )
                 }
                 composable("gameScreen") {
@@ -52,14 +52,14 @@ class MainActivity : ComponentActivity() {
                     GameOverScreen(
                         onRestartClicked = { navController.navigate("gameScreen") },
                         onUpgradeStatsClicked = { navController.navigate("upgradeStats") },
-                        menuViewModel
+                        menuViewModel = menuViewModel
                     )
                 }
                 composable("victoryScreen") {
                     VictoryScreen(
                         onRestartClicked = { navController.navigate("gameScreen") },
                         onUpgradeStatsClicked = { navController.navigate("upgradeStats") },
-                        menuViewModel
+                        menuViewModel = menuViewModel
                     )
                 }
             }
