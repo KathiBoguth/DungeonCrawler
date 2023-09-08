@@ -595,6 +595,19 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             _gameState.update {
                 GameState.InitGame(level.levelCount)
             }
+            _charaScreenStateFlow.update {
+                CharaScreenState(
+                    direction = Direction.DOWN,
+                    nudge = false,
+                    jump = false,
+                    position = chara.position,
+                    flashRed = false,
+                    health = Settings.healthBaseValue,
+                    gold = 0,
+                    weaponId = "",
+                    cuirassId = ""
+                )
+            }
         } else {
             viewModelScope.launch {
                 _gameState.emit(GameState.NextLevel)

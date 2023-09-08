@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.dungeoncrawler.screen.GameOverScreen
 import com.example.dungeoncrawler.screen.gamescreen.GameScreen
 import com.example.dungeoncrawler.screen.mainMenu.MainMenuScreen
 import com.example.dungeoncrawler.screen.mainMenu.UpgradeStatsScreen

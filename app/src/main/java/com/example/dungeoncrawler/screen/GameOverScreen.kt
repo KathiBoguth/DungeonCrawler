@@ -1,4 +1,4 @@
-package com.example.dungeoncrawler
+package com.example.dungeoncrawler.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +17,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.screen.mainMenu.MenuTitle
 import com.example.dungeoncrawler.screen.mainMenu.NavigationButton
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
