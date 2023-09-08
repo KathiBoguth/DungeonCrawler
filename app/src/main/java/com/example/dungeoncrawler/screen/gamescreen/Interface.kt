@@ -64,7 +64,7 @@ fun Controls(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(76.dp, 56.dp),
+            .padding(20.dp),
         contentAlignment = Alignment.BottomStart
     ) {
         ControlPad(moveUp, moveDown, moveLeft, moveRight)
@@ -73,7 +73,7 @@ fun Controls(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(76.dp, 56.dp),
+            .padding(20.dp),
         contentAlignment = Alignment.TopStart
     ) {
         Row(Modifier.background(colorResource(id = R.color.blue_transparent))) {
@@ -86,15 +86,28 @@ fun Controls(
 
 @Composable
 fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
-    FloatingActionButton(
-        onClick = onClick,
-        modifier = Modifier
-            .then(modifier)
-            .clip(triangleShape)
-            .size(48.dp),
-        containerColor = colorResource(id = R.color.secondary),
-    ) {
+    Box(modifier = modifier) {
+        FloatingActionButton(
+            onClick = onClick,
+            containerColor = colorResource(id = R.color.red_transparent)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .clip(triangleShape)
+                    .background(colorResource(id = R.color.secondary))
+            )
+        }
+//        FloatingActionButton(
+//            onClick = onClick,
+//            modifier = Modifier
+//                .clip(triangleShape)
+//                .size(48.dp),
+//            containerColor = colorResource(id = R.color.secondary),
+//        ) {
+//        }
     }
+
 }
 
 @Composable
@@ -177,7 +190,7 @@ fun ControlPad(
 ) {
     Column {
         MoveButton(modifier = Modifier.align(Alignment.CenterHorizontally)) { moveUp() }
-        Row(Modifier.width(48.dp * 3), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(Modifier.width(48.dp * 3 + 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             MoveButton(modifier = Modifier.rotate(-90f)) { moveLeft() }
             MoveButton(modifier = Modifier.rotate(90f)) { moveRight() }
         }
