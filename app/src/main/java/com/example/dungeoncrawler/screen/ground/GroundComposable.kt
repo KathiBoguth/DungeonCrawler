@@ -24,7 +24,6 @@ import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.GroundType
-import kotlin.random.Random
 
 
 @Composable
@@ -32,7 +31,8 @@ fun BackgroundComposable(
     backgroundPosition: CoordinatesDp,
     enemiesState: List<EnemyState>,
     objectsState: List<LevelObjectState>,
-    levelCount: Int
+    levelCount: Int,
+    fieldGround: List<List<GroundType>>
 ) {
     val backgroundOffset: Offset by animateOffsetAsState(
         targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value),
@@ -40,7 +40,7 @@ fun BackgroundComposable(
     )
 
     val backgroundLayout: List<List<GroundType>> by remember(key1 = levelCount) {
-        mutableStateOf(computeBackgroundLayout())
+        mutableStateOf(fieldGround)
     }
 
     val tileSize = Settings.moveLength
@@ -77,31 +77,6 @@ fun BackgroundComposable(
             LevelObjectScreen(objectState = levelObject, backgroundPos = backgroundPosition)
         }
     }
-}
-
-fun randomGroundType(random: Random) : GroundType {
-
-    return when( random.nextInt(4) ) {
-        0 -> GroundType.GROUND1
-        1 -> GroundType.GROUND2
-        2 -> GroundType.PEBBLES
-        3 -> GroundType.WATER
-        else -> GroundType.GROUND1
-    }
-}
-
-fun computeBackgroundLayout(): List<List<GroundType>> {
-    val random = Random(System.currentTimeMillis())
-    val layout = MutableList(Settings.fieldSize - 2) {
-        MutableList(2) { GroundType.STONE }
-    }
-    layout.forEach {
-        val newFields = MutableList(Settings.fieldSize - 2) { randomGroundType(random) }
-        it.addAll(1, newFields)
-    }
-    layout.add(0, MutableList(Settings.fieldSize) { GroundType.STONE })
-    layout.add( MutableList(Settings.fieldSize) { GroundType.STONE })
-    return layout
 }
 
 fun GroundType.getDrawableId()  = when (this) {

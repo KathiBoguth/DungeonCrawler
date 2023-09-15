@@ -13,12 +13,15 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
     override var power = 80
     private var attackCharged = false
 
-    override fun move(field: Array<Array<MutableList<LevelObject>>>) {
-        if(health <= 0) {
+    override fun move(field: List<List<MutableList<LevelObject>>>) {
+        if (health <= 0) {
             return
         }
         val charaNearby = attackCharaIfCloseBy(field)
         if (charaNearby) {
+            enemyPositionFlow.update {
+                LevelObjectPositionChangeDTO(position, direction, false, id)
+            }
             return
         }
         attackCharged = false
@@ -39,11 +42,12 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, false, id) }
     }
 
-    private fun findChara(field: Array<Array<MutableList<LevelObject>>>): Coordinates {
+    private fun findChara(field: List<List<MutableList<LevelObject>>>): Coordinates {
         var charaPos = Coordinates(-1, -1)
         for (row in field.indices) {
-            val index = field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == "character"  } != -1}
-            if ( index != -1) {
+            val index =
+                field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == "character" } != -1 }
+            if (index != -1) {
                 charaPos = Coordinates(row, index)
             }
         }

@@ -27,7 +27,7 @@ abstract class BasicEnemy(idEnemy: String,
     var handler = Handler(Looper.getMainLooper())
     var random: Random = Random(System.currentTimeMillis())
 
-    abstract fun move(field: Array<Array<MutableList<LevelObject>>>)
+    abstract fun move(field: List<List<MutableList<LevelObject>>>)
 
     fun takeDamage(damage: Int) {
         health -= damage
@@ -46,9 +46,9 @@ abstract class BasicEnemy(idEnemy: String,
         }
     }
 
-    fun attackCharaIfCloseBy(field: Array<Array<MutableList<LevelObject>>>): Boolean {
+    fun attackCharaIfCloseBy(field: List<List<MutableList<LevelObject>>>): Boolean {
         val directionChara = checkForChara(field)
-        if( directionChara != null) {
+        if (directionChara != null) {
             if (direction != directionChara) {
                 direction = directionChara
                 return true
@@ -59,17 +59,17 @@ abstract class BasicEnemy(idEnemy: String,
         return false
     }
 
-    private fun checkForChara(field: Array<Array<MutableList<LevelObject>>>): Direction? {
-        if (position.x <0 || position.y <0 || position.x >= field.size || position.y >= field[0].size){ // TODO should not happen
+    private fun checkForChara(field: List<List<MutableList<LevelObject>>>): Direction? {
+        if (position.x < 0 || position.y < 0 || position.x >= field.size || position.y >= field[0].size) { // TODO should not happen
             return null
         }
-        if(position.x != 0){
-            val left = field[position.x-1][position.y]
-            if (left.any { it.type == LevelObjectType.MAIN_CHARA }){
+        if (position.x != 0) {
+            val left = field[position.x - 1][position.y]
+            if (left.any { it.type == LevelObjectType.MAIN_CHARA }) {
                 return Direction.LEFT
             }
         }
-        if(position.x != field.size-1){
+        if (position.x != field.size - 1) {
             val right = field[position.x+1][position.y]
             if (right.any { it.type == LevelObjectType.MAIN_CHARA }){
                 return Direction.RIGHT
@@ -92,18 +92,18 @@ abstract class BasicEnemy(idEnemy: String,
         return null
     }
 
-    fun canWalk(field: Array<Array<MutableList<LevelObject>>>): Boolean {
+    fun canWalk(field: List<List<MutableList<LevelObject>>>): Boolean {
         // TODO: needs movableEntities list for correct calculation
         val objectInFront = getObjectInFrontOfMe(field)
         return !objectInFront.any { !it.type.isSteppableObject() }
     }
 
-    private fun getObjectInFrontOfMe(field: Array<Array<MutableList<LevelObject>>>): List<LevelObject> {
-        val posBeforeMe = when(direction) {
-            Direction.UP -> Coordinates(position.x, position.y-1)
-            Direction.DOWN -> Coordinates(position.x, position.y+1)
-            Direction.LEFT -> Coordinates(position.x-1, position.y)
-            Direction.RIGHT -> Coordinates(position.x+1, position.y)
+    private fun getObjectInFrontOfMe(field: List<List<MutableList<LevelObject>>>): List<LevelObject> {
+        val posBeforeMe = when (direction) {
+            Direction.UP -> Coordinates(position.x, position.y - 1)
+            Direction.DOWN -> Coordinates(position.x, position.y + 1)
+            Direction.LEFT -> Coordinates(position.x - 1, position.y)
+            Direction.RIGHT -> Coordinates(position.x + 1, position.y)
         }
         val isWall = when (direction) {
             Direction.UP -> posBeforeMe.y < 0

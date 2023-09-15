@@ -34,6 +34,7 @@ import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.GroundType
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.screen.ground.BackgroundComposable
@@ -55,10 +56,11 @@ fun GameScreen(
     val charaState by gameViewModel.charaStateFlow.collectAsState()
     val enemiesState = gameViewModel.enemiesStateList
     val objectsState = gameViewModel.objectsStateList
+    val fieldGroundState = gameViewModel.fieldGroundState.collectAsState()
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        gameViewModel.reset()
+        gameViewModel.reset(context = context)
 
     }
 
@@ -95,7 +97,7 @@ fun GameScreen(
         // TODO: maybe add state "loading" and loading screen tp remove the reset()
         when (val state = gameState) {
             is GameState.EndGameOnGameOver -> {
-                gameViewModel.reset()
+                gameViewModel.reset(context = context)
                 onEndGame(
                     onGameOver,
                     gameViewModel::pauseMediaPlayers
@@ -103,7 +105,7 @@ fun GameScreen(
             }
 
             is GameState.EndGameOnVictory -> {
-                gameViewModel.reset()
+                gameViewModel.reset(context = context)
                 onEndGame(
                     onVictory,
                     gameViewModel::pauseMediaPlayers
@@ -116,6 +118,7 @@ fun GameScreen(
 
             is GameState.NextLevel -> {
                 isVisible = false
+                gameViewModel.reset(false, context)
             }
 
             is GameState.NextLevelReady -> {
@@ -142,7 +145,8 @@ fun GameScreen(
             gameViewModel::moveDown,
             gameViewModel::moveLeft,
             gameViewModel::moveRight,
-            levelCount
+            levelCount,
+            fieldGroundState.value
         )
     }
 }
@@ -157,7 +161,8 @@ fun GameScreen(
     moveDown: () -> Unit,
     moveLeft: () -> Unit,
     moveRight: () -> Unit,
-    levelCount: Int
+    levelCount: Int,
+    fieldGround: List<List<GroundType>>
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -179,7 +184,7 @@ fun GameScreen(
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
-    BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount)
+    BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount, fieldGround)
 
     Box(modifier = Modifier.fillMaxSize()) {
         CharacterScreen(charaScreenState)
@@ -236,7 +241,7 @@ fun GamePreview() {
                 Direction.DOWN
             )
         ),
-        {}, {}, {}, {}, {}, levelCount = 0
+        {}, {}, {}, {}, {}, levelCount = 0, emptyList()
     )
 }
 

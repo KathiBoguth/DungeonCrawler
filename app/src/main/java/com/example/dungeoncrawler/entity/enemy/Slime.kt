@@ -10,8 +10,8 @@ class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
     override var speed = 800
     override var power = 20
 
-    override fun move(field: Array<Array<MutableList<LevelObject>>>) {
-        if(health <= 0) {
+    override fun move(field: List<List<MutableList<LevelObject>>>) {
+        if (health <= 0) {
             return
         }
         val charaNearby = attackCharaIfCloseBy(field)

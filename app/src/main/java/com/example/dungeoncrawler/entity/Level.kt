@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.entity
 
+import android.content.Context
 import androidx.compose.ui.unit.Dp
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.armor.Armor
@@ -14,6 +15,7 @@ import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
+import com.example.dungeoncrawler.service.FileReaderService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.random.Random
@@ -34,8 +36,13 @@ class Level(
         private const val TREASURE = "treasure"
     }
 
-    var field: Array<Array<MutableList<LevelObject>>> = Array(Settings.fieldSize) {
-        (Array(Settings.fieldSize) { mutableListOf() })
+    val fileReaderService = FileReaderService()
+
+    var field: List<List<MutableList<LevelObject>>> = List(Settings.fieldSize) {
+        (List(Settings.fieldSize) { mutableListOf() })
+    }
+    var fieldGround: List<List<GroundType>> = List(Settings.fieldSize) {
+        (List(Settings.fieldSize) { GroundType.STONE })
     }
 
     val coinStack = ArrayDeque<String>()
@@ -59,10 +66,10 @@ class Level(
     var levelCount = 1
 
     init {
-        initLevel()
+        // initLevel()
     }
 
-    fun initLevel() {
+    fun initLevel(context: Context) {
         gameObjectIds.clear()
         gameObjectIds.addAll(
             listOf(
@@ -77,9 +84,16 @@ class Level(
                 "${TREASURE}0", "${TREASURE}1", "${TREASURE}2", "${TREASURE}3"
             )
         )
-        field = Array(Settings.fieldSize) {
-            (Array(Settings.fieldSize) { mutableListOf() })
+        fieldGround = fileReaderService.parseFieldSchemeToField(Settings.field, context)
+        field = fieldGround.map {
+            it.map { groundType ->
+                when (groundType) {
+                    GroundType.STONE -> mutableListOf(Wall())
+                    else -> mutableListOf()
+                }
+            }
         }
+
         weapons = listOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND), Bow(10, BOW_WOODEN))
         armors = listOf(
             Cuirass(10, CUIRASS_RAG),
@@ -95,12 +109,14 @@ class Level(
         placeEnemies()
         fillCoinStack()
         fillPotionStack()
-        val randomStartCoordinates = randomFreeCoordinates()
+        val randomStartCoordinates = randomFreeCoordinates(including = Settings.startArea)
+        //TODO to high start coordinates
         field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara) // TODO: should chara be on field or in movableEntities list?
         chara.position = randomStartCoordinates
     }
 
     private fun placeWalls() {
+        // TODO: needed?
         for (row in field.indices) {
             for (column in field[row].indices) {
                 if (row == 0 || column == 0 || row == field.size - 1 || column == field[row].size - 1) {
@@ -115,7 +131,7 @@ class Level(
 
         for (i in 0..treasureCount) {
 
-            val coordinates = randomFreeCoordinates()
+            val coordinates = randomFreeCoordinates(excluding = Settings.startArea)
             val treasureId = "treasure$i"
             placeTreasure(coordinates, treasureId)
 
@@ -132,7 +148,7 @@ class Level(
             field[coordinates.x][coordinates.y].add(Ladder())
             return
         }
-        val randomCoordinates = randomFreeCoordinates()
+        val randomCoordinates = randomFreeCoordinates(excluding = Settings.startArea)
         field[randomCoordinates.x][randomCoordinates.y].add(Ladder())
 
     }
@@ -145,7 +161,7 @@ class Level(
         movableEntitiesList.clear()
         Settings.enemiesPerLevel[levelCount]?.forEach { enemyType ->
             val coordinates =
-                randomFreeCoordinates() // TODO: should enemies be placed on non-steppable stuff as well?
+                randomFreeCoordinates(excluding = Settings.startArea) // TODO: should enemies be placed on non-steppable stuff as well?
             val enemy = when (enemyType) {
                 EnemyEnum.SLIME -> {
                     val count =
@@ -204,9 +220,14 @@ class Level(
         return random.nextInt(max)
     }
 
-    private fun getRandomCoordinates(): Coordinates {
-        val xCord = random.nextInt(field.size)
-        val yCord = random.nextInt(field.size)
+    private fun getRandomCoordinates(
+        bounds: Coordinates = Coordinates(
+            field.size,
+            field[0].size
+        )
+    ): Coordinates {
+        val xCord = random.nextInt(bounds.x)
+        val yCord = random.nextInt(bounds.y)
 
         return Coordinates(xCord, yCord)
     }
@@ -260,12 +281,16 @@ class Level(
         return armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
     }
 
-    private fun randomFreeCoordinates(): Coordinates {
-        var randomCoordinates = getRandomCoordinates()
-        while (field[randomCoordinates.x][randomCoordinates.y].isNotEmpty()
+    private fun randomFreeCoordinates(
+        including: Coordinates = Coordinates(field.size, field[0].size),
+        excluding: Coordinates = Coordinates(0, 0)
+    ): Coordinates {
+        var randomCoordinates = getRandomCoordinates(bounds = including)
+        while (randomCoordinates.x < excluding.x && randomCoordinates.y < excluding.y
+            || field[randomCoordinates.x][randomCoordinates.y].isNotEmpty()
             || movableEntitiesList.any { it.position == randomCoordinates }
         ) {
-            randomCoordinates = getRandomCoordinates()
+            randomCoordinates = getRandomCoordinates(bounds = including)
         }
         return randomCoordinates
     }

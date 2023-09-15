@@ -9,12 +9,15 @@ class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
 
     override var speed = 400
     override var power = 30
-    override fun move(field: Array<Array<MutableList<LevelObject>>>) {
-        if(health <= 0) {
+    override fun move(field: List<List<MutableList<LevelObject>>>) {
+        if (health <= 0) {
             return
         }
         val charaNearby = attackCharaIfCloseBy(field)
         if (charaNearby) {
+            enemyPositionFlow.update {
+                LevelObjectPositionChangeDTO(position, direction, false, id)
+            }
             return
         }
 

@@ -17,6 +17,7 @@ import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
+import com.example.dungeoncrawler.entity.GroundType
 import com.example.dungeoncrawler.entity.Level
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
@@ -75,6 +76,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.InitGame(0))
     val gameState = _gameState.asStateFlow()
+
+    private val _fieldGroundState: MutableStateFlow<List<List<GroundType>>> =
+        MutableStateFlow(emptyList())
+    val fieldGroundState = _fieldGroundState.asStateFlow()
 
     private var dataStoreManager: DataStoreManager? = null
     private lateinit var mediaPlayerDungeon: MediaPlayer
@@ -379,7 +384,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 GameState.EndGameOnVictory
             }
         } else {
-            reset(newGame = false)
+            _gameState.update {
+                GameState.NextLevel
+            }
+            //reset(newGame = false)
         }
     }
 
@@ -578,11 +586,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     }
 
-    fun reset(newGame: Boolean = true) {
+    fun reset(newGame: Boolean = true, context: Context) {
 
         if (newGame) {
             chara = MainChara()
             level = Level(chara)
+            level.initLevel(context)
 
             viewModelScope.launch {
                 dataStoreManager?.getDataFromDataStoreGameScreen()?.collect {
@@ -612,11 +621,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 )
             }
         } else {
-            viewModelScope.launch {
-                _gameState.emit(GameState.NextLevel)
-            }
 
-            level.initLevel()
+            level.initLevel(context)
 
             viewModelScope.launch {
                 delay(100.milliseconds)
@@ -638,6 +644,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             it.copy(position = chara.position, health = chara.health, gold = chara.gold)
         }
         _enemiesStateList.clear()
+
+        _fieldGroundState.update {
+            level.fieldGround
+        }
+
         level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach {
             val enemyType = when (it as BasicEnemy) {
                 is Slime -> EnemyEnum.SLIME

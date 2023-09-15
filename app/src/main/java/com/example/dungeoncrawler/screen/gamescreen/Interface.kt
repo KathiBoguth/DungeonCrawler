@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -89,7 +90,8 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
     Box(modifier = modifier) {
         FloatingActionButton(
             onClick = onClick,
-            containerColor = colorResource(id = R.color.red_transparent)
+            containerColor = colorResource(id = R.color.red_transparent),
+            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -98,14 +100,6 @@ fun MoveButton(modifier: Modifier, onClick: () -> Unit) {
                     .background(colorResource(id = R.color.secondary))
             )
         }
-//        FloatingActionButton(
-//            onClick = onClick,
-//            modifier = Modifier
-//                .clip(triangleShape)
-//                .size(48.dp),
-//            containerColor = colorResource(id = R.color.secondary),
-//        ) {
-//        }
     }
 
 }

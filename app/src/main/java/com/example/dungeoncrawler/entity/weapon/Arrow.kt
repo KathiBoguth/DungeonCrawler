@@ -41,7 +41,10 @@ class Arrow(id: String, arrowDirection: Direction, coordinates: Coordinates): Mo
         }
     }
 
-    fun move(field: Array<Array<MutableList<LevelObject>>>, movableEntitiesList: List<MovableEntity>) : BasicEnemy? {
+    fun move(
+        field: List<List<MutableList<LevelObject>>>,
+        movableEntitiesList: List<MovableEntity>
+    ): BasicEnemy? {
 
         field[position.x][position.y].remove(this)
 
