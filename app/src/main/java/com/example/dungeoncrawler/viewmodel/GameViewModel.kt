@@ -77,9 +77,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.InitGame(0))
     val gameState = _gameState.asStateFlow()
 
-    private val _fieldGroundState: MutableStateFlow<List<List<GroundType>>> =
+    private val _fieldLayoutState: MutableStateFlow<List<List<GroundType>>> =
         MutableStateFlow(emptyList())
-    val fieldGroundState = _fieldGroundState.asStateFlow()
+    val fieldLayoutState = _fieldLayoutState.asStateFlow()
 
     private var dataStoreManager: DataStoreManager? = null
     private lateinit var mediaPlayerDungeon: MediaPlayer
@@ -645,8 +645,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         _enemiesStateList.clear()
 
-        _fieldGroundState.update {
-            level.fieldGround
+        _fieldLayoutState.update {
+            level.fieldLayout
         }
 
         level.movableEntitiesList.filter { it.type == LevelObjectType.ENEMY }.forEach {

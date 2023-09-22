@@ -32,15 +32,18 @@ fun BackgroundComposable(
     enemiesState: List<EnemyState>,
     objectsState: List<LevelObjectState>,
     levelCount: Int,
-    fieldGround: List<List<GroundType>>
+    fieldLayout: List<List<GroundType>>
 ) {
     val backgroundOffset: Offset by animateOffsetAsState(
         targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value),
         label = "backgroundOffsetAnimation"
     )
 
-    val backgroundLayout: List<List<GroundType>> by remember(key1 = levelCount) {
-        mutableStateOf(fieldGround)
+    val backgroundLayout: List<List<GroundType>> by remember(
+        key1 = levelCount,
+        key2 = fieldLayout
+    ) {
+        mutableStateOf(fieldLayout)
     }
 
     val tileSize = Settings.moveLength

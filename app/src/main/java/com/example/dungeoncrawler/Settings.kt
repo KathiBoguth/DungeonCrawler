@@ -8,10 +8,14 @@ class Settings {
 
     companion object {
         private const val roomsPath = "rooms"
-        const val fieldSize = 12
-        val field = listOf(
-            listOf(URI("$roomsPath/room0.csv"), URI("$roomsPath/room1.csv")),
-            listOf(URI("$roomsPath/room1.csv"), URI("$roomsPath/room1.csv"))
+        val startRoomUri = URI("$roomsPath/room0.csv")
+        val roomFiles = listOf(
+            URI("$roomsPath/roomRandom.csv"),
+            URI("$roomsPath/roomWall.csv"),
+            URI("$roomsPath/roomWallBottom.csv"),
+            URI("$roomsPath/roomWallTop.csv"),
+            URI("$roomsPath/roomWallLeft.csv"),
+            URI("$roomsPath/roomWallRight.csv")
         )
         val startArea = Coordinates(5, 5)
 

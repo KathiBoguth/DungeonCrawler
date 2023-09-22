@@ -10,14 +10,9 @@ import kotlin.random.Random
 
 class FileReaderService {
 
-    companion object {
-        const val roomsPath = "rooms/"
-    }
-
     private val random = Random(System.currentTimeMillis())
 
     private fun parseRoomCsvToList(filename: URI, context: Context): List<List<GroundType>> {
-        //val file = File(filename)
         var fileContent = ""
         try {
             val inputStream: InputStream = context.assets.open(filename.path)

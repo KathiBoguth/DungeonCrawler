@@ -18,6 +18,7 @@ import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.FileReaderService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.net.URI
 import kotlin.random.Random
 
 class Level(
@@ -38,12 +39,8 @@ class Level(
 
     val fileReaderService = FileReaderService()
 
-    var field: List<List<MutableList<LevelObject>>> = List(Settings.fieldSize) {
-        (List(Settings.fieldSize) { mutableListOf() })
-    }
-    var fieldGround: List<List<GroundType>> = List(Settings.fieldSize) {
-        (List(Settings.fieldSize) { GroundType.STONE })
-    }
+    var field: List<List<MutableList<LevelObject>>> = emptyList()
+    var fieldLayout: List<List<GroundType>> = emptyList()
 
     val coinStack = ArrayDeque<String>()
     val potionStack = ArrayDeque<String>()
@@ -65,10 +62,6 @@ class Level(
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
 
-    init {
-        // initLevel()
-    }
-
     fun initLevel(context: Context) {
         gameObjectIds.clear()
         gameObjectIds.addAll(
@@ -84,11 +77,14 @@ class Level(
                 "${TREASURE}0", "${TREASURE}1", "${TREASURE}2", "${TREASURE}3"
             )
         )
-        fieldGround = fileReaderService.parseFieldSchemeToField(Settings.field, context)
-        field = fieldGround.map {
+        val randomField = getRandomFieldLayout()
+        fieldLayout = fileReaderService.parseFieldSchemeToField(randomField, context)
+        //fieldLayout = fileReaderService.parseFieldSchemeToField(Settings.field, context)
+        field = fieldLayout.map {
             it.map { groundType ->
                 when (groundType) {
                     GroundType.STONE -> mutableListOf(Wall())
+                    GroundType.WATER -> mutableListOf(Water())
                     else -> mutableListOf()
                 }
             }
@@ -110,9 +106,27 @@ class Level(
         fillCoinStack()
         fillPotionStack()
         val randomStartCoordinates = randomFreeCoordinates(including = Settings.startArea)
-        //TODO to high start coordinates
-        field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara) // TODO: should chara be on field or in movableEntities list?
+        //field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara) // TODO: should chara be on field or in movableEntities list?
+        field[3][3].add(chara)
         chara.position = randomStartCoordinates
+    }
+
+    private fun getRandomFieldLayout(): List<List<URI>> {
+        val size = random.nextInt(5)
+        val fieldLayout = mutableListOf<List<URI>>()
+        for (i in 0..size) {
+            val list = mutableListOf<URI>()
+            for (j in 0..size) {
+                val file = if (i == 0 && j == 0) {
+                    Settings.startRoomUri
+                } else {
+                    Settings.roomFiles[random.nextInt(Settings.roomFiles.size)]
+                }
+                list.add(file)
+            }
+            fieldLayout.add(list)
+        }
+        return fieldLayout
     }
 
     private fun placeWalls() {

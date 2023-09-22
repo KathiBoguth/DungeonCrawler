@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,7 +55,7 @@ fun GameScreen(
     val charaState by gameViewModel.charaStateFlow.collectAsState()
     val enemiesState = gameViewModel.enemiesStateList
     val objectsState = gameViewModel.objectsStateList
-    val fieldGroundState = gameViewModel.fieldGroundState.collectAsState()
+    val fieldLayoutState = gameViewModel.fieldLayoutState.collectAsState()
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -146,7 +145,7 @@ fun GameScreen(
             gameViewModel::moveLeft,
             gameViewModel::moveRight,
             levelCount,
-            fieldGroundState.value
+            fieldLayoutState.value
         )
     }
 }
@@ -162,18 +161,21 @@ fun GameScreen(
     moveLeft: () -> Unit,
     moveRight: () -> Unit,
     levelCount: Int,
-    fieldGround: List<List<GroundType>>
+    fieldLayout: List<List<GroundType>>
 ) {
-    val density = LocalDensity.current
     val configuration = LocalConfiguration.current
-    val adjustWidth =
-        ((density.density - 2.55) * 200) //TODO: no idea how to calculate, not connected to density?
-    val adjustHeight =
-        ((density.density - 2.45) * 200) //TODO: no idea how to calculate, not connected to density?
-    val backgroundOrigPosition = CoordinatesDp(
-        (configuration.screenWidthDp / 2).dp + adjustWidth.dp,
-        (configuration.screenWidthDp / 2).dp + adjustHeight.dp
-    )
+    val backgroundOrigPosition = if (fieldLayout.isNotEmpty()) {
+        val someNumber = -5.3
+        val adjustment =
+            (someNumber + (0.5 * fieldLayout.size)) * Settings.moveLength //TODO: no idea how to calculate, not connected to density?
+        CoordinatesDp(
+            (configuration.screenWidthDp / 2).dp + adjustment.dp, //+ (fieldLayout.size* Settings.moveLength.dp)* (configuration.screenWidthDp / configuration.screenHeightDp),//adjustWidth.dp,
+            (configuration.screenWidthDp / 2).dp + adjustment.dp// + adjustHeight.dp
+        )
+    } else {
+        CoordinatesDp(0.dp, 0.dp)
+    }
+
 
     val backgroundPosition by remember(key1 = charaScreenState.position, key2 = levelCount) {
         val moveLength = Settings.moveLength
@@ -184,7 +186,7 @@ fun GameScreen(
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
-    BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount, fieldGround)
+    BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount, fieldLayout)
 
     Box(modifier = Modifier.fillMaxSize()) {
         CharacterScreen(charaScreenState)
@@ -208,6 +210,7 @@ fun GameScreen(
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun GamePreview() {
+    val fieldLayout = List(12) { List(12) { GroundType.WATER } }
     GameScreen(
         charaScreenState = CharaScreenState(
             direction = Direction.DOWN,
@@ -241,7 +244,7 @@ fun GamePreview() {
                 Direction.DOWN
             )
         ),
-        {}, {}, {}, {}, {}, levelCount = 0, emptyList()
+        {}, {}, {}, {}, {}, levelCount = 0, fieldLayout
     )
 }
 

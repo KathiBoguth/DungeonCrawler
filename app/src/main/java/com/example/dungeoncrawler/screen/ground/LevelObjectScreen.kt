@@ -42,6 +42,7 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
     val skin = when (objectState.type) {
         LevelObjectType.MAIN_CHARA -> -1
         LevelObjectType.WALL -> -1
+        LevelObjectType.WATER -> -1
         LevelObjectType.TREASURE -> R.drawable.treasure
         LevelObjectType.LADDER -> R.drawable.ladder
         LevelObjectType.ENEMY -> -1
