@@ -8,7 +8,9 @@ class Settings {
 
     companion object {
         private const val roomsPath = "rooms"
-        val startRoomUri = URI("$roomsPath/room0.csv")
+        val startRoomUri = URI("$roomsPath/roomWall.csv")
+        val startCoordinates = Coordinates(3, 3)
+        val endbossRoomUri = URI("$roomsPath/roomRandom.csv")
         val roomFiles = listOf(
             URI("$roomsPath/roomRandom.csv"),
             URI("$roomsPath/roomWall.csv"),
@@ -28,7 +30,6 @@ class Settings {
         const val treasureMaxMoney = 100
         const val nudgeWidth = 20f
         const val animDuration = 100L
-        const val levelsMax = 3
 
         val enemiesPerLevel = mapOf(
             1 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.SLIME),

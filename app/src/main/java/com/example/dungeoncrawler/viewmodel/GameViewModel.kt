@@ -378,7 +378,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun nextLevel() {
         val levelCount = level.levelCount
         level.levelCount = levelCount + 1
-        if (levelCount > Settings.levelsMax) {
+        if (levelCount >= Settings.enemiesPerLevel.size) {
             saveGold()
             _gameState.update {
                 GameState.EndGameOnVictory
@@ -387,7 +387,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             _gameState.update {
                 GameState.NextLevel
             }
-            //reset(newGame = false)
         }
     }
 

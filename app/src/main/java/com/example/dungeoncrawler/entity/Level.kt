@@ -1,6 +1,7 @@
 package com.example.dungeoncrawler.entity
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.ui.unit.Dp
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.entity.armor.Armor
@@ -16,6 +17,7 @@ import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.FileReaderService
+import com.example.dungeoncrawler.service.PathFindingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.URI
@@ -77,13 +79,30 @@ class Level(
                 "${TREASURE}0", "${TREASURE}1", "${TREASURE}2", "${TREASURE}3"
             )
         )
-        val randomField = getRandomFieldLayout()
-        fieldLayout = fileReaderService.parseFieldSchemeToField(randomField, context)
-        //fieldLayout = fileReaderService.parseFieldSchemeToField(Settings.field, context)
+        for (i in 0..10) {
+            val successful = initField(context)
+            if (successful) {
+                return
+            }
+        }
+        Log.e("Level", "error") // TODO do something when level creation fails
+
+    }
+
+    private fun initField(context: Context): Boolean {
+        val endBoss = levelCount >= Settings.enemiesPerLevel.size
+
+        val fieldScheme = if (endBoss) {
+            listOf(listOf(Settings.endbossRoomUri))
+        } else {
+            getRandomFieldLayout()
+        }
+        fieldLayout = fileReaderService.parseFieldSchemeToField(fieldScheme, context)
         field = fieldLayout.map {
             it.map { groundType ->
                 when (groundType) {
                     GroundType.STONE -> mutableListOf(Wall())
+                    // TODO remove Water?
                     GroundType.WATER -> mutableListOf(Water())
                     else -> mutableListOf()
                 }
@@ -97,22 +116,23 @@ class Level(
             Cuirass(50, CUIRASS_DIAMOND)
         )
         placeWalls()
-        val endBoss = levelCount >= Settings.enemiesPerLevel.size
         if (!endBoss) {
             placeTreasures()
-            placeLadder()
+            val ladderPlaced = placeLadder()
+            if (!ladderPlaced) {
+                return false
+            }
         }
         placeEnemies()
         fillCoinStack()
         fillPotionStack()
-        val randomStartCoordinates = randomFreeCoordinates(including = Settings.startArea)
-        //field[randomStartCoordinates.x][randomStartCoordinates.y].add(chara) // TODO: should chara be on field or in movableEntities list?
-        field[3][3].add(chara)
-        chara.position = randomStartCoordinates
+        field[Settings.startCoordinates.x][Settings.startCoordinates.y].add(chara)
+        chara.position = Settings.startCoordinates
+        return true
     }
 
     private fun getRandomFieldLayout(): List<List<URI>> {
-        val size = random.nextInt(5)
+        val size = random.nextInt(4) + 1
         val fieldLayout = mutableListOf<List<URI>>()
         for (i in 0..size) {
             val list = mutableListOf<URI>()
@@ -157,13 +177,30 @@ class Level(
         gameObjectIds.add(treasureId)
     }
 
-    private fun placeLadder(coordinates: Coordinates? = null) {
+    private fun placeLadder(coordinates: Coordinates? = null): Boolean {
         if (coordinates != null) {
             field[coordinates.x][coordinates.y].add(Ladder())
-            return
+            return true
         }
-        val randomCoordinates = randomFreeCoordinates(excluding = Settings.startArea)
-        field[randomCoordinates.x][randomCoordinates.y].add(Ladder())
+        val fieldIntArray = PathFindingService.fieldToIntArray(fieldLayout)
+        var randomCoordinates = randomFreeCoordinates(excluding = Settings.startArea)
+        var isPathToLadder =
+            PathFindingService.isPath(fieldIntArray, Settings.startCoordinates, randomCoordinates)
+        for (i in 0..10) {
+            if (isPathToLadder) {
+                field[randomCoordinates.x][randomCoordinates.y].add(Ladder())
+                return true
+            } else {
+                randomCoordinates = randomFreeCoordinates(excluding = Settings.startArea)
+                isPathToLadder = PathFindingService.isPath(
+                    fieldIntArray,
+                    Settings.startCoordinates,
+                    randomCoordinates
+                )
+            }
+        }
+        return false
+
 
     }
 

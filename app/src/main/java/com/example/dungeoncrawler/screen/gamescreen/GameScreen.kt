@@ -76,7 +76,7 @@ fun GameScreen(
         gameViewModel.setupMediaPlayer(context)
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                if (levelCount > Settings.levelsMax) {
+                if (levelCount >= Settings.enemiesPerLevel.size) {
                     gameViewModel.startMediaPlayerBoss()
                 } else {
                     gameViewModel.startMediaPlayerDungeon()
@@ -123,7 +123,7 @@ fun GameScreen(
             is GameState.NextLevelReady -> {
                 isVisible = true
                 levelCount = state.levelCount
-                if (levelCount > Settings.levelsMax) {
+                if (levelCount >= Settings.enemiesPerLevel.size) {
                     gameViewModel.pauseMediaPlayerDungeon()
                     gameViewModel.startMediaPlayerBoss()
                 }
@@ -166,11 +166,19 @@ fun GameScreen(
     val configuration = LocalConfiguration.current
     val backgroundOrigPosition = if (fieldLayout.isNotEmpty()) {
         val someNumber = -5.3
-        val adjustment =
-            (someNumber + (0.5 * fieldLayout.size)) * Settings.moveLength //TODO: no idea how to calculate, not connected to density?
+        val adjustmentX = if (fieldLayout.size >= 10) {
+            (someNumber + (0.5 * fieldLayout.size)).times(Settings.moveLength)  //TODO: no idea how to calculate, not connected to density?
+        } else {
+            -(Settings.moveLength * 0.5)
+        }
+        val adjustmentY = if (fieldLayout.size >= 10) {
+            adjustmentX
+        } else {
+            -(Settings.moveLength * 1.85)
+        }
         CoordinatesDp(
-            (configuration.screenWidthDp / 2).dp + adjustment.dp, //+ (fieldLayout.size* Settings.moveLength.dp)* (configuration.screenWidthDp / configuration.screenHeightDp),//adjustWidth.dp,
-            (configuration.screenWidthDp / 2).dp + adjustment.dp// + adjustHeight.dp
+            (configuration.screenWidthDp / 2).dp + adjustmentX.dp, //+ (fieldLayout.size* Settings.moveLength.dp)* (configuration.screenWidthDp / configuration.screenHeightDp),//adjustWidth.dp,
+            (configuration.screenWidthDp / 2).dp + adjustmentY.dp// + adjustHeight.dp
         )
     } else {
         CoordinatesDp(0.dp, 0.dp)
