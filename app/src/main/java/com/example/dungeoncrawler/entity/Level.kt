@@ -1,6 +1,8 @@
 package com.example.dungeoncrawler.entity
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.compose.ui.unit.Dp
 import com.example.dungeoncrawler.Settings
@@ -10,6 +12,7 @@ import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import com.example.dungeoncrawler.entity.enemy.Ogre
+import com.example.dungeoncrawler.entity.enemy.Plant
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Arrow
@@ -59,6 +62,8 @@ class Level(
             ""
         )
     )
+
+    var charaFixated = false
 
     var arrowFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
     var pebbleFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
@@ -225,6 +230,12 @@ class Level(
                 EnemyEnum.WOLF -> {
                     val count = enemyList.count { alreadyAdded -> alreadyAdded.id.contains("wolf") }
                     Wolf("wolf$count", enemyPositionFlow)
+                }
+
+                EnemyEnum.PLANT -> {
+                    val count =
+                        enemyList.count { alreadyAdded -> alreadyAdded.id.contains("plant") }
+                    Plant("plant$count", enemyPositionFlow)
                 }
 
                 EnemyEnum.OGRE -> {
@@ -414,6 +425,12 @@ class Level(
 
         val coordinatesTreasure = Coordinates(xCoord + 1, yCoord)
         placeTreasure(coordinatesTreasure, "treasure0")
+    }
+
+    fun fixateChara() {
+        charaFixated = true
+        val runnableCode = Runnable { charaFixated = false }
+        Handler(Looper.getMainLooper()).postDelayed(runnableCode, 3000)
     }
 
 }

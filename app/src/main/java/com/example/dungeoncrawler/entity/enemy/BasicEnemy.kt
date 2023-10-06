@@ -39,6 +39,7 @@ abstract class BasicEnemy(idEnemy: String,
                 is Slime -> EnemyEnum.SLIME
                 is Wolf -> EnemyEnum.WOLF
                 is Ogre -> EnemyEnum.OGRE
+                is Plant -> EnemyEnum.PLANT
                 else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
             }
             attackDamage.value =
@@ -139,6 +140,18 @@ abstract class BasicEnemy(idEnemy: String,
                 Coordinates(posX, position.y)
             }
         }
+    }
+
+    protected fun findChara(field: List<List<MutableList<LevelObject>>>): Coordinates {
+        var charaPos = Coordinates(-1, -1)
+        for (row in field.indices) {
+            val index =
+                field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == "character" } != -1 }
+            if (index != -1) {
+                charaPos = Coordinates(row, index)
+            }
+        }
+        return charaPos
     }
 
     fun destroy() {

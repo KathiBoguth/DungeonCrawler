@@ -111,6 +111,7 @@ fun GameOverScreen(
         EnemyEnum.SLIME -> R.drawable.slime_front
         EnemyEnum.WOLF -> R.drawable.wolf_front
         EnemyEnum.OGRE -> R.drawable.ogre_front
+        EnemyEnum.PLANT -> R.drawable.plant_front
     }
 
     GameOverScreen(

@@ -46,18 +46,6 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         enemyPositionFlow.update { LevelObjectPositionChangeDTO(position, direction, false, id) }
     }
 
-    private fun findChara(field: List<List<MutableList<LevelObject>>>): Coordinates {
-        var charaPos = Coordinates(-1, -1)
-        for (row in field.indices) {
-            val index =
-                field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == "character" } != -1 }
-            if (index != -1) {
-                charaPos = Coordinates(row, index)
-            }
-        }
-        return charaPos
-    }
-
     private fun getNextDirection(horizontalDistance: Int, verticalDistance: Int): Direction {
         if (direction == Direction.UP && verticalDistance < 0
             || direction == Direction.DOWN && verticalDistance > 0

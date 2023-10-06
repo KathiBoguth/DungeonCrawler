@@ -74,6 +74,13 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             Direction.RIGHT -> R.drawable.wolf_right
         }
 
+        EnemyEnum.PLANT -> when (enemyState.direction) {
+            Direction.UP -> R.drawable.plant_back
+            Direction.DOWN -> R.drawable.plant_front
+            Direction.LEFT -> R.drawable.plant_left
+            Direction.RIGHT -> R.drawable.plant_right
+        }
+
         EnemyEnum.OGRE -> {
             if (enemyState.loadsAttack) {
                 R.drawable.ogre_attack

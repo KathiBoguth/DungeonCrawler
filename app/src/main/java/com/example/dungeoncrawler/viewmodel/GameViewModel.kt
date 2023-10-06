@@ -27,6 +27,7 @@ import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.entity.enemy.Ogre
+import com.example.dungeoncrawler.entity.enemy.Plant
 import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Arrow
@@ -123,7 +124,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun moveUp() {
-
         if (turn(Direction.UP)) {
             _charaScreenStateFlow.update {
                 it.copy(direction = Direction.UP)
@@ -342,6 +342,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun movePossible(coordinates: Coordinates): Boolean {
+        if (level.charaFixated) {
+            return false
+        }
+
         if (level.movableEntitiesList.any { it.position == coordinates }) {
             return false
         }
@@ -687,6 +691,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 is Slime -> EnemyEnum.SLIME
                 is Wolf -> EnemyEnum.WOLF
                 is Ogre -> EnemyEnum.OGRE
+                is Plant -> EnemyEnum.PLANT
                 else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
             }
             _enemiesStateList.add(
@@ -768,6 +773,16 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
                     }
 
+                }
+            }
+            if (it is Plant) {
+                viewModelScope.launch {
+                    it.fixateCharaFlow.collect {
+                        if (it) {
+                            level.fixateChara()
+                            flashCharaRed()
+                        }
+                    }
                 }
             }
         }
