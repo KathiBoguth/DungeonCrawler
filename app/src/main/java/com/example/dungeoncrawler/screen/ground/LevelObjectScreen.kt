@@ -58,11 +58,15 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
         }
 
         LevelObjectType.ARROW -> {
-            when (objectState.direction) {
-                Direction.DOWN -> R.drawable.arrow_down
-                Direction.LEFT -> R.drawable.arrow_left
-                Direction.RIGHT -> R.drawable.arrow_right
-                Direction.UP -> R.drawable.arrow_up
+            if (objectState.id == "pebble_throwable") {
+                R.drawable.pebble_throwable
+            } else {
+                when (objectState.direction) {
+                    Direction.DOWN -> R.drawable.arrow_down
+                    Direction.LEFT -> R.drawable.arrow_left
+                    Direction.RIGHT -> R.drawable.arrow_right
+                    Direction.UP -> R.drawable.arrow_up
+                }
             }
         }
 

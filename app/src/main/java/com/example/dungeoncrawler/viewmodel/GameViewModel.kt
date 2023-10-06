@@ -408,6 +408,36 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    private fun throwPebble(coordinates: Coordinates, direction: Direction) {
+        level.throwPebble(coordinates, direction, ::attackChara)
+        viewModelScope.launch {
+            level.pebbleFlow?.collect { pebble ->
+                if (pebble.newPosition == Coordinates(-1, -1)) {
+                    _objectsStateList.removeIf { it.id == pebble.id }
+                    return@collect
+                }
+                if (_objectsStateList.none { it.id == pebble.id }) {
+                    _objectsStateList.add(
+                        LevelObjectState(
+                            pebble.id,
+                            LevelObjectType.ARROW,
+                            pebble.newPosition,
+                            pebble.newDirection
+                        )
+                    )
+                    return@collect
+                }
+                _objectsStateList.replaceAll {
+                    if (it.id == pebble.id) {
+                        it.copy(position = pebble.newPosition)
+                    } else {
+                        it
+                    }
+                }
+            }
+        }
+    }
+
     private fun takeWeapon(coordinates: Coordinates) {
         val oldWeapon = chara.weapon
         val weapon = level.field[coordinates.x][coordinates.y]
@@ -498,6 +528,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             onEnemyDefeated(attackedEnemy)
         }
 
+    }
+
+    private fun attackChara(attackValue: Int) {
+        takeDamage(attackValue, EnemyEnum.OGRE)
     }
 
     private fun placeCoin(position: Coordinates) {
@@ -725,6 +759,17 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     onEnemyAttack(dto)
                 }
             })
+            if (it is Ogre) {
+                viewModelScope.launch {
+                    it.pebbleFlow.collect { pebble ->
+                        if (pebble != null) {
+                            throwPebble(pebble.position, pebble.direction)
+                        }
+
+                    }
+
+                }
+            }
         }
     }
 
@@ -742,14 +787,18 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         nudgeEnemy(damageDTO)
 
+        takeDamage(damageDTO.damage, damageDTO.enemyType)
+    }
+
+    private fun takeDamage(damage: Int, enemyType: EnemyEnum) {
         val protection = chara.armor?.protection ?: 0
-        chara.health -= max(0, (damageDTO.damage - (chara.baseDefense + protection)))
+        chara.health -= max(0, (damage - (chara.baseDefense + protection)))
         _charaScreenStateFlow.update {
             it.copy(health = chara.health)
         }
 
         if (chara.health <= 0) {
-            killedBy.enemyType = damageDTO.enemyType
+            killedBy.enemyType = enemyType
             saveGold()
 
             viewModelScope.launch {

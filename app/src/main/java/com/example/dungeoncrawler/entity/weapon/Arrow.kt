@@ -7,13 +7,13 @@ import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MovableEntity
-import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.LevelObjectPositionChangeDTO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class Arrow(id: String, arrowDirection: Direction, coordinates: Coordinates): MovableEntity(LevelObjectType.ARROW, id) {
+open class Arrow(id: String, arrowDirection: Direction, coordinates: Coordinates) :
+    MovableEntity(LevelObjectType.ARROW, id) {
 
     var handler = Handler(Looper.getMainLooper())
     var speed = 200
@@ -44,7 +44,7 @@ class Arrow(id: String, arrowDirection: Direction, coordinates: Coordinates): Mo
     fun move(
         field: List<List<MutableList<LevelObject>>>,
         movableEntitiesList: List<MovableEntity>
-    ): BasicEnemy? {
+    ): MovableEntity? {
 
         field[position.x][position.y].remove(this)
 
@@ -53,11 +53,11 @@ class Arrow(id: String, arrowDirection: Direction, coordinates: Coordinates): Mo
             deactivateArrow()
             return null
         }
-        val enemy =
+        val enemyOrChara =
             movableEntitiesList.firstOrNull { it.position.x == position.x && it.position.y == position.y }
-        if (enemy != null) {
+        if (enemyOrChara != null) {
             deactivateArrow()
-            return (enemy as BasicEnemy)
+            return enemyOrChara
 
         }
         val isNotSteppable =

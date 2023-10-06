@@ -14,6 +14,7 @@ import com.example.dungeoncrawler.entity.enemy.Slime
 import com.example.dungeoncrawler.entity.enemy.Wolf
 import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Bow
+import com.example.dungeoncrawler.entity.weapon.Pebble
 import com.example.dungeoncrawler.entity.weapon.Sword
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.FileReaderService
@@ -60,6 +61,7 @@ class Level(
     )
 
     var arrowFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
+    var pebbleFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
@@ -124,6 +126,7 @@ class Level(
             }
         }
         placeEnemies()
+        movableEntitiesList.add(chara)
         fillCoinStack()
         fillPotionStack()
         field[Settings.startCoordinates.x][Settings.startCoordinates.y].add(chara)
@@ -367,8 +370,8 @@ class Level(
         val runnableCode: Runnable = object : Runnable {
             override fun run() {
                 val enemy = arrow.move(field, movableEntitiesList)
-                if (enemy != null) {
-                    attack(enemy)
+                if (enemy != null && enemy.type == LevelObjectType.ENEMY) {
+                    attack(enemy as BasicEnemy)
                 }
                 if (arrow.isActive) {
                     arrow.handler.postDelayed(this, arrow.speed.toLong())
@@ -378,9 +381,35 @@ class Level(
         arrow.handler.postDelayed(runnableCode, arrow.speed.toLong())
     }
 
+    fun throwPebble(
+        coordinates: Coordinates,
+        direction: Direction,
+        attack: (attackalue: Int) -> Unit
+    ) {
+        val id = "pebble_throwable"
+        val pebble = Pebble(direction, coordinates)
+
+        gameObjectIds.add(id)
+        field[coordinates.x][coordinates.y].add(pebble)
+        pebbleFlow = pebble.positionFlow
+
+        val runnableCode: Runnable = object : Runnable {
+            override fun run() {
+                val chara = pebble.move(field, movableEntitiesList)
+                if (chara != null && chara.type == LevelObjectType.MAIN_CHARA) {
+                    attack(pebble.attackValue)
+                }
+                if (pebble.isActive) {
+                    pebble.handler.postDelayed(this, pebble.speed.toLong())
+                }
+            }
+        }
+        pebble.handler.postDelayed(runnableCode, pebble.speed.toLong())
+    }
+
     fun endBossDefeated() {
-        val xCoord = (field.size/2)
-        val yCoord = (field[xCoord].size/2)
+        val xCoord = (field.size / 2)
+        val yCoord = (field[xCoord].size / 2)
         val coordinatesLadder = Coordinates(xCoord - 1, yCoord)
         placeLadder(coordinatesLadder)
 
