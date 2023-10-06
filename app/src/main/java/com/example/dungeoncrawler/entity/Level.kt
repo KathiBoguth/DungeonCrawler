@@ -87,7 +87,8 @@ class Level(
                 return
             }
         }
-        Log.e("Level", "error") // TODO do something when level creation fails
+        Log.e("Level", "level creation failed, try recursively again")
+        initLevel(context)
 
     }
 
@@ -104,8 +105,6 @@ class Level(
             it.map { groundType ->
                 when (groundType) {
                     GroundType.STONE -> mutableListOf(Wall())
-                    // TODO remove Water?
-                    GroundType.WATER -> mutableListOf(Water())
                     else -> mutableListOf()
                 }
             }
