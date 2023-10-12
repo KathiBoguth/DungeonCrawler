@@ -15,7 +15,8 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
     override var power = 40
 
     private var fixationReady = true
-    private var fixationCooldown = 5000L
+    private var fixationDuration = 3000L
+    private var fixationAttackCooldown = 5000L
     private val range = 3
 
     val fixateCharaFlow = MutableStateFlow(false)
@@ -38,9 +39,9 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
             fixateCharaFlow.update {
                 true
             }
-            fixationReady = false
-            val runnableCode = Runnable { fixationReady = true }
-            Handler(Looper.getMainLooper()).postDelayed(runnableCode, fixationCooldown)
+            handleFixationAttackCooldown()
+            handleCharaFixationcooldown()
+
             return
         }
         val nextDirection = if (charaInRange) {
@@ -69,5 +70,25 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
         enemyPositionFlow.update {
             LevelObjectPositionChangeDTO(position, direction, false, id)
         }
+    }
+
+    private fun handleCharaFixationcooldown() {
+        val runnableCodeFixationCooldown = Runnable {
+            fixateCharaFlow.update {
+                false
+            }
+        }
+        Handler(Looper.getMainLooper()).postDelayed(runnableCodeFixationCooldown, fixationDuration)
+    }
+
+    private fun handleFixationAttackCooldown() {
+        fixationReady = false
+        val runnableCodeAttackCooldown = Runnable {
+            fixationReady = true
+        }
+        Handler(Looper.getMainLooper()).postDelayed(
+            runnableCodeAttackCooldown,
+            fixationAttackCooldown
+        )
     }
 }

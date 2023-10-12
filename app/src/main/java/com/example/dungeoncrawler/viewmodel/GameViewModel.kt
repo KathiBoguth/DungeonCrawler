@@ -782,13 +782,20 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 viewModelScope.launch {
                     it.fixateCharaFlow.collect { fixated ->
                         if (fixated) {
-                            level.fixateChara(_charaScreenStateFlow)
+                            level.fixateChara()
                             _charaScreenStateFlow.update { chara ->
                                 chara.copy(
                                     fixated = true
                                 )
                             }
                             flashCharaRed()
+                        } else {
+                            level.releaseChara()
+                            _charaScreenStateFlow.update { chara ->
+                                chara.copy(
+                                    fixated = false
+                                )
+                            }
                         }
                     }
                 }

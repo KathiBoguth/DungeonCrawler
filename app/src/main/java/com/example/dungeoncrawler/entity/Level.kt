@@ -1,12 +1,9 @@
 package com.example.dungeoncrawler.entity
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.compose.ui.unit.Dp
 import com.example.dungeoncrawler.Settings
-import com.example.dungeoncrawler.data.CharaScreenState
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.armor.Cuirass
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
@@ -25,7 +22,6 @@ import com.example.dungeoncrawler.service.FileReaderService
 import com.example.dungeoncrawler.service.PathFindingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import java.net.URI
 import kotlin.random.Random
 
@@ -429,15 +425,12 @@ class Level(
         placeTreasure(coordinatesTreasure, "treasure0")
     }
 
-    fun fixateChara(charaScreenStateFlow: MutableStateFlow<CharaScreenState>) {
+    fun fixateChara() {
         charaFixated = true
-        val runnableCode = Runnable {
-            charaFixated = false
-            charaScreenStateFlow.update {
-                it.copy(fixated = false)
-            }
-        }
-        Handler(Looper.getMainLooper()).postDelayed(runnableCode, 3000)
+    }
+
+    fun releaseChara() {
+        charaFixated = false
     }
 
 }
