@@ -6,6 +6,7 @@ import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.math.abs
 
 class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) :
     BasicEnemy(plantId, enemyPositionFlow) {
@@ -32,7 +33,8 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
 
         val horizontalDistance = charaPos.x - position.x
         val verticalDistance = charaPos.y - position.y
-        if (fixationReady && horizontalDistance <= range && verticalDistance <= range) {
+        val charaInRange = abs(horizontalDistance) <= range && abs(verticalDistance) <= range
+        if (fixationReady && charaInRange) {
             fixateCharaFlow.update {
                 true
             }
@@ -41,21 +43,28 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
             Handler(Looper.getMainLooper()).postDelayed(runnableCode, fixationCooldown)
             return
         }
-
-        val turn = random.nextFloat()
-
-        if (turn > 0.8) {
-            direction = when (random.nextInt(4)) {
-                0 -> Direction.RIGHT
-                1 -> Direction.DOWN
-                2 -> Direction.LEFT
-                else -> Direction.UP
-            }
-
+        val nextDirection = if (charaInRange) {
+            getNextDirection(horizontalDistance, verticalDistance)
         } else {
+            val turn = random.nextFloat()
+            if (turn > 0.8) {
+                when (random.nextInt(4)) {
+                    0 -> Direction.RIGHT
+                    1 -> Direction.DOWN
+                    2 -> Direction.LEFT
+                    else -> Direction.UP
+                }
+
+            } else {
+                direction
+            }
+        }
+        if (nextDirection == direction) {
             if (canWalk(field)) {
                 position = moveOneStep()
             }
+        } else {
+            direction = nextDirection
         }
         enemyPositionFlow.update {
             LevelObjectPositionChangeDTO(position, direction, false, id)

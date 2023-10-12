@@ -20,10 +20,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
+import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 
 @Composable
@@ -68,5 +70,34 @@ fun CharacterScreen(charaScreenState: CharaScreenState) {
                 .offset(charaOffset.x.dp, charaOffset.y.dp),
             colorFilter = ColorFilter.tint(animatedFlashColor, BlendMode.SrcAtop)
         )
+        if (charaScreenState.fixated) {
+            Image(
+                painter = painterResource(id = R.drawable.tendril),
+                contentDescription = stringResource(id = R.string.tendril),
+                modifier = Modifier
+                    .width(62.dp)
+                    .height(73.dp)
+                    .offset(charaOffset.x.dp, charaOffset.y.dp),
+            )
+        }
     }
+}
+
+@Preview
+@Composable
+fun CharaPreview() {
+    val charaScreenState = CharaScreenState(
+        nudge = false,
+        cuirassId = "",
+        jump = false,
+        direction = Direction.DOWN,
+        fixated = false,
+        flashRed = false,
+        weaponId = "",
+        gold = 0,
+        health = 100,
+        position = Coordinates(5, 5)
+    )
+
+    CharacterScreen(charaScreenState = charaScreenState)
 }

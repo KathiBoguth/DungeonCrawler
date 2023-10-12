@@ -229,7 +229,8 @@ fun GamePreview() {
             gold = 0,
             health = 0,
             weaponId = "",
-            cuirassId = ""
+            cuirassId = "",
+            fixated = false
         ),
         enemiesState = listOf(
             EnemyState(

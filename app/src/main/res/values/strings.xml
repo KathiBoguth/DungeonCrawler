@@ -5,7 +5,8 @@
     <string name="down">down</string>
     <string name="right">right</string>
     <string name="interact">interact</string>
-    <string name="main_character">main character</string>
+    <string name="main_character">tendril</string>
+    <string name="tendril">main character</string>
     <string name="start_game">Start Game</string>
     <string name="main_menu">Main Menu</string>
     <string name="background">background</string>

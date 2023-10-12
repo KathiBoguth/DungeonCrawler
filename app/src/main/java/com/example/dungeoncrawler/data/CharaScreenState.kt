@@ -12,5 +12,6 @@ data class CharaScreenState(
     val health: Int,
     val gold: Int,
     val weaponId: String,
-    val cuirassId: String
+    val cuirassId: String,
+    val fixated: Boolean
 )

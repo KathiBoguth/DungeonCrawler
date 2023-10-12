@@ -62,7 +62,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 health = Settings.healthBaseValue,
                 gold = 0,
                 weaponId = "",
-                cuirassId = ""
+                cuirassId = "",
+                fixated = false
             )
         )
     val charaStateFlow = _charaScreenStateFlow.asStateFlow()
@@ -654,7 +655,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     health = Settings.healthBaseValue,
                     gold = 0,
                     weaponId = "",
-                    cuirassId = ""
+                    cuirassId = "",
+                    fixated = false
                 )
             }
         } else {
@@ -669,7 +671,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     it.copy(
                         position = findCoordinate(chara.id),
                         health = chara.health,
-                        gold = chara.gold
+                        gold = chara.gold,
+                        fixated = false
                     )
                 }
                 delay(200.milliseconds)
@@ -777,9 +780,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
             if (it is Plant) {
                 viewModelScope.launch {
-                    it.fixateCharaFlow.collect {
-                        if (it) {
-                            level.fixateChara()
+                    it.fixateCharaFlow.collect { fixated ->
+                        if (fixated) {
+                            level.fixateChara(_charaScreenStateFlow)
+                            _charaScreenStateFlow.update { chara ->
+                                chara.copy(
+                                    fixated = true
+                                )
+                            }
                             flashCharaRed()
                         }
                     }
