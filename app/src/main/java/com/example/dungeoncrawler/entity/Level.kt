@@ -33,6 +33,7 @@ class Level(
 
     companion object {
         const val SWORD_WOODEN = "sword_wooden"
+        const val SWORD_IRON = "sword_iron"
         const val SWORD_DIAMOND = "sword_diamond"
         const val CUIRASS_RAG = "cuirass_rag"
         const val CUIRASS_IRON = "cuirass_iron"
@@ -77,6 +78,7 @@ class Level(
         gameObjectIds.addAll(
             listOf(
                 SWORD_WOODEN,
+                SWORD_IRON,
                 SWORD_DIAMOND,
                 CUIRASS_RAG,
                 CUIRASS_IRON,
@@ -116,7 +118,13 @@ class Level(
             }
         }
 
-        weapons = listOf(Sword(10, SWORD_WOODEN), Sword(50, SWORD_DIAMOND), Bow(10, BOW_WOODEN))
+        weapons = listOf(
+            Sword(10, SWORD_WOODEN),
+            Sword(25, SWORD_WOODEN),
+            Sword(25, SWORD_IRON),
+            Bow(10, BOW_WOODEN),
+            Sword(50, SWORD_DIAMOND),
+        )
         armors = listOf(
             Cuirass(10, CUIRASS_RAG),
             Cuirass(25, CUIRASS_IRON),
@@ -326,13 +334,15 @@ class Level(
 
     fun randomWeapon(): Weapon {
         val randomValue = random.nextFloat()
-        // TODO: probably display issues?
         val diamondProbability = min(0.4, max(levelCount - 7, 0) * 0.1)
-        val bowProbability = min(0.4, max(levelCount - 3, 0) * 0.1)
+        val bowProbability = min(0.4, max(levelCount - 4, 0) * 0.1)
+        val ironProbability = min(0.4, max(levelCount - 3, 0) * 0.1)
 
         return if (randomValue < diamondProbability) {
             weapons.find { it.id == SWORD_DIAMOND } ?: weapons.first()
         } else if (randomValue < diamondProbability + bowProbability) {
+            weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
+        } else if (randomValue < min(diamondProbability + bowProbability + ironProbability, 0.9)) {
             weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
         } else {
             weapons.find { it.id == SWORD_WOODEN } ?: weapons.first()

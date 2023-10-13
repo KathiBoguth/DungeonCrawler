@@ -34,6 +34,7 @@ import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_DIAMOND
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_IRON
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_RAG
 import com.example.dungeoncrawler.entity.Level.Companion.SWORD_DIAMOND
+import com.example.dungeoncrawler.entity.Level.Companion.SWORD_IRON
 import com.example.dungeoncrawler.entity.Level.Companion.SWORD_WOODEN
 
 @Composable
@@ -147,6 +148,7 @@ fun StatsText(text: String) {
 fun Inventory(weaponId: String, cuirassId: String) {
     val weaponResource = when (weaponId) {
         SWORD_WOODEN -> R.drawable.sword_wooden
+        SWORD_IRON -> R.drawable.sword_iron
         SWORD_DIAMOND -> R.drawable.sword_diamond
         BOW_WOODEN -> R.drawable.bow
         else -> -1

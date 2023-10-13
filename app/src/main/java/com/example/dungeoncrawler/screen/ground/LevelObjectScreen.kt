@@ -26,6 +26,7 @@ import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_DIAMOND
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_IRON
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_RAG
 import com.example.dungeoncrawler.entity.Level.Companion.SWORD_DIAMOND
+import com.example.dungeoncrawler.entity.Level.Companion.SWORD_IRON
 import com.example.dungeoncrawler.entity.Level.Companion.SWORD_WOODEN
 import com.example.dungeoncrawler.entity.LevelObjectType
 
@@ -54,6 +55,7 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
             when (objectState.id) {
                 BOW_WOODEN -> R.drawable.bow
                 SWORD_WOODEN -> R.drawable.sword_wooden
+                SWORD_IRON -> R.drawable.sword_iron
                 SWORD_DIAMOND -> R.drawable.sword_diamond
                 else -> -1
             }
