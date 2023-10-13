@@ -616,16 +616,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         } else {
             placeCoin(attackedEnemy.position)
         }
-
-        // TODO: maybe this could be removed?
-        attackedEnemy.position = Coordinates(-1, -1)
-        _enemiesStateList.replaceAll {
-            if (it.id == attackedEnemy.id) {
-                it.copy(visible = false)
-            } else {
-                it
-            }
-        }
+        level.movableEntitiesList.removeIf { it.id == attackedEnemy.id }
         _enemiesStateList.removeIf { it.id == attackedEnemy.id }
         attackedEnemy.destroy()
 

@@ -23,6 +23,8 @@ import com.example.dungeoncrawler.service.PathFindingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.URI
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.random.Random
 
 class Level(
@@ -325,25 +327,30 @@ class Level(
     fun randomWeapon(): Weapon {
         val randomValue = random.nextFloat()
         // TODO: probably display issues?
+        val diamondProbability = min(0.4, max(levelCount - 7, 0) * 0.1)
+        val bowProbability = min(0.4, max(levelCount - 3, 0) * 0.1)
 
-        return if (randomValue < 0.4) {
-            weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
-        } else if (randomValue < 0.8) {
-            weapons.find { it.id == SWORD_WOODEN } ?: weapons.first()
-        } else {
+        return if (randomValue < diamondProbability) {
             weapons.find { it.id == SWORD_DIAMOND } ?: weapons.first()
+        } else if (randomValue < diamondProbability + bowProbability) {
+            weapons.find { it.id == BOW_WOODEN } ?: weapons.first()
+        } else {
+            weapons.find { it.id == SWORD_WOODEN } ?: weapons.first()
         }
     }
 
     fun randomArmor(): Armor {
         val randomValue = random.nextFloat()
+        val diamondProbability = min(0.4, max(levelCount - 7, 0) * 0.1)
+        val ironProbability = min(0.4, max(levelCount - 3, 0) * 0.1)
 
-        if (randomValue < 0.5) {
-            return armors.find { it.id == CUIRASS_RAG } ?: armors.first()
-        } else if (randomValue < 0.8) {
-            return armors.find { it.id == CUIRASS_IRON } ?: armors.first()
+        return if (randomValue < diamondProbability) {
+            armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
+        } else if (randomValue < diamondProbability + ironProbability) {
+            armors.find { it.id == CUIRASS_IRON } ?: armors.first()
+        } else {
+            armors.find { it.id == CUIRASS_RAG } ?: armors.first()
         }
-        return armors.find { it.id == CUIRASS_DIAMOND } ?: armors.first()
     }
 
     private fun randomFreeCoordinates(

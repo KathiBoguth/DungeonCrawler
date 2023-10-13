@@ -11,6 +11,7 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
 
     override var speed = 800
     override var power = 80
+    override var health = 500
     private var attackCharged = false
 
     val pebbleFlow: MutableStateFlow<Pebble?> = MutableStateFlow(null)

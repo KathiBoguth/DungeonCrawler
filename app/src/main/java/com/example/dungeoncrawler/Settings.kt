@@ -34,9 +34,67 @@ class Settings {
         val enemiesPerLevel = mapOf(
             1 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.SLIME),
             2 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.PLANT),
-            3 to arrayOf(EnemyEnum.WOLF, EnemyEnum.WOLF, EnemyEnum.PLANT, EnemyEnum.PLANT),
-            4 to arrayOf(EnemyEnum.WOLF, EnemyEnum.WOLF, EnemyEnum.WOLF, EnemyEnum.PLANT),
-            5 to arrayOf(EnemyEnum.OGRE)
+            3 to arrayOf(
+                EnemyEnum.SLIME,
+                EnemyEnum.SLIME,
+                EnemyEnum.SLIME,
+                EnemyEnum.SLIME,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF
+            ),
+            4 to arrayOf(
+                EnemyEnum.SLIME,
+                EnemyEnum.SLIME,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF
+            ),
+            5 to arrayOf(
+                EnemyEnum.SLIME,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF
+            ),
+            6 to arrayOf(
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF
+            ),
+            7 to arrayOf(
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF
+            ),
+            8 to arrayOf(
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF
+            ),
+            9 to arrayOf(
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.PLANT,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF,
+                EnemyEnum.WOLF
+            ),
+            10 to arrayOf(EnemyEnum.OGRE)
         )
     }
 }

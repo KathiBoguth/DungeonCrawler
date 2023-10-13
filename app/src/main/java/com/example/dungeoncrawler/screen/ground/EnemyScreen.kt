@@ -42,19 +42,24 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
         ), label = ""
     )
     val position by remember(key1 = enemyState.position, key2 = backgroundPos) {
-        val position = getPositionFromCoordinates(enemyState.position, enemyState.type == EnemyEnum.OGRE)
+        val position =
+            getPositionFromCoordinates(enemyState.position, enemyState.type == EnemyEnum.OGRE)
         return@remember mutableStateOf(position)
     }
 
-    val positionAsOffset: Offset by
-    animateOffsetAsState(Offset(position.x.value, position.y.value), label = "enemy offset")
+    val positionAsOffset: Offset by animateOffsetAsState(
+        Offset(position.x.value, position.y.value),
+        label = "enemy offset"
+    )
 
     val flashColor = if (enemyState.flashRed) {
         colorResource(id = R.color.red_semitransparent)
     } else {
         colorResource(id = R.color.transparent)
     }
-    val animatedFlashColor: Color by animateColorAsState(targetValue = flashColor, animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
+    val animatedFlashColor: Color by animateColorAsState(
+        targetValue = flashColor,
+        animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
         label = "enemy flash red"
     )
 

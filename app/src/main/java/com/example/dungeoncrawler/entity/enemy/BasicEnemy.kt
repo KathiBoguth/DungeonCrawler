@@ -17,7 +17,7 @@ abstract class BasicEnemy(idEnemy: String,
                           val enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>):
     MovableEntity(LevelObjectType.ENEMY, idEnemy) {
 
-    var health = 100
+    open var health = 100
 
     abstract var speed: Int
     abstract var power: Int

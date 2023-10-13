@@ -36,8 +36,10 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
         return@remember mutableStateOf(position)
     }
 
-    val positionAsOffset: Offset by
-    animateOffsetAsState(Offset(position.x.value, position.y.value), label = "level object offset")
+    val positionAsOffset: Offset by animateOffsetAsState(
+        Offset(position.x.value, position.y.value),
+        label = "level object offset"
+    )
 
     val skin = when (objectState.type) {
         LevelObjectType.MAIN_CHARA -> -1
@@ -84,7 +86,13 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
     if (skin != -1){
         Box(modifier = Modifier
             .fillMaxSize()
-            .offset(positionAsOffset.x.dp, positionAsOffset.y.dp)
+            .then(
+                if (objectState.type == LevelObjectType.ARROW) {
+                    Modifier.offset(positionAsOffset.x.dp, positionAsOffset.y.dp)
+                } else {
+                    Modifier.offset(position.x, position.y)
+                }
+            )
             .wrapContentSize(unbounded = true)) {
             Image(
                 painter = painterResource(id = skin),
