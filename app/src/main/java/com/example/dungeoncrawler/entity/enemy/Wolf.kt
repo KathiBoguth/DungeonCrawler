@@ -15,6 +15,9 @@ class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         }
         val charaNearby = attackCharaIfCloseBy(field)
         if (charaNearby) {
+            enemyPositionFlow.update {
+                LevelObjectPositionChangeDTO(position, direction, false, id)
+            }
             return
         }
 

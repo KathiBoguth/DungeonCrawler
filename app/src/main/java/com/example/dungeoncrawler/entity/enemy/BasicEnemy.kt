@@ -155,14 +155,16 @@ abstract class BasicEnemy(idEnemy: String,
         return charaPos
     }
 
-    fun getNextDirection(horizontalDistance: Int, verticalDistance: Int): Direction {
-        if (direction == Direction.UP && verticalDistance < 0
-            || direction == Direction.DOWN && verticalDistance > 0
-            || direction == Direction.RIGHT && horizontalDistance > 0
-            || direction == Direction.LEFT && horizontalDistance < 0
-        ) {
-            return direction
+    fun getNextDirection(
+        horizontalDistance: Int,
+        verticalDistance: Int,
+        field: List<List<MutableList<LevelObject>>>
+    ): Direction {
+        val nextDirection = keepDirectionIfCanWalk(horizontalDistance, verticalDistance, field)
+        if (nextDirection != null) {
+            return nextDirection
         }
+
         return if (abs(horizontalDistance) > abs(verticalDistance)) {
             if (horizontalDistance > 0) {
                 Direction.RIGHT
@@ -177,6 +179,36 @@ abstract class BasicEnemy(idEnemy: String,
             }
         }
     }
+
+    private fun keepDirectionIfCanWalk(
+        horizontalDistance: Int,
+        verticalDistance: Int,
+        field: List<List<MutableList<LevelObject>>>
+    ): Direction? {
+        val canWalk = canWalk(field)
+        if ((direction == Direction.UP && verticalDistance < 0
+                    || direction == Direction.DOWN && verticalDistance > 0
+                    || direction == Direction.RIGHT && horizontalDistance > 0
+                    || direction == Direction.LEFT && horizontalDistance < 0)
+            && canWalk
+        ) {
+            return direction
+        } else if (!canWalk) {
+            return if (direction == Direction.UP || direction == Direction.DOWN) {
+                if (horizontalDistance > 0) {
+                    Direction.RIGHT
+                } else {
+                    Direction.LEFT
+                }
+            } else if (verticalDistance > 0) {
+                Direction.DOWN
+            } else {
+                Direction.UP
+            }
+        }
+        return null
+    }
+
 
     fun destroy() {
         handler.removeCallbacksAndMessages(null)

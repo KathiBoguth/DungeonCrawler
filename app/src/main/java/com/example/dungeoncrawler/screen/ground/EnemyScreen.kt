@@ -58,7 +58,6 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
         label = "enemy flash red"
     )
 
-
     val skin = when (enemyState.type) {
         EnemyEnum.SLIME -> when (enemyState.direction) {
             Direction.UP -> R.drawable.slime_back

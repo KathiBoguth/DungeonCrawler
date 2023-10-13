@@ -27,6 +27,10 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
         }
         val charaNearby = attackCharaIfCloseBy(field)
         if (charaNearby) {
+            enemyPositionFlow.update {
+                LevelObjectPositionChangeDTO(position, direction, false, id)
+
+            }
             return
         }
 
@@ -45,7 +49,7 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
             return
         }
         val nextDirection = if (charaInRange) {
-            getNextDirection(horizontalDistance, verticalDistance)
+            getNextDirection(horizontalDistance, verticalDistance, field)
         } else {
             val turn = random.nextFloat()
             if (turn > 0.8) {

@@ -21,6 +21,10 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         }
         val charaNearby = attackCharaIfCloseBy(field)
         if (charaNearby) {
+            enemyPositionFlow.update {
+                LevelObjectPositionChangeDTO(position, direction, loadAttack = attackCharged, id)
+
+            }
             return
         }
         attackCharged = false
@@ -30,7 +34,7 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         val horizontalDistance = charaPos.x - position.x
         val verticalDistance = charaPos.y - position.y
 
-        val nextDirection = getNextDirection(horizontalDistance, verticalDistance)
+        val nextDirection = getNextDirection(horizontalDistance, verticalDistance, field)
 
         if (nextDirection != direction ) {
             direction = nextDirection
