@@ -640,25 +640,26 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                         gold = it.gold
                     )
                     chara.setBaseValues(charaStats)
+                    _charaScreenStateFlow.update {
+                        CharaScreenState(
+                            direction = Direction.DOWN,
+                            nudge = false,
+                            jump = false,
+                            position = chara.position,
+                            flashRed = false,
+                            health = chara.health,
+                            gold = 0,
+                            weaponId = "",
+                            cuirassId = "",
+                            fixated = false
+                        )
+                    }
                 }
             }
             _gameState.update {
                 GameState.InitGame(level.levelCount)
             }
-            _charaScreenStateFlow.update {
-                CharaScreenState(
-                    direction = Direction.DOWN,
-                    nudge = false,
-                    jump = false,
-                    position = chara.position,
-                    flashRed = false,
-                    health = Settings.healthBaseValue,
-                    gold = 0,
-                    weaponId = "",
-                    cuirassId = "",
-                    fixated = false
-                )
-            }
+
         } else {
 
             level.initLevel(context)
