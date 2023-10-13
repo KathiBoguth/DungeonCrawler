@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.screen.gamescreen
 
+import PauseScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -50,7 +51,8 @@ fun GameScreen(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     gameViewModel: ComposableGameViewModel = viewModel(),
     onGameOver: () -> Unit,
-    onVictory: () -> Unit
+    onVictory: () -> Unit,
+    onGiveUp: () -> Unit
 ) {
     val charaState by gameViewModel.charaStateFlow.collectAsState()
     val enemiesState = gameViewModel.enemiesStateList
@@ -70,17 +72,14 @@ fun GameScreen(
         mutableStateOf(0)
     }
 
-
     val gameState by gameViewModel.gameState.collectAsState()
+    val pausedState by gameViewModel.gamePaused.collectAsState()
+
     DisposableEffect(lifecycleOwner) {
         gameViewModel.setupMediaPlayer(context)
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                if (levelCount >= Settings.enemiesPerLevel.size) {
-                    gameViewModel.startMediaPlayerBoss()
-                } else {
-                    gameViewModel.startMediaPlayerDungeon()
-                }
+                gameViewModel.startMediaPlayerByLevelCount(levelCount)
             } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
                 gameViewModel.pauseMediaPlayers()
             }
@@ -111,6 +110,11 @@ fun GameScreen(
                 )
             }
 
+            is GameState.EndGameOnGiveUp -> {
+                gameViewModel.reset(context = context)
+                onEndGame(onGiveUp, gameViewModel::pauseMediaPlayers)
+            }
+
             is GameState.InitGame -> {
                 levelCount = state.levelCount
             }
@@ -135,18 +139,26 @@ fun GameScreen(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        GameScreen(
-            charaState,
-            enemiesState,
-            objectsState,
-            gameViewModel::interact,
-            gameViewModel::moveUp,
-            gameViewModel::moveDown,
-            gameViewModel::moveLeft,
-            gameViewModel::moveRight,
-            levelCount,
-            fieldLayoutState.value
-        )
+        if (pausedState) {
+            PauseScreen(
+                onReturnClicked = gameViewModel::resumeGame,
+                onGiveUpClicked = gameViewModel::onGiveUp
+            )
+        } else {
+            GameScreen(
+                charaState,
+                enemiesState,
+                objectsState,
+                gameViewModel::interact,
+                gameViewModel::moveUp,
+                gameViewModel::moveDown,
+                gameViewModel::moveLeft,
+                gameViewModel::moveRight,
+                gameViewModel::onPause,
+                levelCount,
+                fieldLayoutState.value
+            )
+        }
     }
 }
 
@@ -160,6 +172,7 @@ fun GameScreen(
     moveDown: () -> Unit,
     moveLeft: () -> Unit,
     moveRight: () -> Unit,
+    onPause: () -> Unit,
     levelCount: Int,
     fieldLayout: List<List<GroundType>>
 ) {
@@ -205,6 +218,7 @@ fun GameScreen(
             moveDown,
             moveLeft,
             moveRight,
+            onPause,
             charaScreenState.gold,
             charaScreenState.health,
             levelCount,
@@ -253,7 +267,7 @@ fun GamePreview() {
                 Direction.DOWN
             )
         ),
-        {}, {}, {}, {}, {}, levelCount = 0, fieldLayout
+        {}, {}, {}, {}, {}, {}, levelCount = 0, fieldLayout
     )
 }
 

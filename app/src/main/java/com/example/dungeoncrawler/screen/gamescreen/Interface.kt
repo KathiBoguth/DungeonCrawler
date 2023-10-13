@@ -43,6 +43,7 @@ fun Controls(
     moveDown: () -> Unit,
     moveLeft: () -> Unit,
     moveRight: () -> Unit,
+    pause: () -> Unit,
     gold: Int,
     health: Int,
     levelCount: Int,
@@ -82,6 +83,14 @@ fun Controls(
             Inventory(weaponId, cuirassId)
         }
 
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        contentAlignment = Alignment.TopEnd
+    ) {
+        PauseButton(pause)
     }
 }
 
@@ -193,5 +202,30 @@ fun ControlPad(
                 .rotate(180f)
                 .align(Alignment.CenterHorizontally)
         ) { moveDown() }
+    }
+}
+
+@Composable
+fun PauseButton(pause: () -> Unit) {
+    Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+        FloatingActionButton(modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(50.dp),
+            containerColor = colorResource(id = R.color.blue_transparent),
+            onClick = { pause() }) {
+
+        }
+        Image(
+            painter = painterResource(id = R.drawable.pause_symbol),
+            contentDescription = "Pause",
+            modifier = Modifier.fillMaxSize(0.75f)
+        )
+    }
+
+}
+
+@Preview
+@Composable
+fun PausePreview() {
+    PauseButton {
+
     }
 }

@@ -68,6 +68,7 @@ class Level(
 
     private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
+    var gamePaused = false
 
     fun initLevel(context: Context) {
         gameObjectIds.clear()
@@ -255,7 +256,9 @@ class Level(
     private fun setMoveRunnable(enemy: BasicEnemy) {
         val runnableCode: Runnable = object : Runnable {
             override fun run() {
-                enemy.move(field)
+                if (!gamePaused) {
+                    enemy.move(field)
+                }
                 enemy.handler.postDelayed(this, enemy.speed.toLong())
             }
         }

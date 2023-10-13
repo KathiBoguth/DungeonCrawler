@@ -6,7 +6,6 @@ import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dungeoncrawler.KilledBy
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
@@ -83,14 +82,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         MutableStateFlow(emptyList())
     val fieldLayoutState = _fieldLayoutState.asStateFlow()
 
+    val gamePaused = MutableStateFlow(false)
+
     private var dataStoreManager: DataStoreManager? = null
     private lateinit var mediaPlayerDungeon: MediaPlayer
     private lateinit var mediaPlayerBoss: MediaPlayer
 
     private var enemyPositionChangeJob: Job? = null // TODO: better solution?
     private val enemyAttackJobs: MutableList<Job> = mutableListOf()
-
-    var killedBy = KilledBy(EnemyEnum.SLIME)
 
     fun initDataStoreManager(newManager: DataStoreManager) {
         dataStoreManager = newManager
@@ -103,8 +102,16 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         mediaPlayerBoss.isLooping = true
     }
 
-    fun startMediaPlayerDungeon() {
+    private fun startMediaPlayerDungeon() {
         mediaPlayerDungeon.start()
+    }
+
+    fun startMediaPlayerByLevelCount(levelCount: Int) {
+        if (levelCount >= Settings.enemiesPerLevel.size) {
+            startMediaPlayerBoss()
+        } else {
+            startMediaPlayerDungeon()
+        }
     }
 
     fun pauseMediaPlayers() {
@@ -536,7 +543,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun attackChara(attackValue: Int) {
-        takeDamage(attackValue, EnemyEnum.OGRE)
+        takeDamage(attackValue)
     }
 
     private fun placeCoin(position: Coordinates) {
@@ -625,6 +632,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun reset(newGame: Boolean = true, context: Context) {
+        if (this::level.isInitialized) {
+            level.gamePaused = false
+        }
+        gamePaused.update { false }
 
         if (newGame) {
             chara = MainChara()
@@ -818,10 +829,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         nudgeEnemy(damageDTO)
 
-        takeDamage(damageDTO.damage, damageDTO.enemyType)
+        takeDamage(damageDTO.damage)
     }
 
-    private fun takeDamage(damage: Int, enemyType: EnemyEnum) {
+    private fun takeDamage(damage: Int) {
         val protection = chara.armor?.protection ?: 0
         chara.health -= max(0, (damage - (chara.baseDefense + protection)))
         _charaScreenStateFlow.update {
@@ -829,7 +840,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
         if (chara.health <= 0) {
-            killedBy.enemyType = enemyType
             saveGold()
 
             viewModelScope.launch {
@@ -897,9 +907,33 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+
+    fun onPause() {
+        if (this::level.isInitialized) {
+            level.gamePaused = true
+            gamePaused.update {
+                true
+            }
+            pauseMediaPlayers()
+        }
+    }
+
+    fun resumeGame() {
+        if (this::level.isInitialized) {
+            level.gamePaused = false
+            gamePaused.update {
+                false
+            }
+            startMediaPlayerByLevelCount(level.levelCount)
+        }
+    }
+
+    fun onGiveUp() {
+        viewModelScope.launch {
+            _gameState.emit(GameState.EndGameOnGiveUp)
+        }
+    }
 }
 
 
-class MissingEnemyTypeException(message: String) : Exception(message) {
-
-}
+class MissingEnemyTypeException(message: String) : Exception(message)
