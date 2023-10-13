@@ -9,6 +9,7 @@
     <color name="red">#CA0000</color>
     <color name="red_transparent">#00CA0000</color>
     <color name="black">#FF000000</color>
+    <color name="grey">#424242</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#ff7f27</color>
     <color name="primary_variant">#D56A21</color>

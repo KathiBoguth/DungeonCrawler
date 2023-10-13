@@ -256,7 +256,8 @@ fun GamePreview() {
                 type = EnemyEnum.SLIME,
                 flashRed = false,
                 visible = true,
-                loadsAttack = false
+                loadsAttack = false,
+                healthPercentage = 1.0
             )
         ),
         objectsState = listOf(

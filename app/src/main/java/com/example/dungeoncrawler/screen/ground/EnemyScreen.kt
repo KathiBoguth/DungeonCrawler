@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -22,6 +24,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
@@ -105,8 +109,12 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
         modifier = Modifier
             .fillMaxSize()
             .offset(positionAsOffset.x.dp, positionAsOffset.y.dp)
-            .wrapContentSize(unbounded = true)
+            .wrapContentSize(unbounded = true),
     ) {
+        if (enemyState.healthPercentage < 1.0) {
+            HealthBar(enemyState.healthPercentage, width)
+        }
+
         Image(
             painter = painterResource(id = skin),
             contentDescription = stringResource(id = R.string.enemy),
@@ -117,6 +125,50 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             colorFilter = ColorFilter.tint(animatedFlashColor, BlendMode.SrcAtop)
         )
     }
+}
+
+@Composable
+fun HealthBar(healthPercentage: Double, enemyWidth: Dp) {
+    val healthBarFullWidth = 54
+    val healthBarWidth = healthBarFullWidth * healthPercentage
+    Box(modifier = Modifier.width(enemyWidth), contentAlignment = Center) {
+        Box(
+            modifier = Modifier
+                .width(healthBarFullWidth.dp)
+                .height(8.dp)
+                .background(colorResource(id = R.color.grey))
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(healthBarWidth.dp)
+                    .height(8.dp)
+                    .background(colorResource(id = R.color.red))
+            )
+
+        }
+
+
+    }
+
+
+}
+
+@Preview
+@Composable
+fun EnemyPreview() {
+    val enemyState = EnemyState(
+        id = "",
+        nudge = false,
+        jump = false,
+        direction = Direction.DOWN,
+        position = Coordinates(0, 0),
+        type = EnemyEnum.OGRE,
+        flashRed = false,
+        visible = true,
+        loadsAttack = false,
+        healthPercentage = 0.5
+    )
+    EnemyScreen(enemyState = enemyState, backgroundPos = CoordinatesDp(0.dp, 0.dp))
 }
 
 fun getPositionFromCoordinates(

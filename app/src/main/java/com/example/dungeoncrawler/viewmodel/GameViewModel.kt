@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dungeoncrawler.KilledBy
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
@@ -90,6 +91,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private var enemyPositionChangeJob: Job? = null // TODO: better solution?
     private val enemyAttackJobs: MutableList<Job> = mutableListOf()
+
+    var killedBy = KilledBy(EnemyEnum.SLIME)
 
     fun initDataStoreManager(newManager: DataStoreManager) {
         dataStoreManager = newManager
@@ -535,6 +538,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun attack(attackedEnemy: BasicEnemy) {
         val weaponBonus = chara.weapon?.attack ?: 0
         attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
+        _enemiesStateList.replaceAll {
+            if (it.id == attackedEnemy.id) {
+                val newHealthPercentage = attackedEnemy.health.toDouble() / attackedEnemy.maxHealth
+                it.copy(healthPercentage = newHealthPercentage)
+            } else {
+                it
+            }
+        }
         flashEnemiesRed(attackedEnemy.id)
         if (attackedEnemy.health <= 0) {
             onEnemyDefeated(attackedEnemy)
@@ -543,7 +554,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun attackChara(attackValue: Int) {
-        takeDamage(attackValue)
+        takeDamage(attackValue, EnemyEnum.OGRE)
     }
 
     private fun placeCoin(position: Coordinates) {
@@ -710,7 +721,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     enemyType,
                     flashRed = false,
                     visible = true,
-                    loadsAttack = false
+                    loadsAttack = false,
+                    healthPercentage = 1.0
                 )
             )
         }
@@ -820,10 +832,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         nudgeEnemy(damageDTO)
 
-        takeDamage(damageDTO.damage)
+        takeDamage(damageDTO.damage, damageDTO.enemyType)
     }
 
-    private fun takeDamage(damage: Int) {
+    private fun takeDamage(damage: Int, enemyType: EnemyEnum) {
         val protection = chara.armor?.protection ?: 0
         chara.health -= max(0, (damage - (chara.baseDefense + protection)))
         _charaScreenStateFlow.update {
@@ -831,6 +843,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
 
         if (chara.health <= 0) {
+            killedBy.enemyType = enemyType
             saveGold()
 
             viewModelScope.launch {

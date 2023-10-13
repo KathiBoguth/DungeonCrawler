@@ -19,6 +19,8 @@ abstract class BasicEnemy(idEnemy: String,
 
     open var health = 100
 
+    val maxHealth by lazy { health }
+
     abstract var speed: Int
     abstract var power: Int
 

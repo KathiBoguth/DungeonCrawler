@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
                 val datastoreManager = DataStoreManager(applicationContext)
                 val killedBy = KilledBy(EnemyEnum.SLIME)
                 menuViewModel.killedBy = killedBy
+                gameViewModel.killedBy = killedBy
                 menuViewModel.initDataStoreManager(datastoreManager)
                 gameViewModel.initDataStoreManager(datastoreManager)
                 composable("mainMenu") {

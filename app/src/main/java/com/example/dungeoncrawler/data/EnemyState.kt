@@ -13,5 +13,6 @@ data class EnemyState(
     val type: EnemyEnum,
     val flashRed: Boolean,
     val visible: Boolean,
-    val loadsAttack: Boolean
+    val loadsAttack: Boolean,
+    val healthPercentage: Double
 )
