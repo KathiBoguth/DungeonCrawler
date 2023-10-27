@@ -28,6 +28,7 @@ class Settings {
         const val treasureMax = 4
         const val margin = 16f
         const val treasureMaxMoney = 100
+        const val diamondWorth = 300
         const val nudgeWidth = 20f
         const val animDuration = 100L
 

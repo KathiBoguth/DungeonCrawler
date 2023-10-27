@@ -192,6 +192,12 @@ class Level(
         gameObjectIds.add(treasureId)
     }
 
+    private fun placeDiamondTreasure(coordinates: Coordinates) {
+        val treasureId = "treasure0"
+        field[coordinates.x][coordinates.y].add(DiamondTreasure(treasureId))
+        gameObjectIds.add(treasureId)
+    }
+
     private fun placeLadder(coordinates: Coordinates? = null): Boolean {
         if (coordinates != null) {
             field[coordinates.x][coordinates.y].add(Ladder())
@@ -441,7 +447,7 @@ class Level(
         placeLadder(coordinatesLadder)
 
         val coordinatesTreasure = Coordinates(xCoord + 1, yCoord)
-        placeTreasure(coordinatesTreasure, "treasure0")
+        placeDiamondTreasure(coordinatesTreasure)
     }
 
     fun fixateChara() {

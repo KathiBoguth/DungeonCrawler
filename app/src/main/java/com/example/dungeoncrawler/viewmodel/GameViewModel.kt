@@ -16,6 +16,7 @@ import com.example.dungeoncrawler.data.GameState
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
+import com.example.dungeoncrawler.entity.Diamond
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.GroundType
 import com.example.dungeoncrawler.entity.Level
@@ -314,12 +315,22 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 removeFromLevelObjectStateFlow(levelObject.id)
             }
 
+            LevelObjectType.TREASURE_DIAMOND -> {
+                levelObjectList.removeIf { it.id == levelObject.id }
+                placeDiamond(position = coordinates)
+                removeFromLevelObjectStateFlow(levelObject.id)
+            }
+
             LevelObjectType.LADDER -> {
                 nextLevel()
             }
 
             LevelObjectType.COIN -> {
                 takeCoin(levelObject as Coin, levelObjectList)
+            }
+
+            LevelObjectType.DIAMOND -> {
+                takeDiamond(levelObject as Diamond, levelObjectList)
             }
 
             LevelObjectType.POTION -> {
@@ -363,8 +374,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         return true
     }
 
-    private fun getRandomReward() {
-        chara.gold += level.randomMoney(Settings.treasureMaxMoney)
+    private fun getReward(amount: Int = level.randomMoney(Settings.treasureMaxMoney)) {
+        chara.gold += amount
         _charaScreenStateFlow.update {
             it.copy(gold = chara.gold)
         }
@@ -500,9 +511,15 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun takeCoin(coin: Coin, levelObjectList: MutableList<LevelObject>) {
-        getRandomReward()
+        getReward()
         levelObjectList.removeIf { it.id == coin.id }
         removeFromLevelObjectStateFlow(coin.id)
+    }
+
+    private fun takeDiamond(diamond: Diamond, levelObjectList: MutableList<LevelObject>) {
+        getReward(Settings.diamondWorth)
+        levelObjectList.removeIf { it.id == diamond.id }
+        removeFromLevelObjectStateFlow(diamond.id)
     }
 
     private fun isArrowOnField(): Boolean {
@@ -565,6 +582,20 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             LevelObjectState(
                 coin,
                 LevelObjectType.COIN,
+                position,
+                Direction.DOWN
+            )
+        )
+    }
+
+    private fun placeDiamond(position: Coordinates) {
+        val diamondId = "diamond0"
+        val diamond = Diamond(diamondId)
+        level.field[position.x][position.y].add(diamond)
+        addToLevelObjectStateFlow(
+            LevelObjectState(
+                diamondId,
+                LevelObjectType.DIAMOND,
                 position,
                 Direction.DOWN
             )
