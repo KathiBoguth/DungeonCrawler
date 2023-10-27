@@ -39,7 +39,8 @@ fun PauseScreen(
             )
             NavigationButton(
                 text = stringResource(id = R.string.giveUp),
-                onGiveUpClicked
+                onGiveUpClicked,
+                primary = false
             )
         }
     }

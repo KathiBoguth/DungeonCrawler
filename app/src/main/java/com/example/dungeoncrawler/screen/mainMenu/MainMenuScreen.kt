@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.screen.mainMenu
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -55,7 +57,8 @@ fun MainMenuScreen(
             )
             NavigationButton(
                 text = stringResource(id = R.string.upgrade_stats),
-                onUpgradeStatsClicked
+                onUpgradeStatsClicked,
+                primary = false
             )
         }
 
@@ -109,7 +112,28 @@ fun MenuButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
         modifier = Modifier
             .width(240.dp)
             .wrapContentHeight()
-        ) {
+    ) {
+        Text(text = text)
+    }
+}
+
+@Composable
+fun MenuButtonSecondary(text: String, enabled: Boolean = true, onClick: () -> Unit) {
+    val borderColor = if (enabled) R.color.primary else R.color.disabled_button
+    OutlinedButton(
+        onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorResource(id = R.color.red_transparent),
+            disabledContainerColor = colorResource(id = R.color.red_transparent),
+            disabledContentColor = colorResource(id = R.color.white_semitransparant)
+        ),
+        shape = RoundedCornerShape(5.dp),
+        border = BorderStroke(2.dp, colorResource(id = borderColor)),
+        enabled = enabled,
+        modifier = Modifier
+            .width(240.dp)
+            .wrapContentHeight()
+    ) {
         Text(text = text)
     }
 }
@@ -119,7 +143,8 @@ fun NavigationButton(
     text: String,
     onNavigate: () -> Unit,
     pauseMusic: Boolean = false,
-    pauseMusicPlayer: () -> Unit = {}
+    pauseMusicPlayer: () -> Unit = {},
+    primary: Boolean = true
 ) {
     fun navigate() {
         if (pauseMusic) {
@@ -127,8 +152,11 @@ fun NavigationButton(
         }
         onNavigate()
     }
-
-    MenuButton(text = text, onClick = ::navigate)
+    if (primary) {
+        MenuButton(text = text, onClick = ::navigate)
+    } else {
+        MenuButtonSecondary(text = text, onClick = ::navigate)
+    }
 }
 
 @Composable
@@ -158,4 +186,12 @@ fun MenuText(text: String) {
 @Composable
 fun MainMenuPreview() {
     MainMenuScreen(onStartGameClicked = {}, onUpgradeStatsClicked = {}, pauseMusicPlayer = {})
+}
+
+@Preview
+@Composable
+fun SecondaryButtonPreview() {
+    MenuButtonSecondary(text = "Upgrade Stats", enabled = false) {
+
+    }
 }

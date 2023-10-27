@@ -148,7 +148,10 @@ fun  UpgradeStatsScreen(
             } else {
                 stringResource(id = R.string.returnToMain)
             }
-            MenuButton(stringResource(id = R.string.reset), enabled = statsUpgradeUiState.isAnyUpgradeSelected) {reset()}
+            MenuButtonSecondary(
+                stringResource(id = R.string.reset),
+                enabled = statsUpgradeUiState.isAnyUpgradeSelected
+            ) { reset() }
             MenuButton(text = returnButtonText) { saveAndReturnToMain() }
         }
     }

@@ -39,7 +39,8 @@ fun VictoryScreen(
             )
             NavigationButton(
                 text = stringResource(id = R.string.upgrade_stats),
-                onUpgradeStatsClicked
+                onUpgradeStatsClicked,
+                primary = false
             )
         }
     }
