@@ -19,6 +19,7 @@ import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.GroundType
 import com.example.dungeoncrawler.entity.Level
+import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
 import com.example.dungeoncrawler.entity.Potion
@@ -220,19 +221,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         //TODO: ConcurrentModificationException
         levelObjectList.forEach {
             when (it.type) {
-                LevelObjectType.COIN -> {
-                    getRandomReward()
-                    levelObjectList.removeIf { levelObject -> it.id == levelObject.id }
-                }
-
-                LevelObjectType.POTION -> {
-                    heal((it as Potion).hpCure)
-                }
-
+                LevelObjectType.COIN -> takeCoin(it as Coin, levelObjectList)
+                LevelObjectType.POTION -> takePotion(it as Potion, levelObjectList)
                 LevelObjectType.LADDER -> nextLevel()
                 LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
                 LevelObjectType.ARMOR -> takeArmor(newCoordinates)
-
                 else -> {}
             }
         }
@@ -326,25 +319,19 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
 
             LevelObjectType.COIN -> {
-                getRandomReward()
-                levelObjectList.removeIf { it.id == levelObject.id }
-                removeFromLevelObjectStateFlow(levelObject.id)
+                takeCoin(levelObject as Coin, levelObjectList)
             }
 
             LevelObjectType.POTION -> {
-                heal((levelObject as Potion).hpCure)
-                levelObjectList.removeIf { it.id == levelObject.id }
-                removeFromLevelObjectStateFlow(levelObject.id)
+                takePotion(levelObject as Potion, levelObjectList)
             }
 
             LevelObjectType.WEAPON -> {
                 takeWeapon(coordinates)
-                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             LevelObjectType.ARMOR -> {
                 takeArmor(coordinates)
-                removeFromLevelObjectStateFlow(levelObject.id)
             }
 
             else -> {}
@@ -476,7 +463,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         level.field[coordinates.x][coordinates.y].removeIf { it.id == weapon.id }
         _objectsStateList.removeIf { it.id == weapon.id }
-
+        removeFromLevelObjectStateFlow(weapon.id)
     }
 
     private fun takeArmor(coordinates: Coordinates) {
@@ -502,7 +489,20 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         level.field[coordinates.x][coordinates.y].removeIf { armor.id == it.id }
         _objectsStateList.removeIf { it.id == armor.id }
+        removeFromLevelObjectStateFlow(armor.id)
 
+    }
+
+    private fun takePotion(potion: Potion, levelObjectList: MutableList<LevelObject>) {
+        heal((potion).hpCure)
+        levelObjectList.removeIf { it.id == potion.id }
+        removeFromLevelObjectStateFlow(potion.id)
+    }
+
+    private fun takeCoin(coin: Coin, levelObjectList: MutableList<LevelObject>) {
+        getRandomReward()
+        levelObjectList.removeIf { it.id == coin.id }
+        removeFromLevelObjectStateFlow(coin.id)
     }
 
     private fun isArrowOnField(): Boolean {
