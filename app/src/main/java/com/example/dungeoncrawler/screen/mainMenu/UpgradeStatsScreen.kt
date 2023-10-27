@@ -164,15 +164,33 @@ fun UpgradeStatRow(
     onClickMinus: () -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = statText, color = Color.White, modifier = Modifier.requiredWidth(100.dp), fontSize = 20.sp)
-        Text(text = upgradeValueText, color = colorResource(id = R.color.secondary), fontSize = 20.sp, modifier = Modifier.padding(
-            PaddingValues(horizontal = 30.dp)
-        ))
+        Text(
+            text = statText,
+            color = Color.White,
+            modifier = Modifier.requiredWidth(100.dp),
+            fontSize = 20.sp
+        )
+        Text(
+            text = upgradeValueText,
+            color = colorResource(id = R.color.secondary),
+            fontSize = 20.sp,
+            modifier = Modifier
+                .requiredWidth(100.dp)
+                .padding(PaddingValues(horizontal = 30.dp))
+        )
         Row(Modifier.width(120.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            RoundButton(content = { Icon(Icons.Default.Add, contentDescription = "plus") }, plusButtonEnabled) {
+            RoundButton(
+                content = { Icon(Icons.Default.Add, contentDescription = "plus") },
+                plusButtonEnabled
+            ) {
                 onClickPlus()
             }
-            RoundButton(content = { Icon(painterResource(id = R.drawable.baseline_remove_24), contentDescription = "minus") }, minusButtonEnabled) {
+            RoundButton(content = {
+                Icon(
+                    painterResource(id = R.drawable.baseline_remove_24),
+                    contentDescription = "minus"
+                )
+            }, minusButtonEnabled) {
                 onClickMinus()
             }
         }

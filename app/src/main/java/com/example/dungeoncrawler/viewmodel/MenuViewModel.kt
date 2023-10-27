@@ -68,11 +68,27 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     healthUpgrade = newHealthUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(newHealthUpgrade, initialUpgradeCount.health, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
-                    healthUpgradeMinusButtonEnabled = isUpgradeSelected(newHealthUpgrade, initialUpgradeCount.health),
-                    isAnyUpgradeSelected = isAnyUpgradeSelected(newHealthUpgrade, it.attackUpgrade, it.defenseUpgrade)
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        newHealthUpgrade,
+                        initialUpgradeCount.health,
+                        newGoldCost
+                    ),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.attackUpgrade,
+                        initialUpgradeCount.attack,
+                        newGoldCost
+                    ),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.defenseUpgrade,
+                        initialUpgradeCount.defense,
+                        newGoldCost
+                    ),
+                    healthUpgradeMinusButtonEnabled = isUpgradeSelected(newHealthUpgrade, 0),
+                    isAnyUpgradeSelected = isAnyUpgradeSelected(
+                        newHealthUpgrade + initialUpgradeCount.health,
+                        it.attackUpgrade,
+                        it.defenseUpgrade
+                    )
                 )
             }
         }
@@ -87,11 +103,27 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     healthUpgrade = newHealthUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(newHealthUpgrade, initialUpgradeCount.health, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
-                    healthUpgradeMinusButtonEnabled = isUpgradeSelected(newHealthUpgrade, initialUpgradeCount.health),
-                    isAnyUpgradeSelected = isAnyUpgradeSelected(newHealthUpgrade, it.attackUpgrade, it.defenseUpgrade)
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        newHealthUpgrade,
+                        initialUpgradeCount.health,
+                        newGoldCost
+                    ),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.attackUpgrade,
+                        initialUpgradeCount.attack,
+                        newGoldCost
+                    ),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.defenseUpgrade,
+                        initialUpgradeCount.defense,
+                        newGoldCost
+                    ),
+                    healthUpgradeMinusButtonEnabled = isUpgradeSelected(newHealthUpgrade, 0),
+                    isAnyUpgradeSelected = isAnyUpgradeSelected(
+                        newHealthUpgrade + initialUpgradeCount.health,
+                        it.attackUpgrade,
+                        it.defenseUpgrade
+                    )
                 )
             }
         }
@@ -106,11 +138,27 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     attackUpgrade = newAttackUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(newAttackUpgrade, initialUpgradeCount.attack, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
-                    attackUpgradeMinusButtonEnabled = isUpgradeSelected(newAttackUpgrade, initialUpgradeCount.attack),
-                    isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, newAttackUpgrade, it.defenseUpgrade)
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.healthUpgrade,
+                        initialUpgradeCount.health,
+                        newGoldCost
+                    ),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        newAttackUpgrade,
+                        initialUpgradeCount.attack,
+                        newGoldCost
+                    ),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.defenseUpgrade,
+                        initialUpgradeCount.defense,
+                        newGoldCost
+                    ),
+                    attackUpgradeMinusButtonEnabled = isUpgradeSelected(newAttackUpgrade, 0),
+                    isAnyUpgradeSelected = isAnyUpgradeSelected(
+                        it.healthUpgrade,
+                        newAttackUpgrade + initialUpgradeCount.attack,
+                        it.defenseUpgrade
+                    )
                 )
             }
         }
@@ -125,11 +173,27 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     attackUpgrade = newAttackUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(newAttackUpgrade, initialUpgradeCount.attack, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(it.defenseUpgrade, initialUpgradeCount.defense, newGoldCost),
-                    attackUpgradeMinusButtonEnabled = isUpgradeSelected(newAttackUpgrade, initialUpgradeCount.attack),
-                    isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, newAttackUpgrade, it.defenseUpgrade)
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.healthUpgrade,
+                        initialUpgradeCount.health,
+                        newGoldCost
+                    ),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        newAttackUpgrade,
+                        initialUpgradeCount.attack,
+                        newGoldCost
+                    ),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.defenseUpgrade,
+                        initialUpgradeCount.defense,
+                        newGoldCost
+                    ),
+                    attackUpgradeMinusButtonEnabled = isUpgradeSelected(newAttackUpgrade, 0),
+                    isAnyUpgradeSelected = isAnyUpgradeSelected(
+                        it.healthUpgrade,
+                        newAttackUpgrade + initialUpgradeCount.attack,
+                        it.defenseUpgrade
+                    )
                 )
             }
         }
@@ -144,11 +208,27 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     defenseUpgrade = newDefenseUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(newDefenseUpgrade, initialUpgradeCount.defense, newGoldCost),
-                    defenseUpgradeMinusButtonEnabled = isUpgradeSelected(newDefenseUpgrade, initialUpgradeCount.defense),
-                    isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, it.attackUpgrade, newDefenseUpgrade)
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.healthUpgrade,
+                        initialUpgradeCount.health,
+                        newGoldCost
+                    ),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.attackUpgrade,
+                        initialUpgradeCount.attack,
+                        newGoldCost
+                    ),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        newDefenseUpgrade,
+                        initialUpgradeCount.defense,
+                        newGoldCost
+                    ),
+                    defenseUpgradeMinusButtonEnabled = isUpgradeSelected(newDefenseUpgrade, 0),
+                    isAnyUpgradeSelected = isAnyUpgradeSelected(
+                        it.healthUpgrade,
+                        it.attackUpgrade,
+                        newDefenseUpgrade + initialUpgradeCount.defense
+                    )
                 )
             }
         }
@@ -163,11 +243,27 @@ class MenuViewModel : ViewModel() {
                 it.copy(
                     goldCost = newGoldCost,
                     defenseUpgrade = newDefenseUpgrade,
-                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(it.healthUpgrade, initialUpgradeCount.health, newGoldCost),
-                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(it.attackUpgrade, initialUpgradeCount.attack, newGoldCost),
-                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(newDefenseUpgrade, initialUpgradeCount.defense, newGoldCost),
-                    defenseUpgradeMinusButtonEnabled = isUpgradeSelected(newDefenseUpgrade, initialUpgradeCount.defense),
-                    isAnyUpgradeSelected = isAnyUpgradeSelected(it.healthUpgrade, it.attackUpgrade, newDefenseUpgrade)
+                    healthUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.healthUpgrade,
+                        initialUpgradeCount.health,
+                        newGoldCost
+                    ),
+                    attackUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        it.attackUpgrade,
+                        initialUpgradeCount.attack,
+                        newGoldCost
+                    ),
+                    defenseUpgradePlusButtonEnabled = isUpgradeAffordable(
+                        newDefenseUpgrade,
+                        initialUpgradeCount.defense,
+                        newGoldCost
+                    ),
+                    defenseUpgradeMinusButtonEnabled = isUpgradeSelected(newDefenseUpgrade, 0),
+                    isAnyUpgradeSelected = isAnyUpgradeSelected(
+                        it.healthUpgrade,
+                        it.attackUpgrade,
+                        newDefenseUpgrade + initialUpgradeCount.defense
+                    )
                 )
             }
         }
