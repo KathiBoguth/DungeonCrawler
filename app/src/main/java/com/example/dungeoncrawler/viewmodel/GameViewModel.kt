@@ -670,9 +670,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 }
             }
             _gameState.update {
-                GameState.InitGame(level.levelCount)
+                GameState.NextLevelReady(level.levelCount)
             }
-
         } else {
 
             level.initLevel(context)

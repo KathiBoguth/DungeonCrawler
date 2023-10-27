@@ -39,6 +39,7 @@ import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.screen.ground.BackgroundComposable
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
+import kotlinx.coroutines.delay
 
 val triangleShape = GenericShape { size, _ ->
     moveTo(size.width / 2f, 0f)
@@ -66,7 +67,7 @@ fun GameScreen(
     }
 
     var isVisible by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
     var levelCount by remember {
         mutableStateOf(0)
@@ -121,6 +122,7 @@ fun GameScreen(
 
             is GameState.NextLevel -> {
                 isVisible = false
+                delay(500)
                 gameViewModel.reset(false, context)
             }
 
