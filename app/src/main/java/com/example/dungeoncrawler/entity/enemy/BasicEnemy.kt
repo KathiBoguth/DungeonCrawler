@@ -10,8 +10,8 @@ import com.example.dungeoncrawler.entity.MovableEntity
 import com.example.dungeoncrawler.entity.Wall
 import com.example.dungeoncrawler.viewmodel.MissingEnemyTypeException
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.abs
-import kotlin.random.Random
 
 abstract class BasicEnemy(idEnemy: String,
                           val enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>):
@@ -28,7 +28,6 @@ abstract class BasicEnemy(idEnemy: String,
         MutableStateFlow(EnemyDamageDTO(0, Direction.UP, EnemyEnum.SLIME, ""))
 
     var handler = Handler(Looper.getMainLooper())
-    var random: Random = Random(System.currentTimeMillis())
 
     abstract fun move(field: List<List<MutableList<LevelObject>>>)
 
@@ -46,7 +45,12 @@ abstract class BasicEnemy(idEnemy: String,
                 else -> throw MissingEnemyTypeException("Enemy type not mapped for this enemy. Probably forgot to add here after adding new enemy.")
             }
             attackDamage.value =
-                EnemyDamageDTO(random.nextInt(power - 10, power + 10), direction, enemyEnum, id)
+                EnemyDamageDTO(
+                    ThreadLocalRandom.current().nextInt(power - 10, power + 10),
+                    direction,
+                    enemyEnum,
+                    id
+                )
         }
     }
 

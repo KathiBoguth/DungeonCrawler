@@ -5,12 +5,10 @@ import com.example.dungeoncrawler.entity.GroundType
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
-import kotlin.random.Random
+import java.util.concurrent.ThreadLocalRandom
 
 
 class FileReaderService {
-
-    private val random = Random(System.currentTimeMillis())
 
     private fun parseRoomCsvToList(filename: URI, context: Context): List<List<GroundType>> {
         var fileContent = ""
@@ -65,7 +63,7 @@ class FileReaderService {
 
     private fun randomGroundType(): GroundType {
 
-        return when (random.nextInt(4)) {
+        return when (ThreadLocalRandom.current().nextInt(4)) {
             0 -> GroundType.GROUND1
             1 -> GroundType.GROUND2
             2 -> GroundType.PEBBLES

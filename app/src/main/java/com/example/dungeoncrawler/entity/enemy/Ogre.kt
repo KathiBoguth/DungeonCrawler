@@ -6,6 +6,7 @@ import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.weapon.Pebble
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.concurrent.ThreadLocalRandom
 
 class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(ogreId, enemyPositionFlow) {
 
@@ -40,7 +41,7 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         if (nextDirection != direction ) {
             direction = nextDirection
         } else {
-            if (random.nextBoolean()) {
+            if (ThreadLocalRandom.current().nextBoolean()) {
                 throwPebble(position, direction)
             } else {
                 position = moveOneStep()
@@ -65,7 +66,7 @@ class Ogre(ogreId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
                 return
             }
             attackDamage.value = EnemyDamageDTO(
-                random.nextInt(power - 10, power + 10),
+                ThreadLocalRandom.current().nextInt(power - 10, power + 10),
                 direction,
                 EnemyEnum.OGRE,
                 id

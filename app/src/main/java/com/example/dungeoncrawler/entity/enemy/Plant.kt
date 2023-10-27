@@ -6,6 +6,7 @@ import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.abs
 
 class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) :
@@ -51,9 +52,9 @@ class Plant(plantId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
         val nextDirection = if (charaInRange) {
             getNextDirection(horizontalDistance, verticalDistance, field)
         } else {
-            val turn = random.nextFloat()
+            val turn = ThreadLocalRandom.current().nextFloat()
             if (turn > 0.8) {
-                when (random.nextInt(4)) {
+                when (ThreadLocalRandom.current().nextInt(4)) {
                     0 -> Direction.RIGHT
                     1 -> Direction.DOWN
                     2 -> Direction.LEFT

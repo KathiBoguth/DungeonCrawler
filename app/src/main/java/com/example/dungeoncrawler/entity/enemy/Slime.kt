@@ -4,6 +4,7 @@ import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.concurrent.ThreadLocalRandom
 
 class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(slimeId, enemyPositionFlow) {
 
@@ -23,10 +24,10 @@ class Slime(slimeId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPosi
             return
         }
 
-        val turn = random.nextFloat()
+        val turn = ThreadLocalRandom.current().nextFloat()
 
         if (turn > 0.8) {
-            direction = when(random.nextInt(4)) {
+            direction = when (ThreadLocalRandom.current().nextInt(4)) {
                 0 -> Direction.RIGHT
                 1 -> Direction.DOWN
                 2 -> Direction.LEFT

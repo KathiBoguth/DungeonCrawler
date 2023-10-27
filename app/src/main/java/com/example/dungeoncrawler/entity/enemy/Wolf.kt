@@ -4,6 +4,7 @@ import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.LevelObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.concurrent.ThreadLocalRandom
 
 class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositionChangeDTO>) : BasicEnemy(wolfId, enemyPositionFlow) {
 
@@ -24,7 +25,7 @@ class Wolf(wolfId: String, enemyPositionFlow: MutableStateFlow<LevelObjectPositi
         val turn = !canWalk(field)
 
         if (turn) {
-            direction = when(random.nextInt(4)) {
+            direction = when (ThreadLocalRandom.current().nextInt(4)) {
                 0 -> Direction.RIGHT
                 1 -> Direction.DOWN
                 2 -> Direction.LEFT

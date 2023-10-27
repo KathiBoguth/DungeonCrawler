@@ -23,9 +23,9 @@ import com.example.dungeoncrawler.service.PathFindingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.URI
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.random.Random
 
 class Level(
     var chara: MainChara
@@ -69,7 +69,6 @@ class Level(
     var arrowFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
     var pebbleFlow: StateFlow<LevelObjectPositionChangeDTO>? = null
 
-    private var random: Random = Random(System.currentTimeMillis())
     var levelCount = 1
     var gamePaused = false
 
@@ -148,7 +147,7 @@ class Level(
     }
 
     private fun getRandomFieldLayout(): List<List<URI>> {
-        val size = random.nextInt(4) + 1
+        val size = ThreadLocalRandom.current().nextInt(4) + 1
         val fieldLayout = mutableListOf<List<URI>>()
         for (i in 0..size) {
             val list = mutableListOf<URI>()
@@ -156,7 +155,7 @@ class Level(
                 val file = if (i == 0 && j == 0) {
                     Settings.startRoomUri
                 } else {
-                    Settings.roomFiles[random.nextInt(Settings.roomFiles.size)]
+                    Settings.roomFiles[ThreadLocalRandom.current().nextInt(Settings.roomFiles.size)]
                 }
                 list.add(file)
             }
@@ -177,7 +176,7 @@ class Level(
     }
 
     private fun placeTreasures() {
-        val treasureCount = random.nextInt(1, Settings.treasureMax)
+        val treasureCount = ThreadLocalRandom.current().nextInt(1, Settings.treasureMax)
 
         for (i in 0..treasureCount) {
 
@@ -292,7 +291,7 @@ class Level(
     }
 
     fun randomMoney(max: Int): Int {
-        return random.nextInt(max)
+        return ThreadLocalRandom.current().nextInt(max)
     }
 
     private fun getRandomCoordinates(
@@ -301,14 +300,14 @@ class Level(
             field[0].size
         )
     ): Coordinates {
-        val xCord = random.nextInt(bounds.x)
-        val yCord = random.nextInt(bounds.y)
+        val xCord = ThreadLocalRandom.current().nextInt(bounds.x)
+        val yCord = ThreadLocalRandom.current().nextInt(bounds.y)
 
         return Coordinates(xCord, yCord)
     }
 
     private fun randomDirection(): Direction {
-        return when (random.nextInt(4)) {
+        return when (ThreadLocalRandom.current().nextInt(4)) {
             0 -> Direction.UP
             1 -> Direction.DOWN
             2 -> Direction.LEFT
@@ -319,7 +318,7 @@ class Level(
 
     fun drop(): LevelObjectType {
 
-        val randomValue = random.nextFloat()
+        val randomValue = ThreadLocalRandom.current().nextFloat()
         return if (randomValue < 0.35) {
             LevelObjectType.COIN
         } else if (randomValue < 0.6) {
@@ -333,7 +332,7 @@ class Level(
     }
 
     fun randomWeapon(): Weapon {
-        val randomValue = random.nextFloat()
+        val randomValue = ThreadLocalRandom.current().nextFloat()
         val diamondProbability = min(0.4, max(levelCount - 7, 0) * 0.1)
         val bowProbability = min(0.4, max(levelCount - 4, 0) * 0.1)
         val ironProbability = min(0.4, max(levelCount - 3, 0) * 0.1)
@@ -350,7 +349,7 @@ class Level(
     }
 
     fun randomArmor(): Armor {
-        val randomValue = random.nextFloat()
+        val randomValue = ThreadLocalRandom.current().nextFloat()
         val diamondProbability = min(0.4, max(levelCount - 7, 0) * 0.1)
         val ironProbability = min(0.4, max(levelCount - 3, 0) * 0.1)
 
