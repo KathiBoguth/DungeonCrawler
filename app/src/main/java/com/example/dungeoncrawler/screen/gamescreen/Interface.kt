@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
+import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.Level.Companion.BOW_WOODEN
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_DIAMOND
 import com.example.dungeoncrawler.entity.Level.Companion.CUIRASS_IRON
@@ -40,10 +41,7 @@ import com.example.dungeoncrawler.entity.Level.Companion.SWORD_WOODEN
 @Composable
 fun Controls(
     interact: () -> Unit,
-    moveUp: () -> Unit,
-    moveDown: () -> Unit,
-    moveLeft: () -> Unit,
-    moveRight: () -> Unit,
+    move: (Direction) -> Unit,
     pause: () -> Unit,
     gold: Int,
     health: Int,
@@ -70,7 +68,7 @@ fun Controls(
             .padding(20.dp),
         contentAlignment = Alignment.BottomStart
     ) {
-        ControlPad(moveUp, moveDown, moveLeft, moveRight)
+        ControlPad(move)
     }
 
     Box(
@@ -188,22 +186,19 @@ fun Inventory(weaponId: String, cuirassId: String) {
 @Preview
 @Composable
 fun ControlPad(
-    moveUp: () -> Unit = {},
-    moveDown: () -> Unit = {},
-    moveLeft: () -> Unit = {},
-    moveRight: () -> Unit = {},
+    move: (Direction) -> Unit = {}
 ) {
     Column {
-        MoveButton(modifier = Modifier.align(Alignment.CenterHorizontally)) { moveUp() }
+        MoveButton(modifier = Modifier.align(Alignment.CenterHorizontally)) { move(Direction.UP) }
         Row(Modifier.width(48.dp * 3 + 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            MoveButton(modifier = Modifier.rotate(-90f)) { moveLeft() }
-            MoveButton(modifier = Modifier.rotate(90f)) { moveRight() }
+            MoveButton(modifier = Modifier.rotate(-90f)) { move(Direction.LEFT) }
+            MoveButton(modifier = Modifier.rotate(90f)) { move(Direction.RIGHT) }
         }
         MoveButton(
             modifier = Modifier
                 .rotate(180f)
                 .align(Alignment.CenterHorizontally)
-        ) { moveDown() }
+        ) { move(Direction.DOWN) }
     }
 }
 

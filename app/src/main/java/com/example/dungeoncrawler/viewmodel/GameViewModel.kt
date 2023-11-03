@@ -104,76 +104,34 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         mediaPlayerService = newPlayerService
     }
 
-    fun moveUp() {
-        if (turn(Direction.UP)) {
+    fun move(direction: Direction) {
+        if (turn(direction)) {
             _charaScreenStateFlow.update {
-                it.copy(direction = Direction.UP)
+                it.copy(direction = direction)
             }
             return
         }
-
         val coordinates = findCoordinate(chara.id)
         if (coordinates.x == -1 || coordinates.y == -1) {
             return
         }
-        val newCoordinates = Coordinates(coordinates.x, coordinates.y - 1)
+        val movementVector = getMovementVector(direction)
 
-        moveIfPossible(newCoordinates, coordinates)
+        moveIfPossible(
+            Coordinates(
+                coordinates.x + movementVector.x,
+                coordinates.y + movementVector.y
+            ), coordinates
+        )
     }
 
-    fun moveDown() {
-        val turn = turn(Direction.DOWN)
-
-        if (turn) {
-            _charaScreenStateFlow.update {
-                it.copy(direction = Direction.DOWN)
-            }
-            return
+    private fun getMovementVector(direction: Direction) =
+        when (direction) {
+            Direction.UP -> Coordinates(0, -1)
+            Direction.DOWN -> Coordinates(0, 1)
+            Direction.LEFT -> Coordinates(-1, 0)
+            Direction.RIGHT -> Coordinates(1, 0)
         }
-
-        val coordinates = findCoordinate(chara.id)
-        if (coordinates.x == -1 || coordinates.y == -1) {
-            return
-        }
-        val newCoordinates = Coordinates(coordinates.x, coordinates.y + 1)
-        moveIfPossible(newCoordinates, coordinates)
-    }
-
-    fun moveLeft() {
-        val turn = turn(Direction.LEFT)
-
-        if (turn) {
-            _charaScreenStateFlow.update {
-                it.copy(direction = Direction.LEFT)
-            }
-            return
-        }
-
-        val coordinates = findCoordinate(chara.id)
-        if (coordinates.x == -1 || coordinates.y == -1) {
-            return
-        }
-        val newCoordinates = Coordinates(coordinates.x - 1, coordinates.y)
-        moveIfPossible(newCoordinates, coordinates)
-    }
-
-    fun moveRight() {
-        val turn = turn(Direction.RIGHT)
-
-        if (turn) {
-            _charaScreenStateFlow.update {
-                it.copy(direction = Direction.RIGHT)
-            }
-            return
-        }
-
-        val coordinates = findCoordinate(chara.id)
-        if (coordinates.x == -1 || coordinates.y == -1) {
-            return
-        }
-        val newCoordinates = Coordinates(coordinates.x + 1, coordinates.y)
-        moveIfPossible(newCoordinates, coordinates)
-    }
 
     private fun moveIfPossible(
         newCoordinates: Coordinates,
