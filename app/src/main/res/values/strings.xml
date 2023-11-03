@@ -21,6 +21,7 @@
     <string name="level">Level: %1$s</string>
     <string name="victory">Victory!</string>
     <string name="paused_title">Game Paused</string>
+    <string name="highscore">Highscore:</string>
     <string name="returnToGame">Return to game</string>
     <string name="giveUp">Give Up</string>
     <string name="restart">Restart</string>

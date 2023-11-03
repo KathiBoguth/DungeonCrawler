@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,8 +44,10 @@ import com.example.dungeoncrawler.viewmodel.MenuViewModel
 fun MainMenuScreen(
     onStartGameClicked: () -> Unit,
     onUpgradeStatsClicked: () -> Unit,
-    pauseMusicPlayer: () -> Unit
+    pauseMusicPlayer: () -> Unit,
+    highscore: Int
 ) {
+    HighscoreDisplay(highscore)
     Column(
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -70,6 +74,7 @@ fun MainMenuScreen(
     onStartGameClicked: () -> Unit, onUpgradeStatsClicked: () -> Unit,
     menuViewModel: MenuViewModel = viewModel()
 ) {
+    val highscore by menuViewModel.getHighscore().collectAsState(0)
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -95,7 +100,8 @@ fun MainMenuScreen(
     MainMenuScreen(
         onStartGameClicked,
         onUpgradeStatsClicked,
-        pauseMusicPlayer = menuViewModel::pauseMediaPlayer
+        pauseMusicPlayer = menuViewModel::pauseMediaPlayer,
+        highscore = highscore
     )
 }
 
@@ -171,6 +177,31 @@ fun MenuTitle(text: String) {
 }
 
 @Composable
+fun HighscoreDisplay(highscore: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Text(
+            text = stringResource(id = R.string.highscore),
+            color = Color.White,
+            fontSize = 26.sp,
+            fontFamily = FontFamily(Font(R.font.carrois_gothic_sc))
+        )
+        Text(
+            text = highscore.toString(),
+            color = Color.White,
+            modifier = Modifier.padding(PaddingValues(horizontal = 40.dp)),
+            fontSize = 26.sp,
+            fontFamily = FontFamily(Font(R.font.carrois_gothic_sc))
+        )
+    }
+
+}
+
+@Composable
 fun MenuText(text: String) {
     Text(
         text = text,
@@ -185,7 +216,7 @@ fun MenuText(text: String) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun MainMenuPreview() {
-    MainMenuScreen(onStartGameClicked = {}, onUpgradeStatsClicked = {}, pauseMusicPlayer = {})
+    MainMenuScreen(onStartGameClicked = {}, onUpgradeStatsClicked = {}, pauseMusicPlayer = {}, 0)
 }
 
 @Preview

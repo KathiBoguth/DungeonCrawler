@@ -17,6 +17,7 @@ class DataStoreManager(private val context: Context) {
         const val HEALTH_UPGRADE_COUNT_KEY = "healthUpgradeCount"
         const val ATTACK_UPGRADE_COUNT_KEY = "attackUpgradeCount"
         const val DEFENSE_UPGRADE_COUNT_KEY = "defenseUpgradeCount"
+        const val HIGHSCORE_KEY = "highscore"
     }
 
     suspend fun saveToDataStore(dataStoreData: DataStoreData) {
@@ -37,6 +38,18 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    suspend fun saveHighscoreToDataStore(gold: Int) {
+        context.dataStore.edit { preferences ->
+            val currentHighscore = preferences[intPreferencesKey(HIGHSCORE_KEY)] ?: 0
+            if (gold > currentHighscore) {
+                preferences[intPreferencesKey(HIGHSCORE_KEY)] = gold
+            }
+        }
+    }
+
+    fun getHighscoreData() = context.dataStore.data.map { preferences ->
+        return@map preferences[intPreferencesKey(HIGHSCORE_KEY)] ?: 0
+    }
 
     fun getDataFromDataStoreUpgradeScreen() = context.dataStore.data.map { preferences ->
         val gold = preferences[intPreferencesKey(GOLD_KEY)]

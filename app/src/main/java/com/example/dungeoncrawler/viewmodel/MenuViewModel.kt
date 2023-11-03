@@ -12,10 +12,12 @@ import com.example.dungeoncrawler.data.DataStoreData
 import com.example.dungeoncrawler.data.StatsUpgradeUiState
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.service.DataStoreManager
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -374,4 +376,6 @@ class MenuViewModel : ViewModel() {
         saveUpgrades()
         onNavigateBack()
     }
+
+    fun getHighscore(): Flow<Int> = dataStoreManager?.getHighscoreData() ?: flowOf(0)
 }

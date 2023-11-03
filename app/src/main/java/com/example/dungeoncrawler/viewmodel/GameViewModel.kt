@@ -38,8 +38,10 @@ import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.DataStoreManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -875,6 +877,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         if (chara.health <= 0) {
             killedBy.enemyType = enemyType
             saveGold()
+            saveHighscore()
 
             viewModelScope.launch {
                 _gameState.emit(GameState.EndGameOnGameOver)
@@ -887,6 +890,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun saveGold() {
         viewModelScope.launch {
             dataStoreManager?.saveGatheredGoldToDataStore(chara.gold)
+        }
+    }
+
+    private fun saveHighscore() {
+        viewModelScope.launch {
+            dataStoreManager?.saveHighscoreToDataStore(chara.gold)
         }
     }
 
@@ -967,6 +976,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             _gameState.emit(GameState.EndGameOnGiveUp)
         }
     }
+
+    fun getHighscore(): Flow<Int> = dataStoreManager?.getHighscoreData() ?: flowOf(0)
 }
 
 

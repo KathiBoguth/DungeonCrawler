@@ -75,6 +75,7 @@ fun GameScreen(
 
     val gameState by gameViewModel.gameState.collectAsState()
     val pausedState by gameViewModel.gamePaused.collectAsState()
+    val highscore by gameViewModel.getHighscore().collectAsState(initial = 0)
 
     DisposableEffect(lifecycleOwner) {
         gameViewModel.setupMediaPlayer(context)
@@ -144,7 +145,8 @@ fun GameScreen(
         if (pausedState) {
             PauseScreen(
                 onReturnClicked = gameViewModel::resumeGame,
-                onGiveUpClicked = gameViewModel::onGiveUp
+                onGiveUpClicked = gameViewModel::onGiveUp,
+                highscore = highscore
             )
         } else {
             GameScreen(

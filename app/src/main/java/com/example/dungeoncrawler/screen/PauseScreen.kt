@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dungeoncrawler.R
+import com.example.dungeoncrawler.screen.mainMenu.HighscoreDisplay
 import com.example.dungeoncrawler.screen.mainMenu.MenuTitle
 import com.example.dungeoncrawler.screen.mainMenu.NavigationButton
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
@@ -24,13 +25,15 @@ import com.example.dungeoncrawler.viewmodel.MenuViewModel
 fun PauseScreen(
     onReturnClicked: () -> Unit,
     onGiveUpClicked: () -> Unit,
-    pauseMusicPlayer: () -> Unit
+    pauseMusicPlayer: () -> Unit,
+    highscore: Int
 ) {
     Column(
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
+        HighscoreDisplay(highscore)
         MenuTitle(stringResource(R.string.paused_title))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             NavigationButton(
@@ -51,9 +54,9 @@ fun PauseScreen(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onReturnClicked: () -> Unit,
     onGiveUpClicked: () -> Unit,
+    highscore: Int,
     menuViewModel: MenuViewModel = viewModel()
 ) {
-
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         menuViewModel.setupMediaPlayer(context)
@@ -78,6 +81,7 @@ fun PauseScreen(
     PauseScreen(
         onReturnClicked = onReturnClicked,
         onGiveUpClicked = onGiveUpClicked,
-        pauseMusicPlayer = menuViewModel::pauseMediaPlayer
+        pauseMusicPlayer = menuViewModel::pauseMediaPlayer,
+        highscore = highscore
     )
 }
