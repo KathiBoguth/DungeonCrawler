@@ -2,12 +2,10 @@ package com.example.dungeoncrawler.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dungeoncrawler.KilledBy
-import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
 import com.example.dungeoncrawler.data.CharaStats
@@ -36,6 +34,7 @@ import com.example.dungeoncrawler.entity.weapon.Arrow
 import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.DataStoreManager
+import com.example.dungeoncrawler.service.MediaPlayerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -90,8 +89,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     val gamePaused = MutableStateFlow(false)
 
     private var dataStoreManager: DataStoreManager? = null
-    private lateinit var mediaPlayerDungeon: MediaPlayer
-    private lateinit var mediaPlayerBoss: MediaPlayer
+    lateinit var mediaPlayerService: MediaPlayerService
 
     private var enemyPositionChangeJob: Job? = null // TODO: better solution?
     private val enemyAttackJobs: MutableList<Job> = mutableListOf()
@@ -102,40 +100,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         dataStoreManager = newManager
     }
 
-    fun setupMediaPlayer(context: Context) {
-        mediaPlayerDungeon = MediaPlayer.create(context, R.raw.dungeon)
-        mediaPlayerDungeon.isLooping = true
-        mediaPlayerBoss = MediaPlayer.create(context, R.raw.boss)
-        mediaPlayerBoss.isLooping = true
-    }
-
-    private fun startMediaPlayerDungeon() {
-        mediaPlayerDungeon.start()
-    }
-
-    fun startMediaPlayerByLevelCount(levelCount: Int) {
-        if (levelCount >= Settings.enemiesPerLevel.size) {
-            startMediaPlayerBoss()
-        } else {
-            startMediaPlayerDungeon()
-        }
-    }
-
-    fun pauseMediaPlayers() {
-        if (mediaPlayerDungeon.isPlaying) {
-            mediaPlayerDungeon.pause()
-        }
-        if (mediaPlayerBoss.isPlaying) {
-            mediaPlayerBoss.pause()
-        }
-    }
-
-    fun pauseMediaPlayerDungeon() {
-        mediaPlayerDungeon.pause()
-    }
-
-    fun startMediaPlayerBoss() {
-        mediaPlayerBoss.start()
+    fun initMediaPlayerService(newPlayerService: MediaPlayerService) {
+        mediaPlayerService = newPlayerService
     }
 
     fun moveUp() {
@@ -957,7 +923,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             gamePaused.update {
                 true
             }
-            pauseMediaPlayers()
+            mediaPlayerService.pauseMediaPlayers()
         }
     }
 
@@ -967,7 +933,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             gamePaused.update {
                 false
             }
-            startMediaPlayerByLevelCount(level.levelCount)
+            mediaPlayerService.startMediaPlayerByLevelCount(level.levelCount)
         }
     }
 
@@ -979,6 +945,5 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     fun getHighscore(): Flow<Int> = dataStoreManager?.getHighscoreData() ?: flowOf(0)
 }
-
 
 class MissingEnemyTypeException(message: String) : Exception(message)

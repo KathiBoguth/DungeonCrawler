@@ -8,7 +8,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -19,7 +18,7 @@ import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.screen.mainMenu.HighscoreDisplay
 import com.example.dungeoncrawler.screen.mainMenu.MenuTitle
 import com.example.dungeoncrawler.screen.mainMenu.NavigationButton
-import com.example.dungeoncrawler.viewmodel.MenuViewModel
+import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 
 @Composable
 fun PauseScreen(
@@ -55,20 +54,19 @@ fun PauseScreen(
     onReturnClicked: () -> Unit,
     onGiveUpClicked: () -> Unit,
     highscore: Int,
-    menuViewModel: MenuViewModel = viewModel()
+    gameViewModel: ComposableGameViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        menuViewModel.setupMediaPlayer(context)
+        gameViewModel.mediaPlayerService.startMediaPlayerMenu()
     }
 
     DisposableEffect(lifecycleOwner) {
-        menuViewModel.setupMediaPlayer(context)
+        gameViewModel.mediaPlayerService.startMediaPlayerMenu()
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                menuViewModel.startMediaPlayer()
+                gameViewModel.mediaPlayerService.startMediaPlayerMenu()
             } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
-                menuViewModel.pauseMediaPlayer()
+                gameViewModel.mediaPlayerService.pauseMediaPlayers()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -81,7 +79,7 @@ fun PauseScreen(
     PauseScreen(
         onReturnClicked = onReturnClicked,
         onGiveUpClicked = onGiveUpClicked,
-        pauseMusicPlayer = menuViewModel::pauseMediaPlayer,
+        pauseMusicPlayer = gameViewModel.mediaPlayerService::pauseMediaPlayers,
         highscore = highscore
     )
 }

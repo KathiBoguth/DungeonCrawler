@@ -14,6 +14,7 @@ import com.example.dungeoncrawler.screen.gamescreen.GameScreen
 import com.example.dungeoncrawler.screen.mainMenu.MainMenuScreen
 import com.example.dungeoncrawler.screen.mainMenu.UpgradeStatsScreen
 import com.example.dungeoncrawler.service.DataStoreManager
+import com.example.dungeoncrawler.service.MediaPlayerService
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
 import com.example.dungeoncrawler.viewmodel.MenuViewModel
 
@@ -26,11 +27,16 @@ class MainActivity : ComponentActivity() {
                 val menuViewModel: MenuViewModel by viewModels()
                 val gameViewModel: ComposableGameViewModel by viewModels()
                 val datastoreManager = DataStoreManager(applicationContext)
+                val mediaPlayerService = MediaPlayerService()
+                mediaPlayerService.setupMediaPlayer(context = applicationContext)
                 val killedBy = KilledBy(EnemyEnum.SLIME)
                 menuViewModel.killedBy = killedBy
                 gameViewModel.killedBy = killedBy
                 menuViewModel.initDataStoreManager(datastoreManager)
+                menuViewModel.initMediaPlayerService(mediaPlayerService)
                 gameViewModel.initDataStoreManager(datastoreManager)
+                gameViewModel.initMediaPlayerService(mediaPlayerService)
+
                 composable("mainMenu") {
                     MainMenuScreen(
                         onUpgradeStatsClicked = { navController.navigate("upgradeStats") },

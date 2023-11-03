@@ -55,9 +55,9 @@ fun UpgradeStatsScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                menuViewModel.startMediaPlayer()
+                menuViewModel.mediaPlayerService.startMediaPlayerMenu()
             } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
-                menuViewModel.pauseMediaPlayer()
+                menuViewModel.mediaPlayerService.pauseMediaPlayers()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -84,7 +84,7 @@ fun UpgradeStatsScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            menuViewModel.pauseMediaPlayer()
+            menuViewModel.mediaPlayerService.pauseMediaPlayers()
         }
     }
 

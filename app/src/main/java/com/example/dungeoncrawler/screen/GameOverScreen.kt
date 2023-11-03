@@ -16,7 +16,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -87,18 +86,17 @@ fun GameOverScreen(
     menuViewModel: MenuViewModel = viewModel()
 ) {
 
-    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        menuViewModel.startMediaPlayer()
+        menuViewModel.mediaPlayerService.startMediaPlayerMenu()
     }
 
     DisposableEffect(lifecycleOwner) {
-        menuViewModel.setupMediaPlayer(context)
+        menuViewModel.mediaPlayerService.startMediaPlayerMenu()
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                menuViewModel.startMediaPlayer()
+                menuViewModel.mediaPlayerService.startMediaPlayerMenu()
             } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
-                menuViewModel.pauseMediaPlayer()
+                menuViewModel.mediaPlayerService.pauseMediaPlayers()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -118,7 +116,7 @@ fun GameOverScreen(
     GameOverScreen(
         onRestartClicked = onRestartClicked,
         onUpgradeStatsClicked = onUpgradeStatsClicked,
-        pauseMusicPlayer = menuViewModel::pauseMediaPlayer,
+        pauseMusicPlayer = menuViewModel.mediaPlayerService::pauseMediaPlayers,
         killedBy = killedBySkin
     )
 }

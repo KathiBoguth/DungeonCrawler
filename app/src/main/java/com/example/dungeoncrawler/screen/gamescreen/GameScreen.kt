@@ -78,12 +78,11 @@ fun GameScreen(
     val highscore by gameViewModel.getHighscore().collectAsState(initial = 0)
 
     DisposableEffect(lifecycleOwner) {
-        gameViewModel.setupMediaPlayer(context)
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                gameViewModel.startMediaPlayerByLevelCount(levelCount)
+                gameViewModel.mediaPlayerService.startMediaPlayerByLevelCount(levelCount)
             } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
-                gameViewModel.pauseMediaPlayers()
+                gameViewModel.mediaPlayerService.pauseMediaPlayers()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -100,7 +99,7 @@ fun GameScreen(
                 gameViewModel.reset(context = context)
                 onEndGame(
                     onGameOver,
-                    gameViewModel::pauseMediaPlayers
+                    gameViewModel.mediaPlayerService::pauseMediaPlayers
                 )
             }
 
@@ -108,13 +107,13 @@ fun GameScreen(
                 gameViewModel.reset(context = context)
                 onEndGame(
                     onVictory,
-                    gameViewModel::pauseMediaPlayers
+                    gameViewModel.mediaPlayerService::pauseMediaPlayers
                 )
             }
 
             is GameState.EndGameOnGiveUp -> {
                 gameViewModel.reset(context = context)
-                onEndGame(onGiveUp, gameViewModel::pauseMediaPlayers)
+                onEndGame(onGiveUp, gameViewModel.mediaPlayerService::pauseMediaPlayers)
             }
 
             is GameState.InitGame -> {
@@ -131,8 +130,8 @@ fun GameScreen(
                 isVisible = true
                 levelCount = state.levelCount
                 if (levelCount >= Settings.enemiesPerLevel.size) {
-                    gameViewModel.pauseMediaPlayerDungeon()
-                    gameViewModel.startMediaPlayerBoss()
+                    gameViewModel.mediaPlayerService.pauseMediaPlayerDungeon()
+                    gameViewModel.mediaPlayerService.startMediaPlayerBoss()
                 }
             }
         }
@@ -146,7 +145,8 @@ fun GameScreen(
             PauseScreen(
                 onReturnClicked = gameViewModel::resumeGame,
                 onGiveUpClicked = gameViewModel::onGiveUp,
-                highscore = highscore
+                highscore = highscore,
+                gameViewModel = gameViewModel
             )
         } else {
             GameScreen(

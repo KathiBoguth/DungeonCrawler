@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -76,18 +75,17 @@ fun MainMenuScreen(
 ) {
     val highscore by menuViewModel.getHighscore().collectAsState(0)
 
-    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        menuViewModel.startMediaPlayer()
+        menuViewModel.mediaPlayerService.startMediaPlayerMenu()
     }
 
     DisposableEffect(lifecycleOwner) {
-        menuViewModel.setupMediaPlayer(context)
+        menuViewModel.mediaPlayerService.startMediaPlayerMenu()
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
-                menuViewModel.startMediaPlayer()
+                menuViewModel.mediaPlayerService.startMediaPlayerMenu()
             } else if (event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_PAUSE) {
-                menuViewModel.pauseMediaPlayer()
+                menuViewModel.mediaPlayerService.pauseMediaPlayers()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -100,7 +98,7 @@ fun MainMenuScreen(
     MainMenuScreen(
         onStartGameClicked,
         onUpgradeStatsClicked,
-        pauseMusicPlayer = menuViewModel::pauseMediaPlayer,
+        pauseMusicPlayer = menuViewModel.mediaPlayerService::pauseMediaPlayers,
         highscore = highscore
     )
 }

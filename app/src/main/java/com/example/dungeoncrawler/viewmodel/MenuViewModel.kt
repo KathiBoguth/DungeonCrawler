@@ -1,17 +1,16 @@
 package com.example.dungeoncrawler.viewmodel
 
 import android.content.Context
-import android.media.MediaPlayer
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dungeoncrawler.KilledBy
-import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.DataStoreData
 import com.example.dungeoncrawler.data.StatsUpgradeUiState
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.service.DataStoreManager
+import com.example.dungeoncrawler.service.MediaPlayerService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,8 +37,14 @@ class MenuViewModel : ViewModel() {
 
     private var dataStoreManager: DataStoreManager? = null
 
-    fun initDataStoreManager(newManager: DataStoreManager){
+    lateinit var mediaPlayerService: MediaPlayerService
+
+    fun initDataStoreManager(newManager: DataStoreManager) {
         dataStoreManager = newManager
+    }
+
+    fun initMediaPlayerService(newPlayerService: MediaPlayerService) {
+        mediaPlayerService = newPlayerService
     }
 
     private var initialData = CharaStats(0, 0, 0, 0)
@@ -56,8 +61,6 @@ class MenuViewModel : ViewModel() {
             started = SharingStarted.WhileSubscribed(5.seconds),
             initialValue = StatsUpgradeUiState()
         )
-
-    private lateinit var mediaPlayer: MediaPlayer
 
     var killedBy = KilledBy(EnemyEnum.SLIME)
 
@@ -352,25 +355,6 @@ class MenuViewModel : ViewModel() {
 
 
     private fun calcCost(upgradeCount: Int): Int = ((upgradeCount+1).toDouble().pow(2.0) * COST_PER_UPGRADE).toInt()
-    fun setupMediaPlayer(context: Context) {
-        if (!this::mediaPlayer.isInitialized){
-            mediaPlayer = MediaPlayer.create(context, R.raw.menu)
-            mediaPlayer.isLooping = true
-            mediaPlayer.start()
-        }
-    }
-
-    fun startMediaPlayer() {
-        mediaPlayer.start()
-    }
-
-    fun pauseMediaPlayer() {
-        mediaPlayer.pause()
-    }
-
-    fun releaseMediaPlayer() {
-        mediaPlayer.release()
-    }
 
     fun returnToMain(onNavigateBack: () -> Unit) {
         saveUpgrades()
