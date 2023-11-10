@@ -80,6 +80,7 @@ fun MainMenuScreen(
     }
 
     DisposableEffect(lifecycleOwner) {
+        menuViewModel.mediaPlayerService.pauseMediaPlayers()
         menuViewModel.mediaPlayerService.startMediaPlayerMenu()
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {

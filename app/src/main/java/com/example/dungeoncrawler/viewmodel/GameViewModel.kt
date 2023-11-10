@@ -12,16 +12,12 @@ import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.GameState
 import com.example.dungeoncrawler.data.LevelObjectState
-import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
-import com.example.dungeoncrawler.entity.Diamond
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.GroundType
 import com.example.dungeoncrawler.entity.Level
-import com.example.dungeoncrawler.entity.LevelObject
 import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.MainChara
-import com.example.dungeoncrawler.entity.Potion
 import com.example.dungeoncrawler.entity.armor.Armor
 import com.example.dungeoncrawler.entity.enemy.BasicEnemy
 import com.example.dungeoncrawler.entity.enemy.EnemyDamageDTO
@@ -35,12 +31,14 @@ import com.example.dungeoncrawler.entity.weapon.Bow
 import com.example.dungeoncrawler.entity.weapon.Weapon
 import com.example.dungeoncrawler.service.DataStoreManager
 import com.example.dungeoncrawler.service.MediaPlayerService
+import com.example.dungeoncrawler.service.ResultOfInteraction
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -145,7 +143,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
-        val levelObjectList = level.field[coordinates.x][coordinates.y]
+        val levelObjectList = level.fieldHelperService.field[coordinates.x][coordinates.y]
         if (levelObjectList.isEmpty() && level.movableEntitiesList.none { it.position == coordinates }) {
             if (chara.weapon is Bow) {
                 if (!isArrowOnField()) {
@@ -161,9 +159,33 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             attack(enemy as BasicEnemy)
             return
         }
-        val levelObject = levelObjectList.firstOrNull()
-        if (levelObject != null) {
-            interactWithLevelObjectByType(levelObject, levelObjectList, coordinates)
+        onInteractWithObject(coordinates)
+    }
+
+    private fun onInteractWithObject(coordinates: Coordinates) {
+        viewModelScope.launch {
+            level.fieldHelperService.interactWithAndRemoveLevelObject(coordinates, level.levelCount)
+                .takeWhile { it != ResultOfInteraction.InteractionFinished }
+                .collect {
+                    when (val resultOfInteraction = it) {
+                        ResultOfInteraction.NextLevel -> nextLevel()
+                        ResultOfInteraction.InteractionFinished -> {}
+                        is ResultOfInteraction.AddLevelObject -> addLevelObject(resultOfInteraction.levelObject)
+                        is ResultOfInteraction.RemoveLevelObject -> _objectsStateList.removeIf { gameObject -> gameObject.id == resultOfInteraction.id }
+                        is ResultOfInteraction.TakeWeapon -> takeWeapon(
+                            resultOfInteraction.weapon,
+                            coordinates
+                        )
+
+                        is ResultOfInteraction.TakeArmor -> takeArmor(
+                            resultOfInteraction.armor,
+                            coordinates
+                        )
+
+                        is ResultOfInteraction.Heal -> heal(resultOfInteraction.heal)
+                        is ResultOfInteraction.Reward -> getReward(resultOfInteraction.amount)
+                    }
+                }
         }
     }
 
@@ -187,21 +209,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         jumpAnimation()
 
-        level.field[coordinates.x][coordinates.y].removeIf { it.id == chara.id }
-        val levelObjectList = level.field[newCoordinates.x][newCoordinates.y]
-        //TODO: ConcurrentModificationException
-        levelObjectList.forEach {
-            when (it.type) {
-                LevelObjectType.COIN -> takeCoin(it as Coin, levelObjectList)
-                LevelObjectType.POTION -> takePotion(it as Potion, levelObjectList)
-                LevelObjectType.LADDER -> nextLevel()
-                LevelObjectType.WEAPON -> takeWeapon(newCoordinates)
-                LevelObjectType.ARMOR -> takeArmor(newCoordinates)
-                else -> {}
-            }
+        level.fieldHelperService.field[coordinates.x][coordinates.y].removeIf { it.id == chara.id }
+        while (level.fieldHelperService.isItemAtPosition(newCoordinates)) {
+            onInteractWithObject(newCoordinates)
         }
-
-        levelObjectList.add(chara)
+        level.fieldHelperService.field[newCoordinates.x][newCoordinates.y].add(chara)
         chara.position = newCoordinates
         _charaScreenStateFlow.update {
             it.copy(position = chara.position)
@@ -227,13 +239,13 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         if (level.movableEntitiesList.any { it.position == coordinates }) {
             return false
         }
-        if (coordinates.x >= level.field.size || coordinates.x < 0) {
+        if (coordinates.x >= level.fieldHelperService.field.size || coordinates.x < 0) {
             return false
         }
-        if (coordinates.y >= level.field[coordinates.x].size || coordinates.y < 0) {
+        if (coordinates.y >= level.fieldHelperService.field[coordinates.x].size || coordinates.y < 0) {
             return false
         }
-        val levelObjectList = level.field[coordinates.x][coordinates.y]
+        val levelObjectList = level.fieldHelperService.field[coordinates.x][coordinates.y]
         if (levelObjectList.isNotEmpty() && levelObjectList.any { !it.type.isSteppableObject() }) {
             return false
         }
@@ -243,64 +255,12 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         return true
     }
 
-    private fun interactWithLevelObjectByType(
-        levelObject: LevelObject,
-        levelObjectList: MutableList<LevelObject>,
-        coordinates: Coordinates
-    ) {
-        when (levelObject.type) {
-            LevelObjectType.TREASURE -> {
-                levelObjectList.removeIf { it.id == levelObject.id }
-                when (level.drop()) {
-                    LevelObjectType.COIN -> placeCoin(coordinates)
-                    LevelObjectType.POTION -> placePotion(coordinates)
-                    LevelObjectType.WEAPON -> placeWeapon(coordinates)
-                    LevelObjectType.ARMOR -> placeArmor(coordinates)
-                    else -> {
-                        placeCoin(coordinates)
-                    }
-                }
-                removeFromLevelObjectStateFlow(levelObject.id)
-            }
-
-            LevelObjectType.TREASURE_DIAMOND -> {
-                levelObjectList.removeIf { it.id == levelObject.id }
-                placeDiamond(position = coordinates)
-                removeFromLevelObjectStateFlow(levelObject.id)
-            }
-
-            LevelObjectType.LADDER -> {
-                nextLevel()
-            }
-
-            LevelObjectType.COIN -> {
-                takeCoin(levelObject as Coin, levelObjectList)
-            }
-
-            LevelObjectType.DIAMOND -> {
-                takeDiamond(levelObject as Diamond, levelObjectList)
-            }
-
-            LevelObjectType.POTION -> {
-                takePotion(levelObject as Potion, levelObjectList)
-            }
-
-            LevelObjectType.WEAPON -> {
-                takeWeapon(coordinates)
-            }
-
-            LevelObjectType.ARMOR -> {
-                takeArmor(coordinates)
-            }
-
-            LevelObjectType.MAIN_CHARA -> {}
-            LevelObjectType.WALL -> {}
-            LevelObjectType.ENEMY -> {}
-            LevelObjectType.ARROW -> {}
-        }
+    private fun addLevelObject(levelObjectState: LevelObjectState) {
+        _objectsStateList.add(levelObjectState)
+        level.gameObjectIds.add(levelObjectState.id)
     }
 
-    private fun getReward(amount: Int = level.randomMoney(Settings.treasureMaxMoney)) {
+    private fun getReward(amount: Int) {
         chara.gold += amount
         _charaScreenStateFlow.update {
             it.copy(gold = chara.gold)
@@ -351,7 +311,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
         // TODO: check if part below is still needed
         // TODO: ConcurrentModificationException
-        val field = level.field.toList()
+        val field = level.fieldHelperService.field.toList()
         for (row in field.indices) {
             val index =
                 field[row].indexOfFirst { it.indexOfFirst { levelObject -> levelObject.id == id } != -1 }
@@ -381,145 +341,26 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     // ----------- TAKE STUFF -------------
 
-    private fun takeWeapon(coordinates: Coordinates) {
+    private fun takeWeapon(weapon: Weapon, coordinates: Coordinates) {
         val oldWeapon = chara.weapon
-        val weapon = level.field[coordinates.x][coordinates.y]
-            .find { it.type == LevelObjectType.WEAPON } as Weapon
-
         chara.putOnWeapon(weapon)
         _charaScreenStateFlow.update {
             it.copy(weaponId = weapon.id)
         }
-
         if (oldWeapon != null) {
-            level.field[coordinates.x][coordinates.y].add(0, oldWeapon)
-            _objectsStateList.add(
-                LevelObjectState(
-                    oldWeapon.id,
-                    oldWeapon.type,
-                    coordinates,
-                    Direction.DOWN
-                )
-            )
+            level.fieldHelperService.placeLevelObject(oldWeapon, coordinates)
         }
-        level.field[coordinates.x][coordinates.y].removeIf { it.id == weapon.id }
-        _objectsStateList.removeIf { it.id == weapon.id }
-        removeFromLevelObjectStateFlow(weapon.id)
     }
 
-    private fun takeArmor(coordinates: Coordinates) {
+    private fun takeArmor(armor: Armor, coordinates: Coordinates) {
         val oldArmor = chara.armor
-        val armor = level.field[coordinates.x][coordinates.y]
-            .find { it.type == LevelObjectType.ARMOR } as Armor
-
         chara.putOnArmor(armor)
         _charaScreenStateFlow.update {
             it.copy(cuirassId = armor.id)
         }
-
         if (oldArmor != null) {
-            level.field[coordinates.x][coordinates.y].add(0, oldArmor)
-            _objectsStateList.add(
-                LevelObjectState(
-                    oldArmor.id,
-                    oldArmor.type,
-                    coordinates,
-                    Direction.DOWN
-                )
-            )
+            level.fieldHelperService.placeLevelObject(oldArmor, coordinates)
         }
-        level.field[coordinates.x][coordinates.y].removeIf { armor.id == it.id }
-        _objectsStateList.removeIf { it.id == armor.id }
-        removeFromLevelObjectStateFlow(armor.id)
-    }
-
-    private fun takePotion(potion: Potion, levelObjectList: MutableList<LevelObject>) {
-        heal((potion).hpCure)
-        levelObjectList.removeIf { it.id == potion.id }
-        removeFromLevelObjectStateFlow(potion.id)
-    }
-
-    private fun takeCoin(coin: Coin, levelObjectList: MutableList<LevelObject>) {
-        getReward()
-        levelObjectList.removeIf { it.id == coin.id }
-        removeFromLevelObjectStateFlow(coin.id)
-    }
-
-    private fun takeDiamond(diamond: Diamond, levelObjectList: MutableList<LevelObject>) {
-        getReward(Settings.diamondWorth)
-        levelObjectList.removeIf { it.id == diamond.id }
-        removeFromLevelObjectStateFlow(diamond.id)
-    }
-
-    // ----------- PLACE STUFF -------------
-
-    private fun placeCoin(position: Coordinates) {
-        val coin = level.coinStack.removeFirst()
-        level.field[position.x][position.y].add(Coin(coin))
-        level.coinStack.addLast(coin)
-        addToLevelObjectStateFlow(
-            LevelObjectState(
-                coin,
-                LevelObjectType.COIN,
-                position,
-                Direction.DOWN
-            )
-        )
-    }
-
-    private fun placeDiamond(position: Coordinates) {
-        val diamondId = "diamond0"
-        val diamond = Diamond(diamondId)
-        level.field[position.x][position.y].add(diamond)
-        addToLevelObjectStateFlow(
-            LevelObjectState(
-                diamondId,
-                LevelObjectType.DIAMOND,
-                position,
-                Direction.DOWN
-            )
-        )
-    }
-
-    private fun placePotion(position: Coordinates) {
-        val potion = level.potionStack.removeFirst()
-        level.field[position.x][position.y].add(Potion(potion))
-        level.potionStack.addLast(potion)
-        addToLevelObjectStateFlow(
-            LevelObjectState(
-                potion,
-                LevelObjectType.POTION,
-                position,
-                Direction.DOWN
-            )
-        )
-    }
-
-    private fun placeWeapon(position: Coordinates) {
-        val weapon = level.randomWeapon()
-        level.field[position.x][position.y].add(weapon)
-        addToLevelObjectStateFlow(
-            LevelObjectState(
-                weapon.id,
-                LevelObjectType.WEAPON,
-                position,
-                Direction.DOWN
-            )
-        )
-
-    }
-
-    private fun placeArmor(position: Coordinates) {
-        val armor = level.randomArmor()
-        level.field[position.x][position.y].add(armor)
-        addToLevelObjectStateFlow(
-            LevelObjectState(
-                armor.id,
-                LevelObjectType.ARMOR,
-                position,
-                Direction.DOWN
-            )
-        )
     }
 
     // ----------- ENEMY FUNCTIONS -------------
@@ -529,7 +370,15 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             level.endBossDefeated()
             addNewGameObjectsToObjectsList()
         } else {
-            placeCoin(attackedEnemy.position)
+            val coin = level.fieldHelperService.placeCoinManually(attackedEnemy.position)
+            addLevelObject(
+                LevelObjectState(
+                    coin.id,
+                    coin.type,
+                    attackedEnemy.position,
+                    Direction.DOWN
+                )
+            )
         }
         level.movableEntitiesList.removeIf { it.id == attackedEnemy.id }
         _enemiesStateList.removeIf { it.id == attackedEnemy.id }
@@ -616,39 +465,6 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // ----------- LEVEL OBJECTS LIST OPERATIONS -------------
-
-    private fun addToLevelObjectStateFlow(levelObject: LevelObjectState) {
-        _objectsStateList.add(levelObject)
-    }
-
-    private fun removeFromLevelObjectStateFlow(levelObjectId: String) {
-        _objectsStateList.removeIf { it.id == levelObjectId }
-    }
-
-    private fun addNewGameObjectsToObjectsList() {
-        level.gameObjectIds.forEach { id ->
-            val coordinates = findCoordinate(id)
-            if (coordinates != Coordinates(-1, -1)) {
-                val newObject = level.field[coordinates.x][coordinates.y].find { it.id == id }
-                if (newObject != null) {
-                    var direction = Direction.DOWN
-                    if (newObject is Arrow) {
-                        direction = newObject.direction
-                    }
-                    _objectsStateList.add(
-                        LevelObjectState(
-                            id,
-                            newObject.type,
-                            coordinates,
-                            direction
-                        )
-                    )
-                }
-            }
-        }
-    }
-
     // ----------- ANIMATIONS -------------
 
     private fun jumpAnimation() {
@@ -727,11 +543,37 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    // ----------- LEVEL OBJECTS LIST OPERATIONS -------------
+
+    private fun addNewGameObjectsToObjectsList() {
+        level.gameObjectIds.forEach { id ->
+            val coordinates = findCoordinate(id)
+            if (coordinates != Coordinates(-1, -1)) {
+                val newObject =
+                    level.fieldHelperService.field[coordinates.x][coordinates.y].find { it.id == id }
+                if (newObject != null) {
+                    var direction = Direction.DOWN
+                    if (newObject is Arrow) {
+                        direction = newObject.direction
+                    }
+                    _objectsStateList.add(
+                        LevelObjectState(
+                            id,
+                            newObject.type,
+                            coordinates,
+                            direction
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     // ----------- CONTROL GAME STATE -------------
 
     fun onPause() {
         if (this::level.isInitialized) {
-            level.gamePaused = true
+            level.fieldHelperService.gamePaused = true
             gamePaused.update {
                 true
             }
@@ -741,7 +583,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     fun resumeGame() {
         if (this::level.isInitialized) {
-            level.gamePaused = false
+            level.fieldHelperService.gamePaused = false
             gamePaused.update {
                 false
             }
@@ -772,7 +614,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     fun reset(newGame: Boolean = true, context: Context) {
         if (this::level.isInitialized) {
-            level.gamePaused = false
+            level.fieldHelperService.gamePaused = false
         }
         gamePaused.update { false }
 
