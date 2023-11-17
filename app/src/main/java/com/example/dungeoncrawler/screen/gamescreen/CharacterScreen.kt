@@ -96,7 +96,8 @@ fun CharaPreview() {
         weaponId = "",
         gold = 0,
         health = 100,
-        position = Coordinates(5, 5)
+        position = Coordinates(5, 5),
+        bombAmount = 1
     )
 
     CharacterScreen(charaScreenState = charaScreenState)

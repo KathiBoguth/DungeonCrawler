@@ -52,6 +52,7 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
         LevelObjectType.COIN -> R.drawable.coin
         LevelObjectType.DIAMOND -> R.drawable.diamond
         LevelObjectType.POTION -> R.drawable.potion
+        LevelObjectType.BOMB -> R.drawable.bomb_unlit
         LevelObjectType.WEAPON -> {
             when (objectState.id) {
                 BOW_WOODEN -> R.drawable.bow

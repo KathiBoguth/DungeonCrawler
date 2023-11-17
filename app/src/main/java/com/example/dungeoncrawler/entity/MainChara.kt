@@ -15,6 +15,7 @@ class MainChara: MovableEntity(LevelObjectType.MAIN_CHARA, "character") {
     var baseDefense = Settings.defenseBaseValue
     var weapon: Weapon? = null
     var armor: Armor? = null
+    var bombAmount: Int = 0
 
 
     fun putOnWeapon(newWeapon: Weapon) {
@@ -23,6 +24,10 @@ class MainChara: MovableEntity(LevelObjectType.MAIN_CHARA, "character") {
 
     fun putOnArmor(newArmor: Armor) {
         armor = newArmor
+    }
+
+    fun takeBomb(bombCount: Int) {
+        bombAmount += bombCount
     }
 
     fun setBaseValues(charaStats: CharaStats) {

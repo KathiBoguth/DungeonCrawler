@@ -31,6 +31,7 @@ class Settings {
         const val diamondWorth = 300
         const val nudgeWidth = 20f
         const val animDuration = 100L
+        const val bombCount = 5
 
         val enemiesPerLevel = mapOf(
             1 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.SLIME),

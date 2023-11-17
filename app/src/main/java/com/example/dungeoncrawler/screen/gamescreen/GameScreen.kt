@@ -216,12 +216,10 @@ fun GameScreen(
             onPause,
             charaScreenState.gold,
             charaScreenState.health,
-            levelCount,
+            levelCount, charaScreenState.bombAmount,
             charaScreenState.weaponId, charaScreenState.cuirassId
         )
-
     }
-
 }
 
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
@@ -239,7 +237,8 @@ fun GamePreview() {
             health = 0,
             weaponId = "",
             cuirassId = "",
-            fixated = false
+            fixated = false,
+            bombAmount = 0
         ),
         enemiesState = listOf(
             EnemyState(

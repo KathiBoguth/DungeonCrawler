@@ -64,7 +64,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                 gold = 0,
                 weaponId = "",
                 cuirassId = "",
-                fixated = false
+                fixated = false,
+                bombAmount = 0
             )
         )
     val charaStateFlow = _charaScreenStateFlow.asStateFlow()
@@ -184,6 +185,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
                         is ResultOfInteraction.Heal -> heal(resultOfInteraction.heal)
                         is ResultOfInteraction.Reward -> getReward(resultOfInteraction.amount)
+                        ResultOfInteraction.TakeBomb -> takeBomb()
                     }
                 }
         }
@@ -360,6 +362,14 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
         if (oldArmor != null) {
             level.fieldHelperService.placeLevelObject(oldArmor, coordinates)
+        }
+    }
+
+    private fun takeBomb() {
+        val bombAmount = Settings.bombCount
+        _charaScreenStateFlow.update {
+            chara.takeBomb(bombAmount)
+            it.copy(bombAmount = chara.bombAmount)
         }
     }
 
@@ -690,7 +700,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                         gold = 0,
                         weaponId = "",
                         cuirassId = "",
-                        fixated = false
+                        fixated = false,
+                        bombAmount = 0
                     )
                 }
             }

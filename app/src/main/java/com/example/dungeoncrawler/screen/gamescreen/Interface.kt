@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -46,6 +47,7 @@ fun Controls(
     gold: Int,
     health: Int,
     levelCount: Int,
+    bombAmount: Int,
     weaponId: String,
     cuirassId: String
 ) {
@@ -58,7 +60,6 @@ fun Controls(
         FloatingActionButton(shape = RoundedCornerShape(50.dp),
             containerColor = colorResource(id = R.color.secondary),
             onClick = { interact() }) {
-
         }
     }
 
@@ -79,7 +80,7 @@ fun Controls(
     ) {
         Row(Modifier.background(colorResource(id = R.color.blue_transparent))) {
             Stats(gold, health, levelCount)
-            Inventory(weaponId, cuirassId)
+            Inventory(weaponId, cuirassId, bombAmount)
         }
 
     }
@@ -143,7 +144,7 @@ fun StatsText(text: String) {
 }
 
 @Composable
-fun Inventory(weaponId: String, cuirassId: String) {
+fun Inventory(weaponId: String, cuirassId: String, bombAmount: Int) {
     val weaponResource = when (weaponId) {
         SWORD_WOODEN -> R.drawable.sword_wooden
         SWORD_IRON -> R.drawable.sword_iron
@@ -157,7 +158,6 @@ fun Inventory(weaponId: String, cuirassId: String) {
         CUIRASS_DIAMOND -> R.drawable.cuirass_diamond
         else -> -1
     }
-
     Column {
         if (weaponResource != -1) {
             Image(
@@ -177,9 +177,34 @@ fun Inventory(weaponId: String, cuirassId: String) {
                     .height(27.dp)
             )
         }
-
-
+        if (bombAmount > 0) {
+            BombInventorySymbol(bombAmount)
+        }
     }
+}
+
+@Composable
+fun BombInventorySymbol(amount: Int) {
+    val bombResource = R.drawable.bomb_unlit
+
+    Box {
+        Image(
+            painter = painterResource(id = bombResource),
+            contentDescription = stringResource(id = R.string.bomb),
+            modifier = Modifier
+                .width(26.dp)
+                .height(27.dp)
+        )
+        Box(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(end = 3.dp)
+                .align(Alignment.BottomEnd)
+        ) {
+            Text(text = amount.toString(), color = colorResource(id = R.color.primary))
+        }
+    }
+
 }
 
 

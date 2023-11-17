@@ -2,6 +2,7 @@ package com.example.dungeoncrawler.service
 
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.LevelObjectState
+import com.example.dungeoncrawler.entity.Bomb
 import com.example.dungeoncrawler.entity.Coin
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Diamond
@@ -47,8 +48,7 @@ import kotlin.math.min
 class FieldHelperService {
     var field: List<List<MutableList<LevelObject>>> = emptyList()
 
-    private var coinCounter: Int = 0
-    private var potionCounter: Int = 0
+    private var itemCounter: Int = 0
 
     var gamePaused = false
 
@@ -110,7 +110,6 @@ class FieldHelperService {
                 if (removed) levelObjectList.removeIf { it.id == levelObject.id }
             }
             emit(ResultOfInteraction.InteractionFinished)
-
         }
     }
 
@@ -124,6 +123,7 @@ class FieldHelperService {
                 when (drop()) {
                     LevelObjectType.COIN -> emit(placeCoin(coordinates))
                     LevelObjectType.POTION -> emit(placePotion(coordinates))
+                    LevelObjectType.BOMB -> emit(placeBombTreasure(coordinates))
                     LevelObjectType.WEAPON -> emit(placeRandomWeapon(coordinates, levelCount))
                     LevelObjectType.ARMOR -> emit(placeRandomArmor(coordinates, levelCount))
                     else -> {
@@ -133,18 +133,15 @@ class FieldHelperService {
                 emit(ResultOfInteraction.RemoveLevelObject(levelObject.id))
                 true
             }
-
             LevelObjectType.TREASURE_DIAMOND -> {
                 placeDiamond(position = coordinates)
                 emit(ResultOfInteraction.RemoveLevelObject(levelObject.id))
                 true
             }
-
             LevelObjectType.LADDER -> {
                 emit(ResultOfInteraction.NextLevel)
                 true
             }
-
             LevelObjectType.COIN -> {
                 takeCoin(levelObject as Coin)
                 true
@@ -157,6 +154,11 @@ class FieldHelperService {
 
             LevelObjectType.POTION -> {
                 takePotion(levelObject as Potion)
+                true
+            }
+
+            LevelObjectType.BOMB -> {
+                takeBomb(levelObject as Bomb)
                 true
             }
 
@@ -173,15 +175,12 @@ class FieldHelperService {
             LevelObjectType.MAIN_CHARA -> {
                 false
             }
-
             LevelObjectType.WALL -> {
                 false
             }
-
             LevelObjectType.ENEMY -> {
                 false
             }
-
             LevelObjectType.ARROW -> {
                 false
             }
@@ -307,10 +306,12 @@ class FieldHelperService {
 
     private fun drop(): LevelObjectType {
         val randomValue = ThreadLocalRandom.current().nextFloat()
-        return if (randomValue < 0.35) {
+        return if (randomValue < 0.3) {
             LevelObjectType.COIN
-        } else if (randomValue < 0.6) {
+        } else if (randomValue < 0.5) {
             LevelObjectType.POTION
+        } else if (randomValue < 0.7) {
+            LevelObjectType.BOMB
         } else if (randomValue < 0.85) {
             LevelObjectType.ARMOR
         } else {
@@ -319,14 +320,14 @@ class FieldHelperService {
     }
 
     private fun placeCoin(position: Coordinates): ResultOfInteraction {
-        val coinId = "coin$coinCounter"
-        coinCounter++
+        val coinId = "coin$itemCounter"
+        itemCounter++
         return placeLevelObject(Coin(coinId), position)
     }
 
     fun placeCoinManually(position: Coordinates): Coin {
-        val coinId = "coin$coinCounter"
-        coinCounter++
+        val coinId = "coin$itemCounter"
+        itemCounter++
         val coin = Coin(coinId)
         field[position.x][position.y].add(coin)
         return coin
@@ -347,13 +348,27 @@ class FieldHelperService {
     }
 
     private fun placePotion(position: Coordinates): ResultOfInteraction {
-        val potionId = "potion$potionCounter"
-        potionCounter++
+        val potionId = "potion$itemCounter"
+        itemCounter++
         field[position.x][position.y].add(Potion(potionId))
         return ResultOfInteraction.AddLevelObject(
             LevelObjectState(
                 potionId,
                 LevelObjectType.POTION,
+                position,
+                Direction.DOWN
+            )
+        )
+    }
+
+    private fun placeBombTreasure(position: Coordinates): ResultOfInteraction {
+        val bombId = "bomb$itemCounter"
+        itemCounter++
+        field[position.x][position.y].add(Bomb(bombId))
+        return ResultOfInteraction.AddLevelObject(
+            LevelObjectState(
+                bombId,
+                LevelObjectType.BOMB,
                 position,
                 Direction.DOWN
             )
@@ -406,6 +421,14 @@ class FieldHelperService {
     private suspend fun FlowCollector<ResultOfInteraction>.takePotion(potion: Potion) {
         emit(ResultOfInteraction.Heal(potion.hpCure))
         emit(ResultOfInteraction.RemoveLevelObject(potion.id))
+    }
+
+    private suspend fun FlowCollector<ResultOfInteraction>.takeBomb(bomb: Bomb) {
+        if (!bomb.lit) {
+            emit(ResultOfInteraction.TakeBomb)
+            emit(ResultOfInteraction.RemoveLevelObject(bomb.id))
+        }
+
     }
 
     private suspend fun FlowCollector<ResultOfInteraction>.takeCoin(coin: Coin) {
@@ -500,6 +523,7 @@ class FieldHelperService {
 sealed class ResultOfInteraction {
     object NextLevel : ResultOfInteraction()
     object InteractionFinished : ResultOfInteraction()
+    object TakeBomb : ResultOfInteraction()
     data class AddLevelObject(val levelObject: LevelObjectState) : ResultOfInteraction()
     data class RemoveLevelObject(val id: String) : ResultOfInteraction()
     data class TakeWeapon(val weapon: Weapon) : ResultOfInteraction()
