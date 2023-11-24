@@ -35,8 +35,7 @@ fun BackgroundComposable(
     fieldLayout: List<List<GroundType>>
 ) {
     val backgroundOffset: Offset by animateOffsetAsState(
-        targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value),
-        label = "backgroundOffsetAnimation"
+        targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value)
     )
 
     val backgroundLayout: List<List<GroundType>> by remember(
@@ -86,6 +85,6 @@ fun GroundType.getDrawableId()  = when (this) {
         GroundType.GROUND1 -> R.drawable.ground
         GroundType.GROUND2 -> R.drawable.ground2
         GroundType.PEBBLES -> R.drawable.pebbles
-        GroundType.WATER -> R.drawable.water
-        GroundType.STONE -> R.drawable.stone_wall
+    GroundType.WATER -> R.drawable.water
+    GroundType.STONE -> R.drawable.ground
 }

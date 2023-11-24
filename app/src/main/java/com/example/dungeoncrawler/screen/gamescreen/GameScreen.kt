@@ -154,6 +154,7 @@ fun GameScreen(
                 enemiesState,
                 objectsState,
                 gameViewModel::interact,
+                gameViewModel::placeBomb,
                 gameViewModel::move,
                 gameViewModel::onPause,
                 levelCount,
@@ -169,6 +170,7 @@ fun GameScreen(
     enemiesState: List<EnemyState>,
     objectsState: List<LevelObjectState>,
     interact: () -> Unit,
+    placeBomb: () -> Unit,
     move: (Direction) -> Unit,
     onPause: () -> Unit,
     levelCount: Int,
@@ -212,6 +214,7 @@ fun GameScreen(
 
         Controls(
             interact,
+            placeBomb,
             move,
             onPause,
             charaScreenState.gold,
@@ -262,7 +265,7 @@ fun GamePreview() {
                 Direction.DOWN
             )
         ),
-        {}, {}, {}, levelCount = 0, fieldLayout
+        {}, {}, {}, {}, levelCount = 0, fieldLayout
     )
 }
 

@@ -1,7 +1,9 @@
 package com.example.dungeoncrawler.screen.gamescreen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +41,11 @@ import com.example.dungeoncrawler.entity.Level.Companion.SWORD_DIAMOND
 import com.example.dungeoncrawler.entity.Level.Companion.SWORD_IRON
 import com.example.dungeoncrawler.entity.Level.Companion.SWORD_WOODEN
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Controls(
     interact: () -> Unit,
+    placeBomb: () -> Unit,
     move: (Direction) -> Unit,
     pause: () -> Unit,
     gold: Int,
@@ -54,12 +58,18 @@ fun Controls(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(76.dp, 112.dp),
+            .padding(76.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
-        FloatingActionButton(shape = RoundedCornerShape(50.dp),
-            containerColor = colorResource(id = R.color.secondary),
-            onClick = { interact() }) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50.dp))
+                .size(76.dp)
+                .background(colorResource(id = R.color.secondary))
+                .combinedClickable(
+                    onClick = { interact() },
+                    onLongClick = { placeBomb() })
+        ) {
         }
     }
 

@@ -2,6 +2,9 @@ package com.example.dungeoncrawler.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +15,7 @@ import com.example.dungeoncrawler.data.CharaStats
 import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.GameState
 import com.example.dungeoncrawler.data.LevelObjectState
+import com.example.dungeoncrawler.entity.Bomb
 import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.GroundType
@@ -188,6 +192,42 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                         ResultOfInteraction.TakeBomb -> takeBomb()
                     }
                 }
+        }
+    }
+
+    fun placeBomb() {
+        Log.e("test", "placeBomb")
+        val coordinates = when (chara.direction) {
+            Direction.UP -> Coordinates(chara.position.x, chara.position.y - 1)
+            Direction.DOWN -> Coordinates(chara.position.x, chara.position.y + 1)
+            Direction.LEFT -> Coordinates(chara.position.x - 1, chara.position.y)
+            Direction.RIGHT -> Coordinates(chara.position.x + 1, chara.position.y)
+        }
+        // TODO: needed?
+        if (coordinates.x < 0 || coordinates.y < 0) {
+            return
+        }
+        val levelObjectList = level.fieldHelperService.field[coordinates.x][coordinates.y]
+
+        if (chara.bombAmount > 0 && levelObjectList.none { !it.type.isSteppableObject() }) {
+            val resultOfInteraction =
+                level.fieldHelperService.placeLevelObject(Bomb("bomb", true), coordinates)
+            addLevelObject((resultOfInteraction as ResultOfInteraction.AddLevelObject).levelObject)
+            chara.bombAmount--
+
+            val runnableCode = Runnable {
+                viewModelScope.launch {
+                    level.fieldHelperService.bombExplode(coordinates).collect { _ ->
+                        levelObjectList.removeIf {
+                            it.id == "wall"
+                        }
+
+                    }
+                }
+
+            }
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed(runnableCode, Settings.bombTimer)
         }
     }
 

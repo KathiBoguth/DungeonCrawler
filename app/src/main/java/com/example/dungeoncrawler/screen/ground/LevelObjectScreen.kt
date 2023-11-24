@@ -38,13 +38,12 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
     }
 
     val positionAsOffset: Offset by animateOffsetAsState(
-        Offset(position.x.value, position.y.value),
-        label = "level object offset"
+        Offset(position.x.value, position.y.value)
     )
 
     val skin = when (objectState.type) {
         LevelObjectType.MAIN_CHARA -> -1
-        LevelObjectType.WALL -> -1
+        LevelObjectType.WALL -> R.drawable.stone_wall
         LevelObjectType.TREASURE -> R.drawable.treasure
         LevelObjectType.TREASURE_DIAMOND -> R.drawable.treasure_diamond
         LevelObjectType.LADDER -> R.drawable.ladder
@@ -52,7 +51,14 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
         LevelObjectType.COIN -> R.drawable.coin
         LevelObjectType.DIAMOND -> R.drawable.diamond
         LevelObjectType.POTION -> R.drawable.potion
-        LevelObjectType.BOMB -> R.drawable.bomb_unlit
+        LevelObjectType.BOMB -> {
+            if (objectState.lit) {
+                R.drawable.bomb_lit
+            } else {
+                R.drawable.bomb_unlit
+            }
+        }
+
         LevelObjectType.WEAPON -> {
             when (objectState.id) {
                 BOW_WOODEN -> R.drawable.bow

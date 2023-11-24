@@ -1,5 +1,6 @@
 package com.example.dungeoncrawler.service
 
+import android.util.Log
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.Bomb
@@ -68,7 +69,7 @@ class FieldHelperService {
         field = fieldLayout.map {
             it.map { groundType ->
                 when (groundType) {
-                    GroundType.STONE -> mutableListOf(Wall())
+                    GroundType.STONE -> mutableListOf(Wall("wall$itemCounter"))
                     else -> mutableListOf()
                 }
             }
@@ -76,8 +77,9 @@ class FieldHelperService {
     }
 
     fun initFieldObjects(endBoss: Boolean, fieldLayout: List<List<GroundType>>): List<String> {
-        placeWalls()
+        val wallsList = placeWalls()
         val gameObjectIds = mutableListOf<String>()
+        gameObjectIds.addAll(wallsList)
         if (!endBoss) {
             val treasureList = placeTreasures()
             gameObjectIds.addAll(treasureList)
@@ -178,9 +180,11 @@ class FieldHelperService {
             LevelObjectType.WALL -> {
                 false
             }
+
             LevelObjectType.ENEMY -> {
                 false
             }
+
             LevelObjectType.ARROW -> {
                 false
             }
@@ -188,14 +192,18 @@ class FieldHelperService {
 
     // ----------- PLACE STUFF -------------
 
-    private fun placeWalls() {
+    private fun placeWalls(): List<String> {
+        val wallList = mutableListOf<String>()
         for (row in field.indices) {
             for (column in field[row].indices) {
                 if (row == 0 || column == 0 || row == field.size - 1 || column == field[row].size - 1) {
-                    field[row][column].add(Wall())
+                    val wall = Wall(wallId = "wall$itemCounter")
+                    field[row][column].add(wall)
+                    wallList.add(wall.id)
                 }
             }
         }
+        return wallList
     }
 
     private fun placeTreasures(): List<String> {
@@ -305,6 +313,7 @@ class FieldHelperService {
     }
 
     private fun drop(): LevelObjectType {
+        return LevelObjectType.BOMB
         val randomValue = ThreadLocalRandom.current().nextFloat()
         return if (randomValue < 0.3) {
             LevelObjectType.COIN
@@ -387,14 +396,33 @@ class FieldHelperService {
 
     fun placeLevelObject(levelObject: LevelObject, position: Coordinates): ResultOfInteraction {
         field[position.x][position.y].add(levelObject)
+        val lit = if (levelObject.type == LevelObjectType.BOMB) {
+            (levelObject as Bomb).lit
+        } else {
+            false
+        }
         return ResultOfInteraction.AddLevelObject(
             LevelObjectState(
                 levelObject.id,
                 levelObject.type,
                 position,
-                Direction.DOWN
+                Direction.DOWN,
+                lit
             )
         )
+    }
+
+    fun bombExplode(coordinates: Coordinates) = flow {
+        Log.e("test", "EXPLODE")
+        for (i in coordinates.x - 1..coordinates.x + 1) {
+            for (j in coordinates.y - 1..coordinates.y + 1) {
+                field[i][j].removeIf {
+                    it.type == LevelObjectType.WALL
+                }
+                emit(Coordinates(i, j))
+            }
+        }
+
     }
 
     // ----------- TAKE STUFF -------------

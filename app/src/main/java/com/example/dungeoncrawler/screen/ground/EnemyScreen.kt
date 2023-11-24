@@ -43,7 +43,7 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
             nudge = enemyState.nudge,
             jump = enemyState.jump,
             direction = enemyState.direction
-        ), label = ""
+        )
     )
     val position by remember(key1 = enemyState.position, key2 = backgroundPos) {
         val position =
@@ -52,8 +52,7 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
     }
 
     val positionAsOffset: Offset by animateOffsetAsState(
-        Offset(position.x.value, position.y.value),
-        label = "enemy offset"
+        Offset(position.x.value, position.y.value)
     )
 
     val flashColor = if (enemyState.flashRed) {
@@ -63,8 +62,7 @@ fun EnemyScreen(enemyState: EnemyState, backgroundPos: CoordinatesDp) {
     }
     val animatedFlashColor: Color by animateColorAsState(
         targetValue = flashColor,
-        animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
-        label = "enemy flash red"
+        animationSpec = tween(durationMillis = Settings.animDuration.toInt())
     )
 
     val skin = when (enemyState.type) {

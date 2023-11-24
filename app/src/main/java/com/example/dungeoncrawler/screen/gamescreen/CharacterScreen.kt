@@ -36,7 +36,7 @@ fun CharacterScreen(charaScreenState: CharaScreenState) {
             nudge = charaScreenState.nudge,
             jump = charaScreenState.jump,
             direction = charaScreenState.direction
-        ), label = "chara offset"
+        )
     )
 
     val flashColor = if (charaScreenState.flashRed) {
@@ -46,8 +46,7 @@ fun CharacterScreen(charaScreenState: CharaScreenState) {
     }
     val animatedFlashColor: Color by animateColorAsState(
         targetValue = flashColor,
-        animationSpec = tween(durationMillis = Settings.animDuration.toInt()),
-        label = "chara flash red"
+        animationSpec = tween(durationMillis = Settings.animDuration.toInt())
     )
 
     val charaSkin = when (charaScreenState.direction) {
