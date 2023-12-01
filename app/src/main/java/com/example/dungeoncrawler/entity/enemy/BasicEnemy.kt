@@ -120,7 +120,7 @@ abstract class BasicEnemy(idEnemy: String,
             Direction.RIGHT -> posBeforeMe.x >= field.size
         }
         return if (isWall) {
-            listOf(Wall("wall0"))
+            listOf(Wall("wallx"))
         } else {
             field[posBeforeMe.x][posBeforeMe.y]
         }

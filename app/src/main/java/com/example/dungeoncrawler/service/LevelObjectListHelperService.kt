@@ -49,7 +49,9 @@ import kotlin.math.min
 class FieldHelperService {
     var field: List<List<MutableList<LevelObject>>> = emptyList()
 
-    private var itemCounter: Int = 0
+    private var _itemCounter: Int = 0
+    private val itemCounter: Int
+        get() = _itemCounter++
 
     var gamePaused = false
 
@@ -77,7 +79,7 @@ class FieldHelperService {
     }
 
     fun initFieldObjects(endBoss: Boolean, fieldLayout: List<List<GroundType>>): List<String> {
-        val wallsList = placeWalls()
+        val wallsList = placeWalls(fieldLayout)
         val gameObjectIds = mutableListOf<String>()
         gameObjectIds.addAll(wallsList)
         if (!endBoss) {
@@ -192,11 +194,11 @@ class FieldHelperService {
 
     // ----------- PLACE STUFF -------------
 
-    private fun placeWalls(): List<String> {
+    private fun placeWalls(fieldLayout: List<List<GroundType>>): List<String> {
         val wallList = mutableListOf<String>()
         for (row in field.indices) {
             for (column in field[row].indices) {
-                if (row == 0 || column == 0 || row == field.size - 1 || column == field[row].size - 1) {
+                if (row == 0 || column == 0 || row == field.size - 1 || column == field[row].size - 1 || fieldLayout[row][column] == GroundType.STONE) {
                     val wall = Wall(wallId = "wall$itemCounter")
                     field[row][column].add(wall)
                     wallList.add(wall.id)
@@ -330,13 +332,11 @@ class FieldHelperService {
 
     private fun placeCoin(position: Coordinates): ResultOfInteraction {
         val coinId = "coin$itemCounter"
-        itemCounter++
         return placeLevelObject(Coin(coinId), position)
     }
 
     fun placeCoinManually(position: Coordinates): Coin {
         val coinId = "coin$itemCounter"
-        itemCounter++
         val coin = Coin(coinId)
         field[position.x][position.y].add(coin)
         return coin
@@ -358,7 +358,6 @@ class FieldHelperService {
 
     private fun placePotion(position: Coordinates): ResultOfInteraction {
         val potionId = "potion$itemCounter"
-        itemCounter++
         field[position.x][position.y].add(Potion(potionId))
         return ResultOfInteraction.AddLevelObject(
             LevelObjectState(
@@ -372,7 +371,6 @@ class FieldHelperService {
 
     private fun placeBombTreasure(position: Coordinates): ResultOfInteraction {
         val bombId = "bomb$itemCounter"
-        itemCounter++
         field[position.x][position.y].add(Bomb(bombId))
         return ResultOfInteraction.AddLevelObject(
             LevelObjectState(
@@ -410,6 +408,12 @@ class FieldHelperService {
                 lit
             )
         )
+    }
+
+    fun removeLevelObject(levelObject: LevelObject, position: Coordinates): ResultOfInteraction {
+        field[position.x][position.y].removeIf { it.id == levelObject.id }
+
+        return ResultOfInteraction.RemoveLevelObject(levelObject.id)
     }
 
     fun bombExplode(coordinates: Coordinates) = flow {

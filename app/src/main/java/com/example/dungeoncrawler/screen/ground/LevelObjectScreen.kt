@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
+import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
@@ -33,7 +34,10 @@ import com.example.dungeoncrawler.entity.LevelObjectType
 @Composable
 fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesDp) {
     val position by remember(key1 = objectState.position, key2 = backgroundPos) {
-        val position = getPositionFromCoordinates(objectState.position)
+        val position = getPositionFromCoordinates(
+            objectState.position,
+            isWall = objectState.type == LevelObjectType.WALL
+        )
         return@remember mutableStateOf(position)
     }
 
@@ -108,8 +112,18 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
                 painter = painterResource(id = skin),
                 contentDescription = stringResource(id = R.string.levelObject),
                 modifier = Modifier
-                    .width(62.dp)
-                    .height(73.dp)
+                    .then(
+                        if (objectState.type == LevelObjectType.WALL) {
+                            Modifier
+                                .width(Settings.moveLength.dp)
+                                .height(Settings.moveLength.dp)
+                        } else {
+                            Modifier
+                                .width(62.dp)
+                                .height(73.dp)
+                        }
+                    )
+
             )
         }
     }

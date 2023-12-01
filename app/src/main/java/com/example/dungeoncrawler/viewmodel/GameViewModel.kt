@@ -210,19 +210,31 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val levelObjectList = level.fieldHelperService.field[coordinates.x][coordinates.y]
 
         if (chara.bombAmount > 0 && levelObjectList.none { !it.type.isSteppableObject() }) {
+            val bomb = Bomb("bomb", true)
             val resultOfInteraction =
-                level.fieldHelperService.placeLevelObject(Bomb("bomb", true), coordinates)
-            addLevelObject((resultOfInteraction as ResultOfInteraction.AddLevelObject).levelObject)
+                level.fieldHelperService.placeLevelObject(bomb, coordinates)
+            val bombState = (resultOfInteraction as ResultOfInteraction.AddLevelObject).levelObject
+            addLevelObject(bombState)
             chara.bombAmount--
+            _charaScreenStateFlow.update {
+                it.copy(bombAmount = chara.bombAmount)
+            }
 
             val runnableCode = Runnable {
                 viewModelScope.launch {
-                    level.fieldHelperService.bombExplode(coordinates).collect { _ ->
-                        levelObjectList.removeIf {
-                            it.id == "wall"
+                    level.fieldHelperService.bombExplode(coordinates).collect { coordinates ->
+                        val bombExplosionLevelObjectList =
+                            level.fieldHelperService.field[coordinates.x][coordinates.y]
+                        bombExplosionLevelObjectList.removeIf {
+                            it.type == LevelObjectType.WALL
                         }
-
+                        _objectsStateList.removeIf {
+                            it.type == LevelObjectType.WALL && it.position == coordinates
+                        }
                     }
+                    val resultOfRemove =
+                        level.fieldHelperService.removeLevelObject(bomb, coordinates)
+                    _objectsStateList.removeIf { gameObject -> gameObject.id == (resultOfRemove as ResultOfInteraction.RemoveLevelObject).id }
                 }
 
             }

@@ -172,11 +172,13 @@ fun EnemyPreview() {
 fun getPositionFromCoordinates(
     coords: Coordinates,
     isOgre: Boolean = false,
+    isWall: Boolean = false
 ): CoordinatesDp {
     val moveLength = Settings.moveLength
+    val margin = if (isWall) 0f else Settings.margin
 
-    var xPos = (coords.x * moveLength).dp + Settings.margin.dp
-    var yPos = (coords.y * moveLength).dp + Settings.margin.dp
+    var xPos = (coords.x * moveLength).dp + margin.dp
+    var yPos = (coords.y * moveLength).dp + margin.dp
     if (isOgre) {
         xPos -= 70.dp
         yPos -= 70.dp
