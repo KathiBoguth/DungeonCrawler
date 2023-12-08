@@ -33,6 +33,7 @@ class Settings {
         const val animDuration = 100L
         const val bombCount = 5
         const val bombTimer = 3000L
+        const val bombDamage = 40
 
         val enemiesPerLevel = mapOf(
             1 to arrayOf(EnemyEnum.SLIME, EnemyEnum.SLIME, EnemyEnum.SLIME),

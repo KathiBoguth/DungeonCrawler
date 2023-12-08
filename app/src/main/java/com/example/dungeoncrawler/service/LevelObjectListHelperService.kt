@@ -50,7 +50,7 @@ class FieldHelperService {
     var field: List<List<MutableList<LevelObject>>> = emptyList()
 
     private var _itemCounter: Int = 0
-    private val itemCounter: Int
+    val itemCounter: Int
         get() = _itemCounter++
 
     var gamePaused = false
@@ -420,10 +420,13 @@ class FieldHelperService {
         Log.e("test", "EXPLODE")
         for (i in coordinates.x - 1..coordinates.x + 1) {
             for (j in coordinates.y - 1..coordinates.y + 1) {
-                field[i][j].removeIf {
-                    it.type == LevelObjectType.WALL
+                if (i >= 0 && j >= 0) {
+//                    field[i][j].removeIf {
+//                        it.type == LevelObjectType.WALL
+//                    }
+                    emit(Coordinates(i, j))
                 }
-                emit(Coordinates(i, j))
+
             }
         }
 

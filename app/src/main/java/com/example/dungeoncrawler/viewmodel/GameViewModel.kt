@@ -210,7 +210,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         val levelObjectList = level.fieldHelperService.field[coordinates.x][coordinates.y]
 
         if (chara.bombAmount > 0 && levelObjectList.none { !it.type.isSteppableObject() }) {
-            val bomb = Bomb("bomb", true)
+            val bomb = Bomb("bomb${level.fieldHelperService.itemCounter}", true)
             val resultOfInteraction =
                 level.fieldHelperService.placeLevelObject(bomb, coordinates)
             val bombState = (resultOfInteraction as ResultOfInteraction.AddLevelObject).levelObject
@@ -225,12 +225,22 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
                     level.fieldHelperService.bombExplode(coordinates).collect { coordinates ->
                         val bombExplosionLevelObjectList =
                             level.fieldHelperService.field[coordinates.x][coordinates.y]
-                        bombExplosionLevelObjectList.removeIf {
-                            it.type == LevelObjectType.WALL
+                        val iterator = bombExplosionLevelObjectList.iterator()
+                        while (iterator.hasNext()) {
+                            val levelObject = iterator.next()
+                            if (levelObject.type == LevelObjectType.MAIN_CHARA) {
+                                attackChara(Settings.bombDamage)
+                            } else if (levelObject.type == LevelObjectType.WALL) {
+                                iterator.remove()
+                            }
                         }
                         _objectsStateList.removeIf {
                             it.type == LevelObjectType.WALL && it.position == coordinates
                         }
+                        level.movableEntitiesList.filter { it.position == coordinates && it.type == LevelObjectType.ENEMY }
+                            .forEach {
+                                enemyTakeDamage(it as BasicEnemy, Settings.bombDamage)
+                            }
                     }
                     val resultOfRemove =
                         level.fieldHelperService.removeLevelObject(bomb, coordinates)
@@ -376,9 +386,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         return Coordinates(-1, -1)
     }
 
-    private fun attack(attackedEnemy: BasicEnemy) {
-        val weaponBonus = chara.weapon?.attack ?: 0
-        attackedEnemy.takeDamage(chara.baseAttack + weaponBonus)
+    private fun enemyTakeDamage(attackedEnemy: BasicEnemy, damage: Int) {
+        attackedEnemy.takeDamage(damage)
         _enemiesStateList.replaceAll {
             if (it.id == attackedEnemy.id) {
                 val newHealthPercentage = attackedEnemy.health.toDouble() / attackedEnemy.maxHealth
@@ -391,6 +400,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         if (attackedEnemy.health <= 0) {
             onEnemyDefeated(attackedEnemy)
         }
+    }
+
+    private fun attack(attackedEnemy: BasicEnemy) {
+        val weaponBonus = chara.weapon?.attack ?: 0
+        enemyTakeDamage(attackedEnemy, chara.baseAttack + weaponBonus)
     }
 
     // ----------- TAKE STUFF -------------
