@@ -45,4 +45,7 @@
     <string name="upgrade_stats">Upgrade Stats</string>
     <string name="arrow">Arrow</string>
     <string name="levelObject">a level object</string>
+    <string name="bombTutorialTitle">Bomb Usage</string>
+    <string name="bombTutorialText">To place bombs, long press the action button. Then wait from a distance and see what happens.</string>
+    <string name="bombTutorialButton">Got it!</string>
 </resources>

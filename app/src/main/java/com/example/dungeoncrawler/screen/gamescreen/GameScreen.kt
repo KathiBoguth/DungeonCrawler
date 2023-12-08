@@ -26,6 +26,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.CharaScreenState
 import com.example.dungeoncrawler.data.EnemyState
@@ -39,6 +40,7 @@ import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.screen.ground.BackgroundComposable
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
 
 val triangleShape = GenericShape { size, _ ->
@@ -59,6 +61,7 @@ fun GameScreen(
     val enemiesState = gameViewModel.enemiesStateList
     val objectsState = gameViewModel.objectsStateList
     val fieldLayoutState = gameViewModel.fieldLayoutState.collectAsState()
+    val bombTutorialIsDisplayed = gameViewModel.bombTutorialIsDisplayed.collectAsState()
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -137,7 +140,12 @@ fun GameScreen(
         }
     }
 
-    AnimatedVisibility(visible = isVisible,
+    if (bombTutorialIsDisplayed.value) {
+        BombTutorialScreen(gameViewModel::dismissBombTutorial)
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -223,6 +231,17 @@ fun GameScreen(
             charaScreenState.weaponId, charaScreenState.cuirassId
         )
     }
+}
+
+@Composable
+fun BombTutorialScreen(dismiss: () -> Unit) {
+    MaterialAlertDialogBuilder(LocalContext.current)
+        .setTitle(R.string.bombTutorialTitle)
+        .setMessage(R.string.bombTutorialText)
+        .setPositiveButton(LocalContext.current.getText(R.string.bombTutorialButton)) { _, _ ->
+            dismiss()
+        }
+        .show()
 }
 
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")

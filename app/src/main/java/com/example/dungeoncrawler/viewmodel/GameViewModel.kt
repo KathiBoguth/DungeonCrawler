@@ -56,6 +56,9 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
 
     private var chara = MainChara()
 
+    private var bombTutorialShown = false
+    val bombTutorialIsDisplayed = MutableStateFlow(false)
+
     private val _charaScreenStateFlow =
         MutableStateFlow(
             CharaScreenState(
@@ -253,6 +256,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    fun dismissBombTutorial() {
+        bombTutorialIsDisplayed.update { false }
+    }
+
     // ----------- BUTTON CLICK HELPERS -------------
 
     private fun getMovementVector(direction: Direction) =
@@ -432,6 +439,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun takeBomb() {
+        if (!bombTutorialShown) {
+            bombTutorialIsDisplayed.update { true }
+            bombTutorialShown = true
+        }
         val bombAmount = Settings.bombCount
         _charaScreenStateFlow.update {
             chara.takeBomb(bombAmount)
