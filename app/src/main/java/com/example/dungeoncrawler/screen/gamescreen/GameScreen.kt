@@ -185,33 +185,35 @@ fun GameScreen(
     fieldLayout: List<List<GroundType>>
 ) {
     val configuration = LocalConfiguration.current
-    val backgroundOrigPosition = if (fieldLayout.isNotEmpty()) {
-        val someNumber = -5.3
-        val adjustmentX = if (fieldLayout.size >= 10) {
-            (someNumber + (0.5 * fieldLayout.size)).times(Settings.moveLength)  //TODO: no idea how to calculate, not connected to density?
+    val backgroundOrigPosition = {
+        if (fieldLayout.isNotEmpty()) {
+            val someNumber = -5.3
+            val adjustmentX = if (fieldLayout.size >= 10) {
+                (someNumber + (0.5 * fieldLayout.size)).times(Settings.moveLength)  //TODO: no idea how to calculate, not connected to density?
+            } else {
+                -(Settings.moveLength * 0.5)
+            }
+            val adjustmentY = if (fieldLayout.size >= 10) {
+                adjustmentX
+            } else {
+                -(Settings.moveLength * 1.85)
+            }
+            CoordinatesDp(
+                (configuration.screenWidthDp / 2).dp + adjustmentX.dp, //+ (fieldLayout.size* Settings.moveLength.dp)* (configuration.screenWidthDp / configuration.screenHeightDp),//adjustWidth.dp,
+                (configuration.screenWidthDp / 2).dp + adjustmentY.dp// + adjustHeight.dp
+            )
         } else {
-            -(Settings.moveLength * 0.5)
+            CoordinatesDp(0.dp, 0.dp)
         }
-        val adjustmentY = if (fieldLayout.size >= 10) {
-            adjustmentX
-        } else {
-            -(Settings.moveLength * 1.85)
-        }
-        CoordinatesDp(
-            (configuration.screenWidthDp / 2).dp + adjustmentX.dp, //+ (fieldLayout.size* Settings.moveLength.dp)* (configuration.screenWidthDp / configuration.screenHeightDp),//adjustWidth.dp,
-            (configuration.screenWidthDp / 2).dp + adjustmentY.dp// + adjustHeight.dp
-        )
-    } else {
-        CoordinatesDp(0.dp, 0.dp)
     }
 
 
     val backgroundPosition by remember(key1 = charaScreenState.position, key2 = levelCount) {
         val moveLength = Settings.moveLength
         val xPosBackground =
-            backgroundOrigPosition.x.minus((charaScreenState.position.x * moveLength).dp)
+            backgroundOrigPosition().x.minus((charaScreenState.position.x * moveLength).dp)
         val yPosBackground =
-            backgroundOrigPosition.y.minus((charaScreenState.position.y * moveLength).dp)
+            backgroundOrigPosition().y.minus((charaScreenState.position.y * moveLength).dp)
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
@@ -247,7 +249,7 @@ fun BombTutorialScreen(dismiss: () -> Unit) {
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp,orientation=landscape")
 @Composable
 fun GamePreview() {
-    val fieldLayout = List(12) { List(12) { GroundType.WATER } }
+    val fieldLayout = { List(12) { List(12) { GroundType.WATER } } }
     GameScreen(
         charaScreenState = CharaScreenState(
             direction = Direction.DOWN,
@@ -284,7 +286,7 @@ fun GamePreview() {
                 Direction.DOWN
             )
         ),
-        {}, {}, {}, {}, levelCount = 0, fieldLayout
+        {}, {}, {}, {}, levelCount = 0, fieldLayout()
     )
 }
 

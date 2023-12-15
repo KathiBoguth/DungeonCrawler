@@ -21,6 +21,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
@@ -49,11 +50,13 @@ fun CharacterScreen(charaScreenState: CharaScreenState) {
         animationSpec = tween(durationMillis = Settings.animDuration.toInt())
     )
 
-    val charaSkin = when (charaScreenState.direction) {
-        Direction.UP -> R.drawable.chara_back
-        Direction.DOWN -> R.drawable.chara_front
-        Direction.RIGHT -> R.drawable.chara_right
-        Direction.LEFT -> R.drawable.chara_left
+    val charaSkin = {
+        when (charaScreenState.direction) {
+            Direction.UP -> R.drawable.chara_back
+            Direction.DOWN -> R.drawable.chara_front
+            Direction.RIGHT -> R.drawable.chara_right
+            Direction.LEFT -> R.drawable.chara_left
+        }
     }
 
     Box(
@@ -61,12 +64,12 @@ fun CharacterScreen(charaScreenState: CharaScreenState) {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = charaSkin),
+            painter = painterResource(id = charaSkin()),
             contentDescription = stringResource(id = R.string.main_character),
             modifier = Modifier
                 .width(62.dp)
                 .height(73.dp)
-                .offset(charaOffset.x.dp, charaOffset.y.dp),
+                .offset { IntOffset(charaOffset.x.dp.roundToPx(), charaOffset.y.dp.roundToPx()) },
             colorFilter = ColorFilter.tint(animatedFlashColor, BlendMode.SrcAtop)
         )
         if (charaScreenState.fixated) {
@@ -76,7 +79,12 @@ fun CharacterScreen(charaScreenState: CharaScreenState) {
                 modifier = Modifier
                     .width(62.dp)
                     .height(73.dp)
-                    .offset(charaOffset.x.dp, charaOffset.y.dp),
+                    .offset {
+                        IntOffset(
+                            charaOffset.x.dp.roundToPx(),
+                            charaOffset.y.dp.roundToPx()
+                        )
+                    },
             )
         }
     }

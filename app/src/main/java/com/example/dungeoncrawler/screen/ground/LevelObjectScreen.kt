@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
@@ -45,71 +46,84 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
         Offset(position.x.value, position.y.value)
     )
 
-    val skin = when (objectState.type) {
-        LevelObjectType.MAIN_CHARA -> -1
-        LevelObjectType.WALL -> R.drawable.stone_wall
-        LevelObjectType.TREASURE -> R.drawable.treasure
-        LevelObjectType.TREASURE_DIAMOND -> R.drawable.treasure_diamond
-        LevelObjectType.LADDER -> R.drawable.ladder
-        LevelObjectType.ENEMY -> -1
-        LevelObjectType.COIN -> R.drawable.coin
-        LevelObjectType.DIAMOND -> R.drawable.diamond
-        LevelObjectType.POTION -> R.drawable.potion
-        LevelObjectType.BOMB -> {
-            if (objectState.lit) {
-                R.drawable.bomb_lit
-            } else {
-                R.drawable.bomb_unlit
-            }
-        }
-
-        LevelObjectType.WEAPON -> {
-            when (objectState.id) {
-                BOW_WOODEN -> R.drawable.bow
-                SWORD_WOODEN -> R.drawable.sword_wooden
-                SWORD_IRON -> R.drawable.sword_iron
-                SWORD_DIAMOND -> R.drawable.sword_diamond
-                else -> -1
-            }
-        }
-
-        LevelObjectType.ARROW -> {
-            if (objectState.id == "pebble_throwable") {
-                R.drawable.pebble_throwable
-            } else {
-                when (objectState.direction) {
-                    Direction.DOWN -> R.drawable.arrow_down
-                    Direction.LEFT -> R.drawable.arrow_left
-                    Direction.RIGHT -> R.drawable.arrow_right
-                    Direction.UP -> R.drawable.arrow_up
+    val skin = {
+        when (objectState.type) {
+            LevelObjectType.MAIN_CHARA -> -1
+            LevelObjectType.WALL -> R.drawable.stone_wall
+            LevelObjectType.TREASURE -> R.drawable.treasure
+            LevelObjectType.TREASURE_DIAMOND -> R.drawable.treasure_diamond
+            LevelObjectType.LADDER -> R.drawable.ladder
+            LevelObjectType.ENEMY -> -1
+            LevelObjectType.COIN -> R.drawable.coin
+            LevelObjectType.DIAMOND -> R.drawable.diamond
+            LevelObjectType.POTION -> R.drawable.potion
+            LevelObjectType.BOMB -> {
+                if (objectState.lit) {
+                    R.drawable.bomb_lit
+                } else {
+                    R.drawable.bomb_unlit
                 }
             }
-        }
 
-        LevelObjectType.ARMOR -> {
-            when (objectState.id) {
-                CUIRASS_RAG -> R.drawable.cuirass_rag
-                CUIRASS_IRON -> R.drawable.cuirass_iron
-                CUIRASS_DIAMOND -> R.drawable.cuirass_diamond
-                else -> -1
+            LevelObjectType.WEAPON -> {
+                when (objectState.id) {
+                    BOW_WOODEN -> R.drawable.bow
+                    SWORD_WOODEN -> R.drawable.sword_wooden
+                    SWORD_IRON -> R.drawable.sword_iron
+                    SWORD_DIAMOND -> R.drawable.sword_diamond
+                    else -> -1
+                }
             }
 
+            LevelObjectType.ARROW -> {
+                if (objectState.id == "pebble_throwable") {
+                    R.drawable.pebble_throwable
+                } else {
+                    when (objectState.direction) {
+                        Direction.DOWN -> R.drawable.arrow_down
+                        Direction.LEFT -> R.drawable.arrow_left
+                        Direction.RIGHT -> R.drawable.arrow_right
+                        Direction.UP -> R.drawable.arrow_up
+                    }
+                }
+            }
+
+            LevelObjectType.ARMOR -> {
+                when (objectState.id) {
+                    CUIRASS_RAG -> R.drawable.cuirass_rag
+                    CUIRASS_IRON -> R.drawable.cuirass_iron
+                    CUIRASS_DIAMOND -> R.drawable.cuirass_diamond
+                    else -> -1
+                }
+
+            }
         }
     }
 
-    if (skin != -1){
+    if (skin() != -1) {
         Box(modifier = Modifier
             .fillMaxSize()
             .then(
                 if (objectState.type == LevelObjectType.ARROW) {
-                    Modifier.offset(positionAsOffset.x.dp, positionAsOffset.y.dp)
+                    Modifier.offset {
+                        IntOffset(
+                            positionAsOffset.x.dp.roundToPx(),
+                            positionAsOffset.y.dp.roundToPx()
+                        )
+                    }
                 } else {
-                    Modifier.offset(position.x, position.y)
+                    // TODO: would need -20 to be in middle, but issue with stones
+                    Modifier.offset {
+                        IntOffset(
+                            position.x.roundToPx(),
+                            position.y.roundToPx()
+                        )
+                    }
                 }
             )
             .wrapContentSize(unbounded = true)) {
             Image(
-                painter = painterResource(id = skin),
+                painter = painterResource(id = skin()),
                 contentDescription = stringResource(id = R.string.levelObject),
                 modifier = Modifier
                     .then(

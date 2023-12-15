@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
@@ -50,7 +51,13 @@ fun BackgroundComposable(
     Box(
         modifier = Modifier
             .wrapContentSize(unbounded = true)
-            .offset(backgroundOffset.x.dp, backgroundOffset.y.dp)
+            // TODO: better way?
+            .offset {
+                IntOffset(
+                    backgroundOffset.x.dp.roundToPx(),
+                    backgroundOffset.y.dp.roundToPx()
+                )
+            }
     ) {
 
         Row(

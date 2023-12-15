@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -48,13 +49,13 @@ fun GameOverScreen(
         Row(
             Modifier
                 .fillMaxWidth()
-                .offset((-10).dp),
+                .offset { IntOffset(-10, -10) },
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         )
         {
             MenuText(text = stringResource(id = R.string.killed_by_message))
-            Box(Modifier.offset((-40).dp)) {
+            Box(Modifier.offset { IntOffset(-40, -40) }) {
                 Image(
                     painter = painterResource(id = killedBy),
                     contentDescription = stringResource(id = R.string.enemy),
