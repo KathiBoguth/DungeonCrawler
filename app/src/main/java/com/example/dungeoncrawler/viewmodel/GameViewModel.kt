@@ -337,6 +337,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun getReward(amount: Int) {
+        mediaPlayerService.playMediaPlayerCoin()
         chara.gold += amount
         _charaScreenStateFlow.update {
             it.copy(gold = chara.gold)
@@ -344,6 +345,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun heal(hpCure: Int) {
+        mediaPlayerService.playMediaPlayerHeal()
         chara.health = min(hpCure + chara.health, chara.maxHealth)
         _charaScreenStateFlow.update {
             it.copy(health = chara.health)
@@ -415,6 +417,11 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun attack(attackedEnemy: BasicEnemy) {
+        if (chara.weapon != null) {
+            mediaPlayerService.playMediaPlayerSword()
+        } else {
+            mediaPlayerService.playMediaPlayerSlash()
+        }
         val weaponBonus = chara.weapon?.attack ?: 0
         enemyTakeDamage(attackedEnemy, chara.baseAttack + weaponBonus)
     }
@@ -422,6 +429,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     // ----------- TAKE STUFF -------------
 
     private fun takeWeapon(weapon: Weapon, coordinates: Coordinates) {
+        mediaPlayerService.playMediaPlayerSword()
         val oldWeapon = chara.weapon
         chara.putOnWeapon(weapon)
         _charaScreenStateFlow.update {
@@ -433,6 +441,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun takeArmor(armor: Armor, coordinates: Coordinates) {
+        mediaPlayerService.playMediaPlayerSword()
         val oldArmor = chara.armor
         chara.putOnArmor(armor)
         _charaScreenStateFlow.update {
@@ -481,6 +490,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     private fun onEnemyAttack(
         damageDTO: EnemyDamageDTO
     ) {
+        mediaPlayerService.playMediaPlayerPunch()
         if (gameState.value == GameState.EndGameOnGameOver || gameState.value == GameState.EndGameOnVictory) {
             return
         }
@@ -885,6 +895,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun explosionAssetsFlow(position: Coordinates) = viewModelScope.launch {
+        mediaPlayerService.playMediaPlayerExplosion()
         (1..8).forEach { _ ->
             _explosionState.update { ExplosionState(it.explosionLevel + 1, position) }
             delay(100)
