@@ -16,6 +16,7 @@ class MediaPlayerService {
     private lateinit var mediaPlayerCoinSound: MediaPlayer
     private lateinit var mediaPlayerSwordSound: MediaPlayer
     private lateinit var mediaPlayerHealSound: MediaPlayer
+    private lateinit var mediaPlayerVictorySound: MediaPlayer
 
     fun setupMediaPlayer(context: Context) {
         mediaPlayerDungeon = MediaPlayer.create(context, R.raw.dungeon)
@@ -30,6 +31,7 @@ class MediaPlayerService {
         mediaPlayerCoinSound = MediaPlayer.create(context, R.raw.coin)
         mediaPlayerSwordSound = MediaPlayer.create(context, R.raw.swordhit)
         mediaPlayerHealSound = MediaPlayer.create(context, R.raw.heal)
+        mediaPlayerVictorySound = MediaPlayer.create(context, R.raw.victorysound)
     }
 
     private fun startMediaPlayerDungeon() {
@@ -108,6 +110,18 @@ class MediaPlayerService {
             mediaPlayerHealSound.pause()
         }
         mediaPlayerHealSound.start()
+    }
+
+    fun playMediaPlayerVictory() {
+        if (mediaPlayerVictorySound.isPlaying) {
+            mediaPlayerVictorySound.pause()
+        }
+        mediaPlayerVictorySound.start()
+        mediaPlayerVictorySound.setOnCompletionListener {
+            mediaPlayerMenu.start()
+            mediaPlayerAttackSound.stop()
+            mediaPlayerPunchSound.stop()
+        }
     }
 
 }

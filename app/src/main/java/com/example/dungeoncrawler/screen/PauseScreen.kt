@@ -57,6 +57,7 @@ fun PauseScreen(
     gameViewModel: ComposableGameViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
+        gameViewModel.mediaPlayerService.pauseMediaPlayers()
         gameViewModel.mediaPlayerService.startMediaPlayerMenu()
     }
 

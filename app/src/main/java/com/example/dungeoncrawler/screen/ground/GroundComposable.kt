@@ -81,11 +81,11 @@ fun BackgroundComposable(
                 }
             }
         }
-        enemiesState.filter { it.visible }.forEach { enemy ->
-            EnemyScreen(enemy, backgroundPosition)
-        }
         objectsState.forEach { levelObject ->
             LevelObjectScreen(objectState = levelObject, backgroundPos = backgroundPosition)
+        }
+        enemiesState.filter { it.visible }.forEach { enemy ->
+            EnemyScreen(enemy, backgroundPosition)
         }
         if (explosionState.explosionLevel in 1..8) {
             Explosion(

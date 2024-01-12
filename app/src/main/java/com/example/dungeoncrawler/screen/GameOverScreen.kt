@@ -88,6 +88,7 @@ fun GameOverScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        menuViewModel.mediaPlayerService.pauseMediaPlayers()
         menuViewModel.mediaPlayerService.startMediaPlayerMenu()
     }
 

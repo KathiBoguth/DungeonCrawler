@@ -470,6 +470,8 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
         if (attackedEnemy is Ogre) {
             level.endBossDefeated()
             addNewGameObjectsToObjectsList()
+            mediaPlayerService.pauseMediaPlayers()
+            mediaPlayerService.playMediaPlayerVictory()
         } else {
             val coin = level.fieldHelperService.placeCoinManually(attackedEnemy.position)
             addLevelObject(

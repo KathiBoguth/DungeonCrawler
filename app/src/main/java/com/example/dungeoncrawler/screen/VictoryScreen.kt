@@ -54,6 +54,7 @@ fun VictoryScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        menuViewModel.mediaPlayerService.pauseMediaPlayers()
         menuViewModel.mediaPlayerService.startMediaPlayerMenu()
     }
 
