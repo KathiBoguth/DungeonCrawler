@@ -25,6 +25,7 @@ import com.example.dungeoncrawler.data.EnemyState
 import com.example.dungeoncrawler.data.LevelObjectState
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.GroundType
+import com.example.dungeoncrawler.viewmodel.ExplosionState
 
 
 @Composable
@@ -33,7 +34,8 @@ fun BackgroundComposable(
     enemiesState: List<EnemyState>,
     objectsState: List<LevelObjectState>,
     levelCount: Int,
-    fieldLayout: List<List<GroundType>>
+    fieldLayout: List<List<GroundType>>,
+    explosionState: ExplosionState
 ) {
     val backgroundOffset: Offset by animateOffsetAsState(
         targetValue = Offset(backgroundPosition.x.value, backgroundPosition.y.value)
@@ -82,8 +84,15 @@ fun BackgroundComposable(
         enemiesState.filter { it.visible }.forEach { enemy ->
             EnemyScreen(enemy, backgroundPosition)
         }
-        objectsState.forEach {levelObject ->
+        objectsState.forEach { levelObject ->
             LevelObjectScreen(objectState = levelObject, backgroundPos = backgroundPosition)
+        }
+        if (explosionState.explosionLevel in 1..8) {
+            Explosion(
+                explosionLevel = explosionState.explosionLevel,
+                positionObject = explosionState.position,
+                backgroundPos = backgroundPosition
+            )
         }
     }
 }

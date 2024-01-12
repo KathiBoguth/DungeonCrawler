@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.dungeoncrawler.R
 import com.example.dungeoncrawler.Settings
 import com.example.dungeoncrawler.data.LevelObjectState
+import com.example.dungeoncrawler.entity.Coordinates
 import com.example.dungeoncrawler.entity.CoordinatesDp
 import com.example.dungeoncrawler.entity.Direction
 import com.example.dungeoncrawler.entity.Level.Companion.BOW_WOODEN
@@ -138,6 +139,72 @@ fun LevelObjectScreen(objectState: LevelObjectState, backgroundPos: CoordinatesD
                         }
                     )
 
+            )
+        }
+    }
+}
+
+@Composable
+fun Explosion(explosionLevel: Int, positionObject: Coordinates, backgroundPos: CoordinatesDp) {
+    val position by remember(key1 = positionObject, key2 = backgroundPos) {
+        val position = getPositionFromCoordinates(
+            positionObject,
+            isWall = false
+        )
+        return@remember mutableStateOf(position)
+    }
+
+    val positionAsOffset: Offset by animateOffsetAsState(
+        Offset(position.x.value, position.y.value)
+    )
+
+    val skin = when (explosionLevel) {
+        1 -> R.drawable.explosion1
+        2 -> R.drawable.explosion2
+        3 -> R.drawable.explosion3
+        4 -> R.drawable.explosion4
+        5 -> R.drawable.explosion5
+        6 -> R.drawable.explosion6
+        7 -> R.drawable.explosion7
+        8 -> R.drawable.explosion8
+        else -> -1
+    }
+    if (skin != -1) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .then(
+                if (explosionLevel > 2) {
+                    Modifier.offset {
+                        IntOffset(
+                            (positionAsOffset.x - Settings.moveLength).dp.roundToPx(),
+                            (positionAsOffset.y - Settings.moveLength).dp.roundToPx()
+                        )
+                    }
+                } else {
+                    Modifier.offset {
+                        IntOffset(
+                            positionAsOffset.x.dp.roundToPx(),
+                            positionAsOffset.y.dp.roundToPx()
+                        )
+                    }
+                }
+
+            )
+            .wrapContentSize(unbounded = true)) {
+            Image(
+                painter = painterResource(id = skin), contentDescription = "explosion",
+                modifier = Modifier
+                    .then(
+                        if (explosionLevel > 2) {
+                            Modifier
+                                .width(Settings.moveLength.dp * 3)
+                                .height(Settings.moveLength.dp * 3)
+                        } else {
+                            Modifier
+                                .width(62.dp)
+                                .height(73.dp)
+                        }
+                    )
             )
         }
     }

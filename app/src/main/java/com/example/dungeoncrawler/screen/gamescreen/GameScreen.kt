@@ -40,6 +40,7 @@ import com.example.dungeoncrawler.entity.LevelObjectType
 import com.example.dungeoncrawler.entity.enemy.EnemyEnum
 import com.example.dungeoncrawler.screen.ground.BackgroundComposable
 import com.example.dungeoncrawler.viewmodel.ComposableGameViewModel
+import com.example.dungeoncrawler.viewmodel.ExplosionState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
 
@@ -62,6 +63,7 @@ fun GameScreen(
     val objectsState = gameViewModel.objectsStateList
     val fieldLayoutState = gameViewModel.fieldLayoutState.collectAsState()
     val bombTutorialIsDisplayed = gameViewModel.bombTutorialIsDisplayed.collectAsState()
+    val explosionState by gameViewModel.explosionState.collectAsState()
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -166,7 +168,8 @@ fun GameScreen(
                 gameViewModel::move,
                 gameViewModel::onPause,
                 levelCount,
-                fieldLayoutState.value
+                fieldLayoutState.value,
+                explosionState
             )
         }
     }
@@ -182,7 +185,8 @@ fun GameScreen(
     move: (Direction) -> Unit,
     onPause: () -> Unit,
     levelCount: Int,
-    fieldLayout: List<List<GroundType>>
+    fieldLayout: List<List<GroundType>>,
+    explosionState: ExplosionState
 ) {
     val configuration = LocalConfiguration.current
     val backgroundOrigPosition = {
@@ -217,7 +221,14 @@ fun GameScreen(
         return@remember mutableStateOf(CoordinatesDp(xPosBackground, yPosBackground))
     }
 
-    BackgroundComposable(backgroundPosition, enemiesState, objectsState, levelCount, fieldLayout)
+    BackgroundComposable(
+        backgroundPosition,
+        enemiesState,
+        objectsState,
+        levelCount,
+        fieldLayout,
+        explosionState
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         CharacterScreen(charaScreenState)
@@ -286,7 +297,7 @@ fun GamePreview() {
                 Direction.DOWN
             )
         ),
-        {}, {}, {}, {}, levelCount = 0, fieldLayout()
+        {}, {}, {}, {}, levelCount = 0, fieldLayout(), ExplosionState(1, Coordinates(0, 0))
     )
 }
 

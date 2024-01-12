@@ -85,6 +85,10 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
     val objectsStateList: List<LevelObjectState>
         get() = _objectsStateList
 
+    private val _explosionState: MutableStateFlow<ExplosionState> =
+        MutableStateFlow(ExplosionState(0, Coordinates(0, 0)))
+    val explosionState = _explosionState.asStateFlow()
+
     private val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.InitGame(0))
     val gameState = _gameState.asStateFlow()
 
@@ -224,6 +228,7 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
 
             val runnableCode = Runnable {
+                explosionAssetsFlow(coordinates)
                 viewModelScope.launch {
                     level.fieldHelperService.bombExplode(coordinates).collect { coordinates ->
                         val bombExplosionLevelObjectList =
@@ -878,6 +883,16 @@ class ComposableGameViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+
+    private fun explosionAssetsFlow(position: Coordinates) = viewModelScope.launch {
+        (1..8).forEach { _ ->
+            _explosionState.update { ExplosionState(it.explosionLevel + 1, position) }
+            delay(100)
+        }
+        _explosionState.update { ExplosionState(0, Coordinates(0, 0)) }
+    }
 }
+
+data class ExplosionState(val explosionLevel: Int, val position: Coordinates)
 
 class MissingEnemyTypeException(message: String) : Exception(message)

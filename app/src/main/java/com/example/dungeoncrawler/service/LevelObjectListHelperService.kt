@@ -315,7 +315,6 @@ class FieldHelperService {
     }
 
     private fun drop(): LevelObjectType {
-        return LevelObjectType.BOMB
         val randomValue = ThreadLocalRandom.current().nextFloat()
         return if (randomValue < 0.3) {
             LevelObjectType.COIN
